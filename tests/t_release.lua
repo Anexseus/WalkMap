@@ -24,9 +24,20 @@ local function fakeManager(env)
     end
     function m:HandlePopupShown(frame) return self:FrameShown(frame, true, true) end
     function m:GetActiveFrame() return self.isUIFocused and self.focusedFrame or nil end
+    -- The game's red error line (UIErrorsFrame, one line per message type).
+    local errorLine = {text = nil}
+    function errorLine:GetText() return self.text end
+    function errorLine:SetText(text) self.text = text end
+    env.LE_GAME_ERR_SYSTEM = 22
+    env.ERROR_NO_FRAME_TO_FOCUS = "No interface frame to focus!"
+    env.UIErrorsFrame = {GetFontStringByID = function(_, id) return id == 22 and errorLine or nil end}
+    m.errorLine = errorLine
     function m:ToggleUIFocus()
         -- The game refuses to focus the UI with no window in its list.
-        if not self.isUIFocused and #self.shownFrames == 0 then return end
+        if not self.isUIFocused and #self.shownFrames == 0 then
+            errorLine.text = env.ERROR_NO_FRAME_TO_FOCUS
+            return
+        end
         self.isUIFocused = not self.isUIFocused
     end
     env.GamepadMode = {FrameControlsManager = m}
@@ -62,6 +73,44 @@ local function close(env)
 end
 
 return {
+    {"Native: with the map open, Select focuses the map before the group window", function(Mock)
+        local env, m = start(Mock, {controllerMode = true, nativeController = true, selectKeepsReleased = true})
+        local crfm = env.CreateFrame("Frame", "CompactRaidFrameManager")
+        crfm:Show()
+        m:FrameShown(crfm)
+        m.isUIFocused = false
+        open(env)
+        Mock.eq(env.WalkMapNativeController.HasFocus(), true, "the map takes focus when it opens")
+        m:ToggleUIFocus()  -- Select: back to the game
+        env.tick(0.3, 3)
+        m:ToggleUIFocus()  -- Select again
+        m.focusedFrame = crfm  -- the game picks the leftmost window: the group window
+        env.WalkMapNativeController.AfterToggle()
+        env.tick(0.3, 3)
+        Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "the map is focused, not the group window")
+        Mock.ok(m.isUIFocused, "UI focus kept")
+        local listed = false
+        for _, f in ipairs(m.shownFrames) do if f == crfm then listed = true end end
+        Mock.ok(listed, "the group window stays reachable")
+        -- Reopened while released: Select takes the map, not the group window.
+        m:ToggleUIFocus()
+        env.tick(0.3, 3)
+        close(env)
+        open(env)
+        Mock.eq(env.WalkMapNativeController.HasFocus(), false, "held back")
+        m:ToggleUIFocus()
+        m.focusedFrame = crfm
+        env.WalkMapNativeController.AfterToggle()
+        env.tick(0.3, 3)
+        Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "map first after reopening too")
+        -- LB/RB to the group window: the map steps down so it opens in front.
+        m.focusedFrame = crfm
+        env.tick(0.5, 5)
+        Mock.eq(env.WalkMapCore.frame:GetFrameStrata(), "LOW", "map below the group window while it has focus")
+        m.focusedFrame = env.WalkMapCore.frame
+        env.tick(0.5, 5)
+        Mock.eq(env.WalkMapCore.frame:GetFrameStrata(), "HIGH", "map back up when focus returns")
+    end},
     {"Native: Select keeps the map released across close and open", function(Mock)
         local env, m = start(Mock, {controllerMode = true, nativeController = true, selectKeepsReleased = true})
         local map = env.WalkMapCore.frame
@@ -84,6 +133,7 @@ return {
         env.tick(0.3, 3)
         Mock.eq(env.WalkMapNativeController.HasFocus(), true, "Select takes the map back")
         Mock.eq(env.WalkMapExtras.MapReleased(), false, "no longer released")
+        Mock.eq(m.errorLine.text, "", "the game's \"No interface frame to focus!\" is blanked")
         close(env)
         open(env)
         Mock.eq(env.WalkMapNativeController.HasFocus(), true, "and it takes focus on the next open again")

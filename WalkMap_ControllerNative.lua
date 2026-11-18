@@ -935,14 +935,75 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
     -- Select (the game's ToggleUIFocus) while the map is open but held back:
     -- take the map. Runs after the game's own code (hooksecurefunc), and
     -- registers the map the normal way, which focuses it.
+    -- With nothing registered the game has just printed its red "No
+    -- interface frame to focus!" for that Select press. WalkMap takes the
+    -- map right after, so the message is wrong: blank that one line. Only
+    -- the error frame's own line is touched (no Blizzard fields written).
+    local function hideNoFrameError()
+        local errors, id, text = UIErrorsFrame, LE_GAME_ERR_SYSTEM, ERROR_NO_FRAME_TO_FOCUS
+        if not (errors and errors.GetFontStringByID and id and text) then return end
+        local ok, line = pcall(errors.GetFontStringByID, errors, id)
+        if ok and line and line.GetText and line:GetText() == text then
+            pcall(line.SetText, line, "")
+        end
+    end
+    native.HideNoFrameError = hideNoFrameError
+    -- Group windows the game keeps in its window list (the raid/party
+    -- manager on the left edge). Being leftmost, the game focuses them first
+    -- when Select brings focus back. With the map open the map comes first;
+    -- LB/RB still reach them.
+    local GROUP_WINDOWS = {"CompactRaidFrameManager"}
+    local function groupWindow(frame)
+        if not frame then return false end
+        for _, name in ipairs(GROUP_WINDOWS) do
+            if frame == _G[name] then return true end
+        end
+        return false
+    end
+    -- Move focus to the map the way the game's own windows get it: take the
+    -- map out of the list and put it back (FrameHidden/FrameShown, both
+    -- taint-wrapped by the game). Never by setting the manager's fields.
+    local function preferMap()
+        local m = manager()
+        if not (m and m.isUIFocused and registered[owner] and owner:IsShown()) then return end
+        local focused = m.focusedFrame
+        if focused == owner or registered[focused] or not groupWindow(focused) then return end
+        unregister(owner)
+        if not registered[owner] then register(owner, false) end
+    end
+    native.PreferMap = preferMap
+    -- Reaching the group window (LB/RB) while the map is open: the game's
+    -- group window sits on a lower layer (MEDIUM) than the map (HIGH) and
+    -- would open behind it. While it has the controller the map steps down
+    -- a layer; it comes back up as soon as focus leaves. Only WalkMap's own
+    -- frame changes, never outside combat lockdown.
+    local mapStrata, lowered
+    local function updateGroupLayer()
+        local m = manager()
+        local want = m and m.isUIFocused and owner:IsShown() and groupWindow(m.focusedFrame) or false
+        if want == (lowered or false) then return end
+        if InCombatLockdown and InCombatLockdown() then return end
+        if want then
+            mapStrata = owner:GetFrameStrata() or "HIGH"
+            owner:SetFrameStrata("LOW")
+            lowered = true
+        else
+            owner:SetFrameStrata(mapStrata or "HIGH")
+            lowered = nil
+        end
+    end
+    native.UpdateGroupLayer = updateGroupLayer
     local function afterToggle()
-        if not WalkMapExtras.MapReleased() or not owner:IsShown() or registered[owner] then return end
         if (InCombatLockdown and InCombatLockdown()) or restricted() then return end
+        if registered[owner] then preferMap() return end
+        if not WalkMapExtras.MapReleased() or not owner:IsShown() then return end
         local m = manager()
         -- The player just left another focused window for gameplay: leave it.
         if m and m.isUIFocused == false and m.shownFrames and #m.shownFrames > 0 then return end
+        if m and m.shownFrames and #m.shownFrames == 0 then hideNoFrameError() end
         WalkMapExtras.SetMapReleased(false)
         native.Update()
+        preferMap()
         -- Let the map's footer and hints catch up (no Resume button).
         if WalkMapCore and WalkMapCore.UpdatePadMode then pcall(WalkMapCore.UpdatePadMode) end
     end
@@ -954,6 +1015,7 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
         local now = GetTime()
         if now < nextPoll then return end
         nextPoll = now + 0.2
+        updateGroupLayer()
         if dirty or owner:IsShown() or anyRegistered() then
             native.Update()
             notify()

@@ -11,7 +11,9 @@ Used by .github/workflows/release.yml when a version tag is pushed.
   CF_PROJECT_ID   optional; else ## X-Curse-Project-ID in WalkMap.toc
   CF_GAME_VERSION optional, e.g. "1.60.1"; else made from ## Interface
                   (16001 -> 1.60.1)
-  CF_RELEASE_TYPE optional: release (default), beta or alpha
+  CF_RELEASE_TYPE optional: release, beta or alpha; else from the tag
+  RELEASE_TAG     optional, e.g. "1.14.8-beta1" (the pushed tag): the file's
+                  name on CurseForge; "beta"/"alpha" in it set the type
 The changelog is this version's section of CHANGELOG.md; QuestieDB is
 sent as a required dependency.
 Needs Python 3.8+ and nothing else.
@@ -85,16 +87,23 @@ def main(argv):
     version = toc_field(toc, "Version")
     project = os.environ.get("CF_PROJECT_ID") or toc_field(toc, "X-Curse-Project-ID")
     game = os.environ.get("CF_GAME_VERSION") or game_version_name(toc_field(toc, "Interface"))
+    label = os.environ.get("RELEASE_TAG") or version
+    if not label.startswith(version):
+        sys.exit("Tag %s does not match ## Version %s" % (label, version))
+    kind = os.environ.get("CF_RELEASE_TYPE")
+    if not kind:
+        lower = label.lower()
+        kind = "alpha" if "alpha" in lower else "beta" if "beta" in lower else "release"
     metadata = {
         "changelog": changelog_section(version),
         "changelogType": "markdown",
-        "displayName": "WalkMap " + version,
-        "releaseType": os.environ.get("CF_RELEASE_TYPE", "release"),
+        "displayName": "WalkMap " + label,
+        "releaseType": kind,
         # QuestieDB (curseforge.com/wow/addons/questiedb, project 1696795)
         # is required, as ## RequiredDeps in WalkMap.toc says.
         "relations": {"projects": [{"slug": "questiedb", "type": "requiredDependency"}]},
     }
-    print("Project %s, WalkMap %s, game version %s, file %s" % (project, version, game, os.path.basename(path)))
+    print("Project %s, WalkMap %s (%s), game version %s, file %s" % (project, label, kind, game, os.path.basename(path)))
     if dry:
         print(json.dumps(metadata, indent=2))
         return

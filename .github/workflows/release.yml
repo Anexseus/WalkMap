@@ -2,6 +2,8 @@
 # checks the addon, runs the tests, builds the zip, uploads it to
 # CurseForge (project id from ## X-Curse-Project-ID in WalkMap.toc) and
 # makes a GitHub release with the same zip and changelog.
+# A tag like 1.14.8-beta1 or 1.14.8-alpha1 uploads a Beta or Alpha file
+# (only players who choose Beta/Alpha get it) and a GitHub pre-release.
 # Needs the repository secret CF_API_KEY (a CurseForge API token).
 name: Release
 
@@ -25,9 +27,11 @@ jobs:
       - name: Tag matches the version in WalkMap.toc
         run: |
           version=$(sed -n 's/^## Version: *//p' WalkMap.toc | tr -d '\r')
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME but WalkMap.toc says $version"; exit 1
-          fi
+          case "$GITHUB_REF_NAME" in
+            "$version"|"$version"-*) ;;
+            *) echo "Tag $GITHUB_REF_NAME but WalkMap.toc says $version"; exit 1 ;;
+          esac
+          echo "VERSION=$version" >> "$GITHUB_ENV"
 
       - name: Check, test and build the zip
         run: python3 tools/Release/check.py --zip dist
@@ -35,7 +39,8 @@ jobs:
       - name: Upload to CurseForge
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-        run: python3 tools/Release/upload_curseforge.py dist/WalkMap-${GITHUB_REF_NAME}.zip
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 tools/Release/upload_curseforge.py "dist/WalkMap-${VERSION}.zip"
 
       - name: GitHub release
         env:
@@ -44,9 +49,12 @@ jobs:
           python3 - <<'PY' > notes.md
           import re
           text = open("CHANGELOG.md", encoding="utf-8").read()
-          tag = "${{ github.ref_name }}"
+          tag = "${{ env.VERSION }}"
           m = re.search(r"^## " + re.escape(tag) + r"\s*$(.*?)(?=^## |\Z)", text, re.M | re.S)
           print(m.group(1).strip() if m else "WalkMap " + tag)
           PY
+          pre=""
+          case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
+          cp "dist/WalkMap-${VERSION}.zip" "dist/WalkMap-${GITHUB_REF_NAME}.zip" 2>/dev/null || true
           gh release create "$GITHUB_REF_NAME" "dist/WalkMap-${GITHUB_REF_NAME}.zip" \
-            --title "WalkMap $GITHUB_REF_NAME" --notes-file notes.md
+            --title "WalkMap $GITHUB_REF_NAME" --notes-file notes.md $pre
