@@ -1,0 +1,29 @@
+WalkMap - a controller-friendly map addon for WoW Forever
+Copyright (C) 2026 Anexseus and Underbuks
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License along
+with this program (COPYING.md). If not, see <https://www.gnu.org/licenses/>.
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Parts of WalkMap come from other projects and keep their own notices; see
+THIRD_PARTY_NOTICES.txt:
+- WalkMap_QuestBlacklist.lua is derived from Questie's quest blacklist
+  (GPLv3, the Questie contributors).
+- Four pfQuest marker images in Icons/ are under the MIT License
+  (Icons/MIT.txt), which is compatible with the GPL.
+
+Source code: the Lua and XML files in this archive are the complete source.
+The tool that regenerates WalkMap_QuestBlacklist.lua is in tools/.
+Textures and templates referenced from the World of Warcraft client belong
+to the game and are not part of WalkMap.

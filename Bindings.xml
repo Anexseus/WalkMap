@@ -1,0 +1,12 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later. WalkMap, see LICENSE.txt. -->
+<Bindings>
+    <Binding name="WALKMAP_TOGGLE" header="WALKMAP">
+        WalkMap_Toggle()
+    </Binding>
+    <Binding name="WALKMAP_CONTROLLER_FOCUS">
+        WalkMap_ToggleControllerFocus()
+    </Binding>
+    <Binding name="WALKMAP_SORT_BAGS">
+        WalkMap_SortBags()
+    </Binding>
+</Bindings>

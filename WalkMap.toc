@@ -1,0 +1,41 @@
+## Interface: 16001
+## Title: WalkMap
+## Notes: Controller-friendly zone map using QuestieDB locations.
+## Author: Anexseus and Underbuks
+## Version: 1.14.7
+## X-License: GPL-3.0-or-later; see LICENSE.txt and THIRD_PARTY_NOTICES.txt
+## X-Credits: Eric Mauser (Shagu), Questie contributors
+## RequiredDeps: QuestieDB
+## LoadSavedVariablesFirst: 1
+## SavedVariables: WalkMapSettings
+## SavedVariablesPerCharacter: WalkMapCharacterSettings
+WalkMap_Data.lua
+WalkMap_Objectives.lua
+WalkMap_LiveDB.lua
+WalkMap_TurnIns.lua
+WalkMap_QuestBlacklist.lua
+WalkMap_QuestRules.lua
+WalkMap_QuestInfo.lua
+WalkMap_UI.lua
+WalkMap_Extras.lua
+WalkMap_Bags.lua
+WalkMap_Combat.lua
+WalkMap_StyleReload.lua
+WalkMap_Maps.lua
+WalkMap_Navigation.lua
+WalkMap_ControllerActions.lua
+WalkMap_ControllerNative.lua
+WalkMap.lua
+WalkMap_Levels.lua
+WalkMap_Fade.lua
+WalkMap_Commands.lua
+WalkMap_ButtonsMenu.lua
+WalkMap_QuestLog.lua
+WalkMap_GameMapGuard.lua
+WalkMap_Tracker.lua
+WalkMap_Announce.lua
+WalkMap_Corpse.lua
+WalkMap_DialogLayer.lua
+WalkMap_MiniHover.lua
+WalkMap_Mini.lua
+WalkMap_MiniNative.lua
