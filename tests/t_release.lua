@@ -30,7 +30,8 @@ local function fakeManager(env)
     function errorLine:SetText(text) self.text = text end
     env.LE_GAME_ERR_SYSTEM = 22
     env.ERROR_NO_FRAME_TO_FOCUS = "No interface frame to focus!"
-    env.UIErrorsFrame = {GetFontStringByID = function(_, id) return id == 22 and errorLine or nil end}
+    env.UIErrorsFrame = {GetFontStringByID = function(_, id) return id == 22 and errorLine or nil end,
+        Clear = function() errorLine.text = "" end}
     m.errorLine = errorLine
     function m:ToggleUIFocus()
         -- The game refuses to focus the UI with no window in its list.

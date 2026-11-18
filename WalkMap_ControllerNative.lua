@@ -937,15 +937,23 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
     -- registers the map the normal way, which focuses it.
     -- With nothing registered the game has just printed its red "No
     -- interface frame to focus!" for that Select press. WalkMap takes the
-    -- map right after, so the message is wrong: blank that one line. Only
-    -- the error frame's own line is touched (no Blizzard fields written).
+    -- map right after, so the message is wrong: clear it. Blanking only its
+    -- line (SetText) did not stick in game - the message frame redraws its
+    -- lines - so the error frame is cleared (its own method; no Blizzard
+    -- fields written). Any other red line shown in that same moment goes
+    -- too, which is rare and harmless.
     local function hideNoFrameError()
         local errors, id, text = UIErrorsFrame, LE_GAME_ERR_SYSTEM, ERROR_NO_FRAME_TO_FOCUS
-        if not (errors and errors.GetFontStringByID and id and text) then return end
-        local ok, line = pcall(errors.GetFontStringByID, errors, id)
-        if ok and line and line.GetText and line:GetText() == text then
-            pcall(line.SetText, line, "")
+        if not (errors and text) then return end
+        local line
+        if errors.GetFontStringByID and id then
+            local ok, found = pcall(errors.GetFontStringByID, errors, id)
+            if ok then line = found end
         end
+        local shown = line and line.GetText and line:GetText()
+        if shown and shown ~= text and not tostring(shown):find(text, 1, true) then return end
+        if errors.Clear then pcall(errors.Clear, errors)
+        elseif line then pcall(line.SetText, line, "") end
     end
     native.HideNoFrameError = hideNoFrameError
     -- Group windows the game keeps in its window list (the raid/party
