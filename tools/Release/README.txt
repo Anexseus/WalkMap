@@ -44,3 +44,12 @@ Before you pack a version, from the WalkMap folder:
 The tests alone:  lua tests/run.lua   (any Lua 5.1-5.4, LuaJIT or texlua)
 
 License: GPL-3.0-or-later, see ../../LICENSE.txt.
+
+Releasing from GitHub
+---------------------
+Push a tag with the version, e.g. 1.14.8 (it must match ## Version in
+WalkMap.toc). .github/workflows/release.yml then runs check.py with the
+tests, builds the zip, uploads it to CurseForge with upload_curseforge.py
+(project 1796543, game version from ## Interface: 16001 -> 1.60.1) and
+makes a GitHub release with the same zip and changelog section.
+It needs the repository secret CF_API_KEY: a CurseForge API token.
