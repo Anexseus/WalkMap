@@ -101,11 +101,10 @@ def main(argv):
         "releaseType": kind,
     }
     # QuestieDB (curseforge.com/wow/addons/questiedb, project 1696795) is
-    # required, as ## RequiredDeps in WalkMap.toc says. Not sent with betas
-    # and alphas for now: after 1.14.8-beta1 (the first file that sent it) a
-    # tester's QuestieDB went missing. CF_RELATIONS=1/0 overrides.
-    relations = os.environ.get("CF_RELATIONS")
-    if relations == "1" or (relations != "0" and kind == "release"):
+    # required, as ## RequiredDeps in WalkMap.toc says. CF_RELATIONS=0 leaves
+    # it out. (A QuestieDB installed while the game runs needs a game
+    # restart, not /reload - that was the "missing" after 1.14.8-beta1.)
+    if os.environ.get("CF_RELATIONS") != "0":
         metadata["relations"] = {"projects": [{"slug": "questiedb", "type": "requiredDependency"}]}
     print("Project %s, WalkMap %s (%s), game version %s, file %s" % (project, label, kind, game, os.path.basename(path)))
     if dry:
