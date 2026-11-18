@@ -7,10 +7,15 @@
 # Needs the repository secret CF_API_KEY (a CurseForge API token).
 name: Release
 
+# The same runs for a branch named release/<version> (e.g. release/1.14.8-beta1),
+# for sessions that can push branches but not tags; the GitHub release then
+# creates the tag.
 on:
   push:
     tags:
       - "*"
+    branches:
+      - "release/*"
 
 permissions:
   contents: write
@@ -27,11 +32,13 @@ jobs:
       - name: Tag matches the version in WalkMap.toc
         run: |
           version=$(sed -n 's/^## Version: *//p' WalkMap.toc | tr -d '\r')
-          case "$GITHUB_REF_NAME" in
+          release="${GITHUB_REF_NAME#release/}"
+          case "$release" in
             "$version"|"$version"-*) ;;
-            *) echo "Tag $GITHUB_REF_NAME but WalkMap.toc says $version"; exit 1 ;;
+            *) echo "Release $release but WalkMap.toc says $version"; exit 1 ;;
           esac
           echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "RELEASE=$release" >> "$GITHUB_ENV"
 
       - name: Check, test and build the zip
         run: python3 tools/Release/check.py --zip dist
@@ -39,7 +46,7 @@ jobs:
       - name: Upload to CurseForge
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ env.RELEASE }}
         run: python3 tools/Release/upload_curseforge.py "dist/WalkMap-${VERSION}.zip"
 
       - name: GitHub release
@@ -54,7 +61,7 @@ jobs:
           print(m.group(1).strip() if m else "WalkMap " + tag)
           PY
           pre=""
-          case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
-          cp "dist/WalkMap-${VERSION}.zip" "dist/WalkMap-${GITHUB_REF_NAME}.zip" 2>/dev/null || true
-          gh release create "$GITHUB_REF_NAME" "dist/WalkMap-${GITHUB_REF_NAME}.zip" \
-            --title "WalkMap $GITHUB_REF_NAME" --notes-file notes.md $pre
+          case "$RELEASE" in *-*) pre="--prerelease" ;; esac
+          cp "dist/WalkMap-${VERSION}.zip" "dist/WalkMap-${RELEASE}.zip" 2>/dev/null || true
+          gh release create "$RELEASE" "dist/WalkMap-${RELEASE}.zip" --target "$GITHUB_SHA" \
+            --title "WalkMap $RELEASE" --notes-file notes.md $pre
