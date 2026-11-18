@@ -9,6 +9,9 @@ Fixed
   (the raid/party manager on the left) while the map is open - not with
   Select, and not when the group changes. Focus stays on the map; close
   the map to use the group window. (During combat the game decides.)
+- Select keeps the map released: after closing and reopening the map in a
+  group, Select takes the map again. Before, with the group window folded
+  in, the game used that Select to open the group window instead.
 - Should the group window get the controller anyway, it opens in front of
   the map instead of behind it.
 

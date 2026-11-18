@@ -978,7 +978,12 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
     -- changes: put the map back in front right after.
     if hooksecurefunc and manager() and type(manager().FrameShown) == "function" then
         pcall(hooksecurefunc, manager(), "FrameShown", function(_, frame)
-            if groupWindow(frame) and not inCall then preferMap() end
+            if not groupWindow(frame) or inCall then return end
+            -- With no window in the game's list (the map held back while
+            -- released) the group window turns Select into "open me", so
+            -- the Select hook never runs: this is that Select - take the map.
+            if not registered[owner] and native.AfterToggle then native.AfterToggle()
+            else preferMap() end
         end)
     end
     -- Reaching the group window (LB/RB) while the map is open: the game's

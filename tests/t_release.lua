@@ -41,6 +41,20 @@ local function fakeManager(env)
         self.isUIFocused = not self.isUIFocused
     end
     env.GamepadMode = {FrameControlsManager = m}
+    -- Post-hooks on the manager's methods run, as in the game.
+    local plainHook = env.hooksecurefunc
+    env.hooksecurefunc = function(target, name, fn)
+        if target == m and type(name) == "string" and type(m[name]) == "function" then
+            local original = m[name]
+            m[name] = function(...)
+                local a, b, c = original(...)
+                fn(...)
+                return a, b, c
+            end
+            return
+        end
+        if plainHook then return plainHook(target, name, fn) end
+    end
     env.SmartNavigationSecureHelper = {}
     env.C_RestrictedActions = {IsAddOnRestrictionActive = function() return false end}
     env.Enum = env.Enum or {}
@@ -103,6 +117,18 @@ return {
         env.WalkMapNativeController.AfterToggle()
         env.tick(0.3, 3)
         Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "map first after reopening too")
+        -- Released, closed and reopened with the group window collapsed: the
+        -- game turns Select into "open the group window" (no Select hook).
+        m:ToggleUIFocus()
+        env.tick(0.3, 3)
+        m:FrameHidden(crfm)  -- collapsed
+        close(env)
+        open(env)
+        Mock.eq(env.WalkMapNativeController.HasFocus(), false, "held back again")
+        m:FrameShown(crfm, false, true)  -- Select expands the group window
+        env.tick(0.3, 3)
+        Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "Select still takes the map")
+        Mock.eq(env.WalkMapExtras.MapReleased(), false, "no longer released")
         -- Focus lands on the group window some other way (LB/RB): back to the map.
         m.focusedFrame = crfm
         env.tick(0.5, 5)
