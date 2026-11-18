@@ -12,7 +12,8 @@ Used by .github/workflows/release.yml when a version tag is pushed.
   CF_GAME_VERSION optional, e.g. "1.60.1"; else made from ## Interface
                   (16001 -> 1.60.1)
   CF_RELEASE_TYPE optional: release (default), beta or alpha
-The changelog is this version's section of CHANGELOG.md.
+The changelog is this version's section of CHANGELOG.md; QuestieDB is
+sent as a required dependency.
 Needs Python 3.8+ and nothing else.
 """
 import json
@@ -89,6 +90,9 @@ def main(argv):
         "changelogType": "markdown",
         "displayName": "WalkMap " + version,
         "releaseType": os.environ.get("CF_RELEASE_TYPE", "release"),
+        # QuestieDB (curseforge.com/wow/addons/questiedb, project 1696795)
+        # is required, as ## RequiredDeps in WalkMap.toc says.
+        "relations": {"projects": [{"slug": "questiedb", "type": "requiredDependency"}]},
     }
     print("Project %s, WalkMap %s, game version %s, file %s" % (project, version, game, os.path.basename(path)))
     if dry:
