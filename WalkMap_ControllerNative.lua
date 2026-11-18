@@ -950,8 +950,9 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
     native.HideNoFrameError = hideNoFrameError
     -- Group windows the game keeps in its window list (the raid/party
     -- manager on the left edge). Being leftmost, the game focuses them first
-    -- when Select brings focus back. With the map open the map comes first;
-    -- LB/RB still reach them.
+    -- when Select brings focus back, and again whenever the group changes
+    -- (it re-adds the window). While the map is open the controller never
+    -- stays on them: focus goes back to the map (outside combat).
     local GROUP_WINDOWS = {"CompactRaidFrameManager"}
     local function groupWindow(frame)
         if not frame then return false end
@@ -964,6 +965,7 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
     -- map out of the list and put it back (FrameHidden/FrameShown, both
     -- taint-wrapped by the game). Never by setting the manager's fields.
     local function preferMap()
+        if (InCombatLockdown and InCombatLockdown()) or restricted() then return end
         local m = manager()
         if not (m and m.isUIFocused and registered[owner] and owner:IsShown()) then return end
         local focused = m.focusedFrame
@@ -972,6 +974,13 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
         if not registered[owner] then register(owner, false) end
     end
     native.PreferMap = preferMap
+    -- The game re-adds (and focuses) the group window when the group
+    -- changes: put the map back in front right after.
+    if hooksecurefunc and manager() and type(manager().FrameShown) == "function" then
+        pcall(hooksecurefunc, manager(), "FrameShown", function(_, frame)
+            if groupWindow(frame) and not inCall then preferMap() end
+        end)
+    end
     -- Reaching the group window (LB/RB) while the map is open: the game's
     -- group window sits on a lower layer (MEDIUM) than the map (HIGH) and
     -- would open behind it. While it has the controller the map steps down
@@ -1015,6 +1024,7 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
         local now = GetTime()
         if now < nextPoll then return end
         nextPoll = now + 0.2
+        preferMap()
         updateGroupLayer()
         if dirty or owner:IsShown() or anyRegistered() then
             native.Update()

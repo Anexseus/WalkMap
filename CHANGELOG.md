@@ -5,12 +5,12 @@
 Fixed
 - Select keeps the map released: taking the map back with Select no longer
   shows the game's red "No interface frame to focus!" message.
-- In a group, Select now focuses the open map before the game's group
-  window (the raid/party manager on the left). LB/RB still reach the group
-  window. This also applies when Select takes back a released map.
-- When you move to the group window with LB/RB while the map is open, it
-  now opens in front of the map instead of behind it. The map steps back
-  while the group window has the controller and comes forward again after.
+- In a group, the controller no longer jumps to the game's group window
+  (the raid/party manager on the left) while the map is open - not with
+  Select, and not when the group changes. Focus stays on the map; close
+  the map to use the group window. (During combat the game decides.)
+- Should the group window get the controller anyway, it opens in front of
+  the map instead of behind it.
 
 ## 1.14.7
 

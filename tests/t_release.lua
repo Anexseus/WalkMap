@@ -103,13 +103,16 @@ return {
         env.WalkMapNativeController.AfterToggle()
         env.tick(0.3, 3)
         Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "map first after reopening too")
-        -- LB/RB to the group window: the map steps down so it opens in front.
+        -- Focus lands on the group window some other way (LB/RB): back to the map.
         m.focusedFrame = crfm
         env.tick(0.5, 5)
-        Mock.eq(env.WalkMapCore.frame:GetFrameStrata(), "LOW", "map below the group window while it has focus")
-        m.focusedFrame = env.WalkMapCore.frame
+        Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "the map takes focus back from the group window")
+        Mock.eq(env.WalkMapCore.frame:GetFrameStrata(), "HIGH", "the map stays on its layer")
+        -- The group changes: the game re-adds and focuses its group window.
+        m:FrameHidden(crfm)
+        m:FrameShown(crfm, false, true)
         env.tick(0.5, 5)
-        Mock.eq(env.WalkMapCore.frame:GetFrameStrata(), "HIGH", "map back up when focus returns")
+        Mock.eq(m.focusedFrame, env.WalkMapCore.frame, "re-added group window does not keep focus")
     end},
     {"Native: Select keeps the map released across close and open", function(Mock)
         local env, m = start(Mock, {controllerMode = true, nativeController = true, selectKeepsReleased = true})
