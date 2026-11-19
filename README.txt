@@ -246,6 +246,43 @@ the problem is visible, copy it and send it along. BugGrabber/BugSack
 screenshots of Lua errors help a lot.
 
 
+KNOWN LIMITATIONS
+-----------------
+These come from the game, not from WalkMap. Some have a partial workaround.
+
+In combat, with the game's gamepad interface:
+- The map window cannot be moved or resized, and its footer and Settings
+  wait until the fight ends. The window is protected so your WalkMap key can
+  open and close it in combat, and the game locks protected windows during a
+  fight. With the mouse and keyboard interface the map works fully.
+- Settings that change the game's minimap, key bindings or its own quest
+  tracker are applied after combat.
+- Share in the quest log is blocked by the game during a fight.
+- WalkMap does not move the controller away from the group window during a
+  fight; it leaves the game's controller system alone in combat.
+
+Select and the controller:
+- When Select takes the map back, the game may first print "No interface
+  frame to focus!". WalkMap removes the message right after.
+- In a group, with the map released, closed and reopened and the group
+  window folded in, the game uses Select to open the group window. WalkMap
+  then takes the controller to the map, but the group window stays open.
+- LB + RB + D-pad up always opens the game's own quest tracker.
+- If the game's own map hits its "SoftCursor" error, the controller can stop
+  working in menus. WalkMap prevents the known cause; if it happens anyway,
+  /reload fixes it.
+
+Chat, data and installation:
+- WalkMap never opens the chat line itself (the game blocks addons from it
+  in controller mode). A linked quest waits until you open chat.
+- The game only gives addons the exact position of party and raid members,
+  not of guild members or friends elsewhere.
+- The game does not tell addons which parts of a map are still unexplored.
+- WoW has no Danish client, so quest and NPC names follow the game's language.
+- An addon installed or updated while the game runs (QuestieDB too) needs a
+  full game restart; /reload is not enough.
+
+
 NOTES
 -----
 - Locations come from QuestieDB: they show where things spawn, not whether
