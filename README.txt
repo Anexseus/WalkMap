@@ -272,15 +272,11 @@ Select and the controller:
   working in menus. WalkMap prevents the known cause; if it happens anyway,
   /reload fixes it.
 
-Chat, data and installation:
+Chat and data:
 - WalkMap never opens the chat line itself (the game blocks addons from it
   in controller mode). A linked quest waits until you open chat.
-- The game only gives addons the exact position of party and raid members,
-  not of guild members or friends elsewhere.
 - The game does not tell addons which parts of a map are still unexplored.
 - WoW has no Danish client, so quest and NPC names follow the game's language.
-- An addon installed or updated while the game runs (QuestieDB too) needs a
-  full game restart; /reload is not enough.
 
 
 NOTES
