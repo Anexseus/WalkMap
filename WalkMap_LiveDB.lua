@@ -139,9 +139,34 @@ local function questRow(id, quests, prereqs)
     if #single > 0 or #group > 0 then prereqs[id] = {single, group} end
 end
 
+-- Rare mobs (QuestieDB rank 4 rare, 2 rare elite), any faction: Places >
+-- Rare mobs. {x, y, name, rank, minLevel, maxLevel} per zone.
+local function consumeRare(id, name, result)
+    local npc = db.Npc
+    local okRank, rank = pcall(npc.GetByIndex, id, 6)
+    if not okRank or (rank ~= 2 and rank ~= 4) then return end
+    local okSpawns, spawns = pcall(npc.GetByIndex, id, 7)
+    if not okSpawns or type(spawns) ~= "table" then return end
+    local _, low = pcall(npc.GetByIndex, id, 4)
+    local _, high = pcall(npc.GetByIndex, id, 5)
+    for areaID, coords in pairs(spawns) do
+        local mapID = areaToMap[areaID]
+        if mapID and type(coords) == "table" then
+            for index = 1, math.min(#coords, 8) do
+                local point = coords[index]
+                if validPoint(point) then
+                    addZonePoint(result.rares, mapID, {round(point[1]), round(point[2]), name, rank,
+                        type(low) == "number" and low or nil, type(high) == "number" and high or nil})
+                end
+            end
+        end
+    end
+end
+
 local function consumeNpc(id, result)
     local npc = db.Npc
     local name = npc.GetByIndex(id, 1)
+    if type(name) == "string" and result.rares then consumeRare(id, name, result) end
     local faction = npc.GetByIndex(id, 13)
     if type(name) ~= "string" or (faction ~= "A" and faction ~= "H" and faction ~= "AH") then return end
     local title = npc.GetByIndex(id, 14) or ""
@@ -613,7 +638,7 @@ local function start()
     turnInCache = {}
     dropCache = {}
     status = "Reading QuestieDB locations..."
-    local result = {services = {}, givers = {}, quests = {}, prereqs = {}, resources = {}}
+    local result = {services = {}, givers = {}, quests = {}, prereqs = {}, resources = {}, rares = {}}
     local position, objectPosition = 1, 1
     local seenResources, resourceCount = {}, {}
     local worker = CreateFrame("Frame")
@@ -661,6 +686,7 @@ local function start()
             WalkMapData.quests = result.quests
             WalkMapData.prereqs = result.prereqs
             WalkMapData.resources = result.resources
+            WalkMapData.rares = result.rares
             status = "Using QuestieDB locations (" .. tostring(#ids)
                 .. " NPCs, " .. tostring(#objectIds) .. " objects scanned)"
             phase, progress = "ready", 100

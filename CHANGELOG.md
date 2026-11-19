@@ -2,6 +2,22 @@
 
 ## 1.14.8
 
+New
+- Unexplored areas: the parts of a zone you have not explored yet show
+  dimmed in red on the large map, so you can see where to go to reveal
+  them. Settings > Map > Unexplored areas (off by default). The map data
+  comes from OpenMap (MIT).
+- Friends and guild on the map: online friends (and Battle.net friends in
+  this game, of your faction) and guild members show by zone - a badge on
+  the zone with who is there. Settings > Map > Friends on the map and Guild
+  on the map (on by default).
+- Share where you are (off by default): your guild and your friends who use
+  WalkMap or OpenMap see a class-coloured dot where you stand, and you see
+  theirs. It uses OpenMap's messages, so WalkMap and OpenMap players see
+  each other. Never shared from dungeons, raids or battlegrounds.
+- Places > Rare mobs: rare mobs and rare elites from QuestieDB, with their
+  level. Off unless chosen.
+
 Fixed
 - Select keeps the map released: taking the map back with Select no longer
   shows the game's red "No interface frame to focus!" message.

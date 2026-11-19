@@ -51,6 +51,15 @@ THE MAP
   turn on Settings > Map > Right-click goes a map level up.
 - The map always opens on the zone you are in. A zone you browsed to is
   forgotten when you close the map.
+- Settings > Map > Unexplored areas (off by default) shows the parts of a
+  zone you have not explored yet, dimmed in red.
+- Friends and guild: online friends and guild members show by zone, a badge
+  with who is there (Settings > Map > Friends on the map / Guild on the
+  map). With Share where you are (off by default) your guild and friends
+  who use WalkMap or OpenMap see a dot where you stand, and you see theirs;
+  never shared from dungeons, raids or battlegrounds.
+- Places > Other > Rare mobs shows rare mobs and rare elites with their
+  level (from QuestieDB).
 - Click a quest's marker (its ? or one of its objective icons) to focus
   that quest: only its markers and area stay on the maps. Click the marker
   again to show all quests. A marker shared by several quests steps
@@ -296,6 +305,9 @@ it, as long as shared versions keep the same license and include the source.
 - WalkMap_QuestBlacklist.lua is derived from Questie's quest blacklist
   (GPLv3, the Questie contributors); tools/QuestBlacklist/ regenerates it.
 - Four marker images in Icons/ come from pfQuest by Shagu (MIT, Icons/MIT.txt).
+- The unexplored-area data (WalkMap_RevealData.lua) comes from OpenMap by the
+  OpenMap contributors (MIT; notice in the file), and location sharing uses
+  OpenMap's message format so both addons see each other.
 - QuestieDB is a separate addon by the Questie contributors.
 See THIRD_PARTY_NOTICES.txt for details. Change history: CHANGELOG.md and
 docs/CHANGELOG-test-builds.md.

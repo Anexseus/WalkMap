@@ -107,6 +107,13 @@ if type(settings.trackerHidden) ~= "table" then settings.trackerHidden = {} end
 settings.combatPad = nil
 settings.closeInCombat = settings.closeInCombat == true
 settings.turnInWaypoint = settings.turnInWaypoint == true
+-- Unexplored areas on the large map (WalkMap.lua): off unless turned on.
+settings.unexplored = settings.unexplored == true
+-- Friends and guild on the map (WalkMap_Friends.lua): by zone on unless
+-- turned off; sharing your own place is off unless turned on.
+if settings.friendsOnMap == nil then settings.friendsOnMap = true end
+if settings.guildOnMap == nil then settings.guildOnMap = true end
+settings.shareLocation = settings.shareLocation == true
 -- Focus waypoint on the minimaps (WalkMap.lua); on unless turned off.
 if settings.focusWaypoint == nil then settings.focusWaypoint = true end
 settings.rightClickUp = settings.rightClickUp == true
@@ -233,6 +240,7 @@ local otherOptions = {
     {"auction", "Auction houses"}, {"stable", "Stable masters"},
     {"pet", "Pet trainers"},
     {"herb", "Herbs"}, {"ore", "Mining"},
+    {"rare", "Rare mobs"},
 }
 local placeGroups = {
     {"profession", "Profession Trainers", professionOptions},
@@ -276,6 +284,7 @@ local icons = {
     giver = "Interface\\GossipFrame\\AvailableQuestIcon",
     herb = "Interface\\Icons\\Trade_Herbalism",
     ore = "Interface\\Icons\\Trade_Mining",
+    rare = "Interface\\Icons\\Ability_Hunter_SniperShot",
 }
 local professionIcons = {
     alchemy = "Interface\\Icons\\Trade_Alchemy",
@@ -322,7 +331,7 @@ local refreshSettingsRows
 local accountLoadArmedAt
 local styleRow
 local styleMenu
-local servicePins, giverPins, resourcePins = {}, {}, {}
+local servicePins, giverPins, resourcePins, rarePins = {}, {}, {}, {}
 local lastGiverSummary = "not checked yet"
 local nextRefresh = 0
 local lastMap, lastLevel
@@ -415,6 +424,7 @@ function extras.Hide()
     hidePool(servicePins)
     hidePool(giverPins)
     hidePool(resourcePins)
+    hidePool(rarePins)
     lastMap = nil
 end
 
@@ -572,6 +582,11 @@ function extras.ControllerHints()
     return settings.controllerHints ~= false
 end
 
+function extras.Unexplored() return settings.unexplored == true end
+function extras.FriendsOnMap() return settings.friendsOnMap ~= false end
+function extras.GuildOnMap() return settings.guildOnMap ~= false end
+function extras.ShareLocation() return settings.shareLocation == true end
+
 function extras.FocusWaypoint()
     return settings.focusWaypoint ~= false
 end
@@ -723,7 +738,8 @@ function extras.AdjustMiniZoom(direction)
 end
 
 function extras.MiniMapPins()
-    return servicePins, giverPins, resourcePins
+    -- (4th: rare mobs, on the big map only)
+    return servicePins, giverPins, resourcePins, rarePins
 end
 
 function extras.MiniIconStyle(native)
@@ -897,6 +913,8 @@ function extras.DebugReport()
         math.floor(extras.FadeAlpha() * 100 + 0.5), settings.fadeKeepArrow ~= false and "kept" or "fades"))
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
+    add("Friends and guild", WalkMapFriends and WalkMapFriends.Status() or "unavailable")
+    add("Unexplored areas", settings.unexplored and ("on, " .. (WalkMapRevealData and "data loaded" or "no data")) or "off")
     add("Map/quest log keys", on(settings.useGameMapKeys)
         .. (WalkMapQuestLog and WalkMapQuestLog.KeyStatus and ("; " .. WalkMapQuestLog.KeyStatus()) or "")
         .. (WalkMapQuestLog and WalkMapQuestLog.InterceptStatus and ("; " .. WalkMapQuestLog.InterceptStatus()) or ""))
@@ -1200,7 +1218,7 @@ end
 -- Refreshing quest and vendor data can wait until the drag ends.
 function extras.RepositionPins()
     if not canvas then return end
-    for _, pool in ipairs({servicePins, giverPins, resourcePins}) do
+    for _, pool in ipairs({servicePins, giverPins, resourcePins, rarePins}) do
         for _, pin in ipairs(pool) do
             if pin:IsShown() and pin.mapPercentX and pin.mapPercentY then
                 local px = pin.mapPercentX * canvas:GetWidth()
@@ -1289,6 +1307,27 @@ local function showResources(mapID)
         end
     end
     for i = count + 1, #resourcePins do resourcePins[i]:Hide() end
+end
+
+-- Rare mobs and rare elites from QuestieDB (LiveDB: WalkMapData.rares).
+local RARE_RANK = {[2] = "Rare Elite", [4] = "Rare"}
+local function showRares(mapID)
+    local count = 0
+    if settings.placeFilters.rare then
+        for _, entry in ipairs((WalkMapData.rares or {})[mapID] or {}) do
+            local key = extras.MarkerKey("rare", mapID, entry[3], entry[1], entry[2])
+            if not extras.MarkerHidden(key) then
+                count = count + 1
+                local levels = entry[5] and (entry[6] and entry[6] ~= entry[5]
+                    and ("Level " .. entry[5] .. "-" .. entry[6]) or ("Level " .. entry[5])) or nil
+                local detail = (RARE_RANK[entry[4]] or "Rare") .. (levels and (" - " .. levels) or "")
+                makePin(rarePins, count, icons.rare, entry[1], entry[2], entry[3],
+                    "|cffc0c0ff" .. detail .. "|r", 16, key)
+                if count >= 120 then break end
+            end
+        end
+    end
+    for i = count + 1, #rarePins do rarePins[i]:Hide() end
 end
 
 local function isCompleted(id)
@@ -1442,6 +1481,7 @@ function extras.Refresh(mapID)
         {"services", showServices, servicePins},
         {"quest givers", showGivers, giverPins},
         {"resources", showResources, resourcePins},
+        {"rare mobs", showRares, rarePins},
     }) do
         local ok, message = pcall(entry[2], mapID, level)
         if not ok then
@@ -1530,6 +1570,13 @@ local function setOption(field, value)
     end
     if field == "closeInCombat" and WalkMapCombat and WalkMapCombat.SettingChanged then
         WalkMapCombat.SettingChanged()
+    end
+    if field == "unexplored" and WalkMapCore and WalkMapCore.RefreshExploration then
+        WalkMapCore.RefreshExploration()
+    end
+    if (field == "friendsOnMap" or field == "guildOnMap" or field == "shareLocation")
+        and WalkMapFriends and WalkMapFriends.SettingChanged then
+        WalkMapFriends.SettingChanged(field)
     end
     markProfileEdited(field)
     if menu then setControllerPanelVisible(menu, false) end
@@ -2637,6 +2684,10 @@ local settingsPages = {
         {"closeInCombat", nil, "Close map when combat starts", "Closes an open map as a fight begins. You can still open it during the fight; it is not closed again."},
         {"turnInWaypoint", nil, "Waypoint to turn-ins", "When a quest is ready to turn in, set the waypoint where the game says to hand it in."},
         {"rightClickUp", nil, "Right-click goes a map level up", "Right-click a zone map to open the continent instead of setting a waypoint. Waypoints are then set with middle-click or Alt-click."},
+        {"unexplored", nil, "Unexplored areas", "Show the parts of a zone you have not explored yet, dimmed in red."},
+        {"friendsOnMap", nil, "Friends on the map", "Online friends (and Battle.net friends in this game) by zone: a badge on the zone with who is there."},
+        {"guildOnMap", nil, "Guild on the map", "Online guild members by zone, the same way."},
+        {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and your friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never shared from dungeons, raids or battlegrounds."},
     }},
     {"Minimap", "WalkMap's minimap and the markers it adds.", {
         {"__miniType", nil, "WalkMap minimap", "Off, zone artwork (a larger, independently zoomed zone preview) or game terrain (the live game minimap with WalkMap's markers)."},

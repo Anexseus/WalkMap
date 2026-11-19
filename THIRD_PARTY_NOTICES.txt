@@ -28,6 +28,18 @@ Bundled files:
 The copyright and permission notice supplied with these images is retained
 unchanged. These images are not original WalkMap artwork.
 
+Unexplored map area data (from OpenMap)
+---------------------------------------
+File: WalkMap_RevealData.lua
+Source: OpenMap v0.8.10, Data/Forever/Reveal.lua (generated from the game's
+tables, build 1.60.1.70245)
+Authors: the OpenMap contributors
+Project: https://github.com/openmap-world/openmap
+License: MIT; the complete notice is kept at the top of the file
+Modifications: the table is renamed WalkMapRevealData; the data is unchanged.
+The location sharing in WalkMap_Friends.lua follows OpenMap's message format
+(prefix "OpenMapLoc", MIT) so WalkMap and OpenMap users can see each other.
+
 Separate dependencies (not bundled)
 -----------------------------------
 QuestieDB by the Questie contributors supplies runtime location records.

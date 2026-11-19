@@ -508,6 +508,12 @@ local mapTileHeight = 256
 -- =========================================================
 
 local exploredTextures = {}
+-- Unexplored areas (Settings > Map > Unexplored areas): the zone's overlay
+-- pieces the player has not found yet, drawn dimmed in red. The full piece
+-- list per map art comes from OpenMap's data (WalkMap_RevealData.lua, MIT);
+-- the game only lists the explored ones. Main map only.
+local unexploredTextures = {}
+local mainCanvas = canvas
 
 local explorationTileWidth = 256
 local explorationTileHeight = 256
@@ -534,6 +540,7 @@ local function applyMapAppearance()
     local baseAlpha = clearView and explorationTileCount > 0 and 0.09 or 1
     for _, texture in ipairs(textures) do texture:SetAlpha(baseAlpha) end
     for _, texture in ipairs(exploredTextures) do texture:SetAlpha(1) end
+    for _, texture in ipairs(unexploredTextures) do texture:SetAlpha(clearView and 0.3 or 0.55) end
 end
 
 
@@ -798,6 +805,10 @@ local function clearExploration()
     explorationTileCount = 0
     appliedTileCount = nil
 
+    if canvas == mainCanvas then
+        for _, texture in ipairs(unexploredTextures) do texture:Hide() end
+    end
+
     for _, texture
         in ipairs(exploredTextures)
     do
@@ -848,11 +859,39 @@ local function refreshExploration(
         or {}
 
 
-    local index = 0
+    local index, unexploredIndex = 0, 0
+
+    -- The pieces not in the game's explored list, from the full list.
+    local all = {}
+    for _, overlay in ipairs(overlays) do all[#all + 1] = overlay end
+    if canvas == mainCanvas and WalkMapExtras.Unexplored and WalkMapExtras.Unexplored()
+        and WalkMapRevealData and C_Map.GetMapArtID then
+        local okArt, artID = pcall(C_Map.GetMapArtID, mapID)
+        local pieces = okArt and WalkMapRevealData[artID]
+        if type(pieces) == "table" then
+            local explored = {}
+            for _, overlay in ipairs(overlays) do
+                explored[tostring(overlay.textureWidth) .. ":" .. tostring(overlay.textureHeight)
+                    .. ":" .. tostring(overlay.offsetX) .. ":" .. tostring(overlay.offsetY)] = true
+            end
+            for key, files in pairs(pieces) do
+                if not explored[key] then
+                    local w, h, x, y = key:match("^(%d+):(%d+):(%d+):(%d+)$")
+                    local ids = {}
+                    for id in tostring(files):gmatch("%d+") do ids[#ids + 1] = tonumber(id) end
+                    if w and #ids > 0 then
+                        all[#all + 1] = {textureWidth = tonumber(w), textureHeight = tonumber(h),
+                            offsetX = tonumber(x), offsetY = tonumber(y), fileDataIDs = ids,
+                            walkmapUnexplored = true}
+                    end
+                end
+            end
+        end
+    end
 
 
     for _, overlay
-        in ipairs(overlays)
+        in ipairs(all)
     do
 
         local w =
@@ -961,12 +1000,18 @@ local function refreshExploration(
                         and bottom > top
                     then
 
-                        index =
-                            index + 1
+                        local pool, slot = exploredTextures, nil
+                        if overlay.walkmapUnexplored then
+                            unexploredIndex = unexploredIndex + 1
+                            pool, slot = unexploredTextures, unexploredIndex
+                        else
+                            index = index + 1
+                            slot = index
+                        end
 
 
                         local texture =
-                            exploredTextures[index]
+                            pool[slot]
 
 
                         if not texture then
@@ -979,9 +1024,15 @@ local function refreshExploration(
                                     1
                                 )
 
-                            exploredTextures[index] =
+                            pool[slot] =
                                 texture
 
+                        end
+
+                        if overlay.walkmapUnexplored then
+                            texture:SetDesaturated(true)
+                            texture:SetVertexColor(1, 0.45, 0.4)
+                            texture:SetAlpha(WalkMapExtras.ClearView() and 0.3 or 0.55)
                         end
 
 
@@ -2374,6 +2425,7 @@ local function clearMap()
     playerDot:Hide()
 
     hidePartyMembers()
+    if WalkMapFriends then pcall(WalkMapFriends.Hide) end
 
     clearExploration()
 
@@ -2416,6 +2468,7 @@ local function repositionCachedPins()
         playerDot.anchorX, playerDot.anchorY = nil, nil
     end
     WalkMapExtras.RepositionPins()
+    if WalkMapFriends then pcall(WalkMapFriends.Reposition) end
 end
 
 local combatLayoutPending
@@ -2509,6 +2562,13 @@ local function layoutMap(
     -- Geometry changes must move every layer in the same UI update. Waiting
     -- for the periodic exploration/quest refresh leaves old-scale art visible.
     repositionCachedPins()
+    for _, texture in ipairs(unexploredTextures) do
+        if texture:IsShown() and texture.artX then
+            texture:ClearAllPoints()
+            texture:SetPoint("TOPLEFT", texture.artX * mapScale, -texture.artY * mapScale)
+            texture:SetSize(texture.artWidth * mapScale, texture.artHeight * mapScale)
+        end
+    end
     for _, texture in ipairs(exploredTextures) do
         if texture:IsShown() and texture.artX then
             texture:ClearAllPoints()
@@ -4079,6 +4139,14 @@ local function update()
         WalkMapExtras.DebugEvent("Party update: " .. tostring(partyError))
     end
 
+    if WalkMapFriends and not resizing then
+        local friendsOK, friendsError = pcall(WalkMapFriends.Refresh, mapID)
+        if not friendsOK then
+            pcall(WalkMapFriends.Hide)
+            WalkMapExtras.DebugEvent("Friends update: " .. tostring(friendsError))
+        end
+    end
+
     local positionOK, positionError = pcall(updatePlayerPosition, mapID)
     if not positionOK then
         playerDot:Hide()
@@ -4388,8 +4456,10 @@ local function visiblePins()
     local left, right, top, bottom = viewport:GetLeft(), viewport:GetRight(),
         viewport:GetTop(), viewport:GetBottom()
     if not left or not right or not top or not bottom then return list end
-    local services, givers, resources = WalkMapExtras.MiniMapPins()
-    for _, pool in ipairs({{waypointPin}, objectivePins, questPins, services, givers, resources}) do
+    local services, givers, resources, rares = WalkMapExtras.MiniMapPins()
+    local social = WalkMapFriends and WalkMapFriends.Pins and WalkMapFriends.Pins() or {}
+    for _, pool in ipairs({{waypointPin}, objectivePins, questPins, services, givers, resources,
+        rares or {}, social}) do
         for _, pin in ipairs(pool) do
             if pin:IsShown() then
                 local x, y = pin:GetCenter()
@@ -5194,6 +5264,15 @@ WalkMapCore = {
     -- Quest data changed: redraw now when the map is open.
     RefreshQuests = function()
         questRefreshAt = 0
+        if frame:IsShown() then safeUpdate() end
+    end,
+    UnexploredShown = function()
+        local n = 0
+        for _, texture in ipairs(unexploredTextures) do if texture:IsShown() then n = n + 1 end end
+        return n
+    end,
+    RefreshExploration = function()
+        explorationRefreshAt = 0
         if frame:IsShown() then safeUpdate() end
     end,
     PadState = function() return padSuspended, padPanning, lastPadButton end,

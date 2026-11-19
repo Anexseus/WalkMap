@@ -19,7 +19,11 @@ local function setup(Mock)
         RequireContract = function() return true end,
         Npc = entity({[234] = {[1] = "Gryan Stoutmantle", [7] = {[40] = {{56.3, 47.5}}}, [10] = {12},
             [13] = "A", [14] = "", [15] = 2},
-            [523] = {[1] = "Thor", [7] = {[40] = {{56.6, 52.6}}}, [13] = "A", [14] = "Gryphon Master", [15] = 8}}),
+            [523] = {[1] = "Thor", [7] = {[40] = {{56.6, 52.6}}}, [13] = "A", [14] = "Gryphon Master", [15] = 8},
+            -- A rare (rank 4) and a rare elite (2), hostile; an ordinary elite (1) is not a rare.
+            [573] = {[1] = "Foe Reaper 4000", [4] = 20, [5] = 20, [6] = 4, [7] = {[40] = {{44.4, 33.3}}}},
+            [519] = {[1] = "Slark", [4] = 15, [5] = 16, [6] = 2, [7] = {[40] = {{40.1, 80.2}}}},
+            [520] = {[1] = "Elite Guard", [4] = 20, [5] = 20, [6] = 1, [7] = {[40] = {{10, 10}}}}}),
         Object = entity({
             [415107] = {[1] = "Burned-Out Remains", [2] = {79008}, [4] = {[40] = {{37.41, 50.7}}}},
             [1617] = {[1] = "Silverleaf", [4] = {[40] = {{50, 50}}}},
@@ -117,5 +121,16 @@ return {
         for _, entry in ipairs(env.WalkMapData.givers[1436]) do
             Mock.ok(entry[3] ~= "Torn Poster", "unknown quest: no giver")
         end
+    end},
+    {"rare mobs and rare elites, whatever their faction, for Places > Rare mobs", function(Mock)
+        local env = setup(Mock)
+        local rares, byName = env.WalkMapData.rares[1436] or {}, {}
+        for _, entry in ipairs(rares) do byName[entry[3]] = entry end
+        Mock.eq(#rares, 2, "two rares in Westfall")
+        Mock.eq(byName["Foe Reaper 4000"][4], 4, "rare")
+        Mock.eq(byName["Foe Reaper 4000"][5], 20, "level")
+        Mock.eq(byName["Slark"][4], 2, "rare elite")
+        Mock.eq(byName["Slark"][6], 16, "max level")
+        Mock.eq(byName["Elite Guard"], nil, "an ordinary elite is not listed")
     end},
 }
