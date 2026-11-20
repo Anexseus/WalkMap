@@ -573,8 +573,11 @@ function friendsMod.Refresh(mapID)
     if wantZones() then
         for full, r in pairs(roster) do
             local wanted = (r.guild and WalkMapExtras.GuildOnMap()) or (r.friend and WalkMapExtras.FriendsOnMap())
-            local zone = wanted and not placed[full] and not inGroup(full)
+            local zone = wanted and not inGroup(full)
                 and WalkMapMaps and WalkMapMaps.IdByName(r.area)
+            -- Someone with a dot is not counted again on another zone's
+            -- badge, but stays in this zone's list (the friends button).
+            if zone and placed[full] and zone ~= mapID then zone = nil end
             if zone then
                 if not zones[zone] then zones[zone] = {}; order[#order + 1] = zone end
                 table.insert(zones[zone], r)
@@ -598,6 +601,19 @@ function friendsMod.Refresh(mapID)
         end
     end
     for i = badges + 1, #zonePins do zonePins[i]:Hide() end
+    -- Dots in this zone missing from the list (the game's roster gave
+    -- another zone, or has not caught up yet): add them too.
+    local listed = {}
+    for _, r in ipairs(hereList) do listed[r.full] = true end
+    for full in pairs(placed) do
+        local p = live[full]
+        if p and p.map == mapID and not listed[full] then
+            local r = roster[full]
+            hereList[#hereList + 1] = {name = Shown(full), class = p.class or (r and r.class),
+                level = p.level or (r and r.level), guild = p.guild or (r and r.guild),
+                friend = friends[full] ~= nil or (r and r.friend), full = full}
+        end
+    end
     if friendsMod.UpdateTab then friendsMod.UpdateTab() end
 end
 

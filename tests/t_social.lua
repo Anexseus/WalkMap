@@ -152,6 +152,12 @@ return {
         for _, p in ipairs(env.WalkMapFriends.Pins()) do if p:IsShown() and p.pinName == "Anna" then dot = p end end
         Mock.ok(dot, "Anna's dot")
         Mock.eq(dot.mapPercentX, 0.3, "x") Mock.eq(dot.mapPercentY, 0.4, "y")
+        -- With a dot she is still in the friends button's list, once.
+        local listed = 0
+        for _, o in ipairs(env.WalkMapFriends.InviteOptions()) do
+            if tostring(o[2]):find("Anna", 1, true) then listed = listed + 1 end
+        end
+        Mock.eq(listed, 1, "Anna in the list once, dot or not")
         -- Your own message back from the guild, with a sibling realm's name:
         -- no dot for yourself.
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me-TestRealm4")
