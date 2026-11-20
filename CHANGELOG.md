@@ -32,6 +32,15 @@ Changed
   the first row or Down on the last row scrolls, as before.
   The bar matches the window look: the game's own knob and arrows in
   Classic, and gold, brass or bronze in Stone, Wood and Leather.
+  The "x more below (scroll)" line is gone: the bar says it.
+
+Fixed
+- No dot for yourself: your own shared place coming back from the guild
+  was shown as someone else when the name came back with a second name
+  or a sibling realm's name.
+- The friends button's list now includes those who share where they are
+  in the zone (they have a dot), not only those the game's lists place
+  there.
 
 ## 1.14.8
 
