@@ -71,6 +71,7 @@ function W:GetStringWidth()
     return #tostring(self.__text or "") * 6 * scale
 end
 function W:GetFont() return "Fonts\\FRIZQT__.TTF", self.__fontSize or 12, "" end
+function W:EnableGamePadButton(on) self.__gamepadButtons = on and true or false end
 function W:SetFont(_, size) self.__fontSize = size return true end
 function W:GetFrameLevel() return self.__level end
 function W:SetFrameLevel(level) self.__level = level end

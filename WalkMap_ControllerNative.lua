@@ -935,6 +935,8 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
             -- NPC), and the map was selected again.
             for i = #windows, 1, -1 do unregister(windows[i].frame) end
             unregister(owner)
+            -- Keep WalkMap's own controller fallback paused too.
+            if WalkMapCore and WalkMapCore.UpdatePadMode then pcall(WalkMapCore.UpdatePadMode) end
         end
     end
     native.WatchRelease = watchRelease

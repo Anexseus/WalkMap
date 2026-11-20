@@ -224,6 +224,7 @@ return {
         m:ToggleUIFocus()  -- Select: back to the game
         env.tick(0.3, 3)
         Mock.eq(env.WalkMapExtras.MapReleased(), true, "released")
+        Mock.eq(env.WalkMapCore.frame.__gamepadButtons or false, false, "WalkMap's own controller fallback stays off")
         -- Talk to an NPC: the game's window takes focus, then closes.
         local gossip = env.CreateFrame("Frame", "GossipFrame")
         gossip:Show()

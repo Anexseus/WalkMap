@@ -4791,6 +4791,12 @@ updatePadMode = function()
     end
     local enabled = frame:IsShown() and controllerMode
     local nativeActive = WalkMapNativeController and WalkMapNativeController.Update()
+    -- Native map released by Select: it is out of the game's window list
+    -- until Select takes it back, so the custom fallback must stay paused.
+    if enabled and not nativeActive and WalkMapExtras.MapReleased() and WalkMapNativeController
+        and WalkMapNativeController.UsesNativeNavigation() then
+        padSuspended = true
+    end
     if frame.EnableGamePadButton then
         frame:EnableGamePadButton(enabled and not nativeActive and not padSuspended)
     end
