@@ -1067,8 +1067,16 @@ refresh = function()
             header.text:SetText(entry.title .. (entry.gameCollapsed and "  (collapsed in game)" or ""))
             header.count:SetText(collapsed and tostring(counts[entry.title] or 0) or "")
             -- Long zone names shrink to stay inside the list.
-            local room = (tonumber(header:GetWidth()) or 0) - 30 - (tonumber(header.count:GetStringWidth()) or 0)
-            if room > 40 then WalkMapUI.FitText(header.text, room) end
+            -- Long zone names shrink to stay inside the list; if even the
+            -- smallest size is too wide, the end is cut ("...").
+            -- (The header spans the panel less 12 px each side.)
+            local room = (tonumber(panel:GetWidth()) or 0) - 24 - 30 - (tonumber(header.count:GetStringWidth()) or 0)
+            header.text:SetWidth(0)
+            header.text:SetWordWrap(false)
+            if room > 40 then
+                WalkMapUI.FitText(header.text, room)
+                if (tonumber(header.text:GetStringWidth()) or 0) > room then header.text:SetWidth(room) end
+            end
             -- Arrow points right when folded in, down when open.
             if header.arrow.SetRotation then header.arrow:SetRotation(collapsed and 0 or -math.pi / 2) end
             header:Show()

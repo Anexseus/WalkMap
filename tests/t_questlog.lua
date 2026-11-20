@@ -161,6 +161,20 @@ return {
             end
         end
         Mock.ok(checked >= 4, "the action buttons and the zone filter were checked")
+        -- Zone headers stay inside the list too, even a long one.
+        env.__quests[1].title = "Excavation Site: Wetlands"
+        env.__quests[1].isCollapsed = true
+        log.Refresh()
+        local headers = 0
+        for _, child in ipairs(log.Panel().__children) do
+            if child.text and child.count and child.arrow and child:IsShown() then
+                headers = headers + 1
+                local width = child.text:GetWidth() or 0
+                if width <= 0 then width = child.text:GetStringWidth() end
+                Mock.ok(width <= log.Panel():GetWidth() - 24 - 30, "header inside the list")
+            end
+        end
+        Mock.ok(headers >= 1, "a header was checked")
         env.__fontScale = 1
         log.Refresh()
         for _, child in ipairs(log.Panel().__children) do
