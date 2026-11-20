@@ -18,6 +18,8 @@
 --   "L1\t<uiMapID>\t<x>\t<y>\t<CLASS>\t<level>"  (x, y 0..1 on that map)
 --   "L0"  stopped sharing;  "H1" hello to a friend who comes online,
 --   answered with "H2" (or your place when you share it).
+--   "W1\t<uiMapID>\t<zoneUID>"  WalkMap only: your layer in that zone (OpenMap
+--   ignores it), sent with L1 when known. See "Layers" below.
 -- Every few seconds while you move, each minute while you stand still. The
 -- realm handling (Forever's numbered realms share one pool) follows
 -- OpenMap's Map/Friends.lua.
@@ -182,19 +184,61 @@ local function send(key, text, channel, target, bn)
     sender:Show()
 end
 
-local function toFriend(full, text)
+local function toFriend(full, text, slot)
     local f = friends[full]
     if not f then return end
-    if f.bn then send(full, text, nil, nil, f.bn) else send(full, text, "WHISPER", f.whisper) end
+    local key = full .. (slot or "")
+    if f.bn then send(key, text, nil, nil, f.bn) else send(key, text, "WHISPER", f.whisper) end
 end
 
-local function broadcast(text)
+-- slot: a second message kind per target (the layer) that must not replace
+-- the place waiting in the queue.
+local function broadcast(text, slot)
     local guild = IsInGuild and IsInGuild()
-    if guild then send("GUILD", text, "GUILD") end
+    if guild then send("GUILD" .. (slot or ""), text, "GUILD") end
     for full in pairs(known) do
-        if friends[full] and not (guild and roster[full] and roster[full].guild) then toFriend(full, text) end
+        if friends[full] and not (guild and roster[full] and roster[full].guild) then toFriend(full, text, slot) end
     end
 end
+
+-- =========================================================
+-- Layers. The game does not say which layer (copy of a zone) you are on,
+-- but every creature's GUID carries the zone copy it lives in:
+-- "Creature-0-<server>-<instance>-<zoneUID>-<npcID>-<spawn>". Targeting,
+-- mouse-over or a nameplate of any creature gives yours. Two players in
+-- the same zone are on the same layer when their zoneUIDs match. Nothing is
+-- shown when either side does not know (or the game hides the GUID).
+-- =========================================================
+local LAYER_FRESH = 30 * 60
+local mine = {}           -- {map, uid, at}
+local layers = {}         -- full name -> {map, uid, at}
+local function zoneNow()
+    local m = call(C_Map.GetBestMapForUnit, "player")
+    return type(m) == "number" and m or nil
+end
+local function readLayer(unit)
+    if value(IsInInstance and IsInInstance()) then return end
+    local guid = call(UnitGUID, unit)
+    if type(guid) ~= "string" then return end
+    local kind, _, _, _, uid = strsplit and strsplit("-", guid)
+    if not strsplit then kind, uid = guid:match("^(%a+)%-%d+%-%d+%-%d+%-(%d+)%-") end
+    if (kind ~= "Creature" and kind ~= "Vehicle") or not uid or uid == "0" then return end
+    local m = zoneNow()
+    if not m then return end
+    if mine.uid ~= uid or mine.map ~= m then last.at = -math.huge end   -- tell the others soon
+    mine.map, mine.uid, mine.at = m, uid, now()
+end
+friendsMod.ReadLayer = readLayer
+local function myLayer(m)
+    if mine.uid and mine.map == m and m == zoneNow() and now() - mine.at < LAYER_FRESH then return mine.uid end
+end
+-- "Same layer" / "Other layer" for someone in zone m, or nil when unknown.
+local function layerFor(full, m)
+    local theirs, ours = layers[full], myLayer(m)
+    if not (theirs and ours and theirs.map == m and now() - theirs.at < LAYER_FRESH) then return nil end
+    return theirs.uid == ours
+end
+friendsMod.LayerFor = layerFor
 
 -- Where you are: zone uiMapID and x, y; nil inside an instance.
 local function here()
@@ -229,6 +273,8 @@ local function tick()
         tonumber(call(UnitLevel, "player")) or 0)
     sharing = true
     broadcast(last.text)
+    local uid = myLayer(m)
+    if uid then broadcast(("W1\t%d\t%s"):format(m, uid), "#layer") end
 end
 friendsMod.Tick = tick
 friendsMod.LastSent = function() return last.text end
@@ -243,7 +289,7 @@ local function scanGuild()
         local full = value(online) and Full(name)
         if full and not isMe(full) then
             roster[full] = {name = Shown(full), class = value(class), level = tonumber(value(level)),
-                area = value(area), guild = true}
+                area = value(area), guild = true, full = full}
         end
     end
 end
@@ -252,7 +298,7 @@ local function addFriend(full, level, area, className, how)
     local r = roster[full]
     if not samePool(full) and not r then return end
     r = r or {name = Shown(full), level = tonumber(value(level)), area = value(area),
-        class = classFile(value(className))}
+        class = classFile(value(className)), full = full}
     r.friend = true
     roster[full] = r
     if how.bn or not friends[full] then friends[full] = how end
@@ -327,6 +373,12 @@ local function heard(full, text, guild)
     if not guild and not friends[full] then return end   -- a whisper only from a friend
     if kind == "L0" then
         live[full] = nil
+        layers[full] = nil
+    elseif kind == "W1" then
+        local zone, uid = tonumber(m), x
+        if zone and type(uid) == "string" and uid:match("^%d+$") then
+            layers[full] = {map = zone, uid = uid, at = now()}
+        end
     elseif kind == "L1" then
         m, x, y = tonumber(m), tonumber(x), tonumber(y)
         if not (m and x and y) or x < 0 or x > 1 or y < 0 or y > 1 then return end
@@ -434,8 +486,11 @@ local function zoneLines(zone, people)
             break
         end
         local cr, cg, cb = classColor(r.class)
+        local same = r.full and layerFor(r.full, zone)
+        local right = tag(r.guild, r.friend)
+        if same ~= nil then right = right .. (same and " - same layer" or " - other layer") end
         lines[#lines + 1] = {text = r.level and r.level > 0 and ("%s  %d"):format(r.name, r.level) or r.name,
-            right = tag(r.guild, r.friend), r = cr, g = cg, b = cb}
+            right = right, r = cr, g = cg, b = cb}
     end
     return lines
 end
@@ -462,6 +517,11 @@ function friendsMod.Refresh(mapID)
                 if p.level and p.level > 0 then lines[#lines + 1] = {text = "Level " .. p.level} end
                 local friend = friends[full] or (roster[full] and roster[full].friend)
                 lines[#lines + 1] = {text = tag(p.guild, friend), r = 0.6, g = 0.8, b = 1}
+                local same = layerFor(full, p.map)
+                if same ~= nil then
+                    lines[#lines + 1] = same and {text = "Same layer as you", r = 0.4, g = 1, b = 0.4}
+                        or {text = "Other layer than you", r = 1, g = 0.6, b = 0.2}
+                end
                 local ago = t - p.at
                 if ago >= 20 then lines[#lines + 1] = {text = ("Updated %d s ago"):format(ago), r = 0.6, g = 0.6, b = 0.6} end
                 d.lines, d.pinName = lines, Shown(full)
@@ -611,12 +671,16 @@ function friendsMod.SettingChanged(field)
     end
 end
 
+function friendsMod.MyLayer() return mine.uid and myLayer(mine.map) end
+
 function friendsMod.Status()
     local online, sharingNow = 0, 0
     for _ in pairs(roster) do online = online + 1 end
     for _ in pairs(live) do sharingNow = sharingNow + 1 end
-    return ("friends/guild online %d, sharing %d, my sharing %s"):format(online, sharingNow,
-        wantShare() and (sharing and "on (sent)" or "on") or "off")
+    local uid = mine.map and myLayer(mine.map)
+    return ("friends/guild online %d, sharing %d, my sharing %s, my layer %s"):format(online, sharingNow,
+        wantShare() and (sharing and "on (sent)" or "on") or "off",
+        uid and (uid .. " in map " .. mine.map) or "unknown")
 end
 
 -- Test hooks.
@@ -628,7 +692,8 @@ friendsMod.Live, friendsMod.Roster, friendsMod.Known = live, roster, known
 local events = CreateFrame("Frame")
 for _, event in ipairs({"PLAYER_LOGIN", "GUILD_ROSTER_UPDATE", "FRIENDLIST_UPDATE",
     "BN_FRIEND_INFO_CHANGED", "BN_FRIEND_ACCOUNT_ONLINE", "BN_FRIEND_ACCOUNT_OFFLINE",
-    "CHAT_MSG_ADDON", "BN_CHAT_MSG_ADDON", "PLAYER_ENTERING_WORLD"}) do
+    "CHAT_MSG_ADDON", "BN_CHAT_MSG_ADDON", "PLAYER_ENTERING_WORLD",
+    "PLAYER_TARGET_CHANGED", "UPDATE_MOUSEOVER_UNIT", "NAME_PLATE_UNIT_ADDED"}) do
     pcall(events.RegisterEvent, events, event)
 end
 local scanQueued = false
@@ -660,6 +725,13 @@ events:SetScript("OnEvent", function(_, event, ...)
                 if wantZones() or wantShare() then askRosters() end
             end)
         end
+    elseif event == "PLAYER_TARGET_CHANGED" then
+        if wantShare() then pcall(readLayer, "target") end
+    elseif event == "UPDATE_MOUSEOVER_UNIT" then
+        if wantShare() then pcall(readLayer, "mouseover") end
+    elseif event == "NAME_PLATE_UNIT_ADDED" then
+        local unit = ...
+        if wantShare() and type(unit) == "string" then pcall(readLayer, unit) end
     elseif event == "PLAYER_ENTERING_WORLD" then
         -- Into an instance: stop at once (tick also checks).
         if wantShare() then pcall(tick) end

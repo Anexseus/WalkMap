@@ -2,6 +2,14 @@
 
 ## 1.14.9
 
+New
+- Same layer or not: with Share where you are on, WalkMap learns your layer
+  from any creature you target, mouse over or see a nameplate of, and
+  sends it along. A friend's or guild member's dot (and the friends button
+  list) then says "Same layer" or "Other layer" - only when both of you
+  are known, in the same zone. OpenMap users and unknown layers show
+  nothing about layers. The Debug report shows your own layer.
+
 Changed
 - Settings, the welcome page and What's new show a scroll bar with arrows
   on pages that have more rows than fit, so it is clear they scroll. Mouse
