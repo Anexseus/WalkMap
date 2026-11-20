@@ -3496,8 +3496,19 @@ local function clearWaypoint(message)
     if message then say(message) end
 end
 
+-- The quests a quest or objective marker stands for (nil for other pins).
+function viewport.walkmapPinQuests(pin)
+    if not pin then return nil end
+    local ids = {}
+    for _, item in ipairs(pin.entries or {}) do ids[#ids + 1] = item.questID end
+    for _, entry in ipairs(pin.groupEntries or {}) do ids[#ids + 1] = entry.id end
+    if #ids == 0 and type(pin.questID) == "number" then ids[1] = pin.questID end
+    return #ids > 0 and ids or nil
+end
+
 -- A in map control: on the waypoint's star (within its size) A clears it;
--- anywhere else it sets one.
+-- on a quest marker (the one the cross shows the tooltip of) A focuses that
+-- quest, as a click would; anywhere else it sets a waypoint.
 local function padWaypointAt(x, y)
     local waypoint = WalkMapExtras.Waypoint()
     if waypoint and waypoint.mapID == currentMap then
@@ -3507,6 +3518,15 @@ local function padWaypointAt(x, y)
             clearWaypoint("Waypoint cleared.")
             return
         end
+    end
+    -- (the cross is declared further down; WalkMapCore.crosshair is it)
+    local cross = WalkMapCore and WalkMapCore.crosshair
+    local hover = cross and cross.walkmapHoverPin and cross.walkmapHoverPin()
+    local quests = viewport.walkmapPinQuests(hover)
+    if quests then
+        if GameTooltip then GameTooltip:Hide() end
+        viewport.walkmapFocusClick(quests)
+        return
     end
     setWaypoint(currentMap, x, y, "Map point")
 end
@@ -5081,7 +5101,8 @@ WalkMapNativeController.Init(frame, {
         if enter then pcall(enter, selectedPin) end
         if WalkMapNativeController.SetPanHint then
             WalkMapNativeController.SetPanHint("Marker " .. markerIndex .. "/" .. #markerCycle
-                .. "   Y: next   A: " .. (selectedPin.walkmapWaypoint and "clear waypoint" or "set waypoint")
+                .. "   Y: next   A: " .. (selectedPin.walkmapWaypoint and "clear waypoint"
+                    or viewport.walkmapPinQuests(selectedPin) and "focus quest" or "set waypoint")
                 .. "   D-pad: pan   X/B: back")
         end
     end,
@@ -5091,6 +5112,8 @@ WalkMapNativeController.Init(frame, {
             local pin = selectedPin
             if pin.walkmapWaypoint then
                 clearWaypoint("Waypoint cleared.")
+            elseif viewport.walkmapPinQuests(pin) then
+                viewport.walkmapFocusClick(viewport.walkmapPinQuests(pin))
             elseif pin.mapPercentX and pin.mapPercentY and currentMap then
                 setWaypoint(currentMap, pin.mapPercentX, pin.mapPercentY,
                     pin.questTitle or pin.pinName or pin.objectiveName or "Marker")

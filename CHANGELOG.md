@@ -26,6 +26,9 @@ New
   waypoint.
 - Map control: Y steps only through the markers around the crosshair,
   nearest first (up to 12). Move the crosshair to browse another spot.
+- Map control: A on a quest or objective marker focuses that quest, as a
+  click does (again to step through or turn focus off). A elsewhere still
+  sets a waypoint.
 - What's new shows once for this update, where friends, guild, sharing and
   unexplored areas can be turned on right away. The welcome page for new
   players offers friends, guild and sharing too.

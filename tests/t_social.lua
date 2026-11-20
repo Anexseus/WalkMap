@@ -199,4 +199,17 @@ return {
         Mock.eq(#lines, 2, "one line for her")
         Mock.eq(lines[2].right, "Friend", "Friend before Guild")
     end},
+    {"A on a quest marker focuses the quest instead of setting a waypoint", function(Mock)
+        local env = start(Mock)
+        openMap(env)
+        local cross = env.WalkMapCore.crosshair
+        local marker = {questID = 101, GetScript = function() return nil end}
+        cross.walkmapHoverPin = function() return marker end
+        env.WalkMapWaypoint.PadAt(0.3, 0.3)
+        Mock.eq(env.WalkMapExtras.QuestFocus(), 101, "quest focused")
+        Mock.eq(env.WalkMapExtras.Waypoint(), nil, "no waypoint")
+        cross.walkmapHoverPin = function() return nil end
+        env.WalkMapWaypoint.PadAt(0.3, 0.3)
+        Mock.ok(env.WalkMapExtras.Waypoint(), "off a marker: waypoint as before")
+    end},
 }
