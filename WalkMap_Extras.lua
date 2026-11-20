@@ -2868,13 +2868,6 @@ refreshSettingsRows = function()
     for n = 1, math.min(slots, #items - settingsPanel.scroll) do
         shownItems[n] = items[settingsPanel.scroll + n]
     end
-    if settingsPanel.more then
-        local above, below = settingsPanel.scroll, scrollMax - settingsPanel.scroll
-        local parts = {}
-        if above > 0 then parts[#parts + 1] = above .. " more above" end
-        if below > 0 then parts[#parts + 1] = below .. " more below" end
-        settingsPanel.more:SetText(#parts > 0 and (table.concat(parts, ", ") .. " (scroll)") or "")
-    end
     -- Scroll bar beside the options: only on pages that scroll. The thumb's
     -- size is the share of the page you see, its place where you are.
     local bar = settingsPanel.scrollBar
@@ -3408,9 +3401,6 @@ local function createSettingsPanel()
     end)
     bar:Hide()
     settingsPanel.scrollBar = bar
-    settingsPanel.more = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    settingsPanel.more:SetPoint("BOTTOMRIGHT", settingsPanel, "BOTTOMRIGHT", -92, 17)
-    settingsPanel.more:SetTextColor(0.95, 0.78, 0.35)
     settingsPanel.scroll = 0
     -- Scroll by one row. Returns true when the list moved.
     function settingsPanel.walkmapScrollBy(delta)
