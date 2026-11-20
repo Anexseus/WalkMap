@@ -699,8 +699,13 @@ function friendsMod.InviteOptions()
     return options
 end
 
--- Shown while either list is on (WalkMapExtras.Resize asks).
-function friendsMod.TabWanted() return wantZones() end
+-- Shown while either list is on (WalkMapExtras.Resize asks), unless the
+-- footer's Buttons menu hides it (per character, key "friends").
+function friendsMod.TabWanted()
+    local saved = type(WalkMapCharacterSettings) == "table" and WalkMapCharacterSettings.hiddenButtons
+    if type(saved) == "table" and saved.friends == true then return false end
+    return wantZones()
+end
 
 function friendsMod.SettingChanged(field)
     if field == "shareLocation" and not wantShare() then stopSharing() end

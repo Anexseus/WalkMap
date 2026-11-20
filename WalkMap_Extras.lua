@@ -2401,6 +2401,7 @@ end
 -- The footer's Buttons menu: WalkMap.lua supplies the list and does the
 -- hiding (Items, IsHidden, Toggle, SetAll).
 function extras.SetButtonsMenu(provider) buttonsMenu = provider end
+function extras.ButtonsProvider() return buttonsMenu end
 function extras.OpenButtonsMenu(button)
     if not menu or not buttonsMenu then return end
     local options = buttonsMenu.Items()

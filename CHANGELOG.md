@@ -7,6 +7,8 @@ New
   list of the friends and guild members in the zone you are looking at,
   and pick one to invite them to your group. People already in your group
   are left out.
+- The friends button can be hidden from the footer's Buttons menu
+  (Friends and guild), per character like the other buttons.
 - Same layer or not: with Share where you are on, WalkMap learns your layer
   from any creature you target, mouse over or see a nameplate of (read the
   same way as LayerETA does, so it matches the layer LayerSwap hosts use),

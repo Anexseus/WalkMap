@@ -88,6 +88,16 @@ return {
         Mock.eq(lines[2].text, "Anna  18", "name and level")
         Mock.eq(lines[2].right, "Guild", "tagged Guild")
         Mock.eq(tab.count:GetText(), 1, "count on the button")
+        -- The footer's Buttons menu hides and shows it (per character).
+        local provider = env.WalkMapExtras.ButtonsProvider()
+        local listed = false
+        for _, item in ipairs(provider.Items()) do if item[1] == "friends" then listed = true end end
+        Mock.ok(listed, "friends button listed under Buttons")
+        provider.Toggle("friends")
+        Mock.ok(not tab:IsShown(), "hidden from Buttons")
+        Mock.eq(env.WalkMapCharacterSettings.hiddenButtons.friends, true, "saved per character")
+        provider.Toggle("friends")
+        Mock.ok(tab:IsShown(), "back from Buttons")
         -- Click: a list of who is here; picking one invites them.
         local invited
         env.C_PartyInfo = {InviteUnit = function(name) invited = name end}

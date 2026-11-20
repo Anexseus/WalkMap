@@ -52,6 +52,7 @@ do
         {"clearview", "Clear view", function() return {top[2]} end},
         {"mini", "WalkMap mini", function() return {top[3]} end},
         {"follow", "Follow", function() return {top[4]} end},
+        {"friends", "Friends and guild", function() return {} end},
         {"questlog", "Quest log book", function() return {tab()} end},
         {"quests", "Quests", function() return {questButton} end},
         {"zoom", "M+ / M-", function() return {miniZoomInButton, miniZoomOutButton} end},
@@ -91,6 +92,14 @@ do
             -- WalkMap_Levels.lua shows and hides its own button and reads
             -- the same saved choice.
             if WalkMapLevels and WalkMapLevels.Refresh then WalkMapLevels.Refresh() end
+            return
+        end
+        if key == "friends" then
+            -- WalkMapFriends.TabWanted reads the same saved choice; the toolbar
+            -- lays out again so the other buttons take the space.
+            if not (InCombatLockdown and InCombatLockdown()) and WalkMapExtras.Resize then
+                WalkMapExtras.Resize()
+            end
             return
         end
         if protected and InCombatLockdown and InCombatLockdown() then return end
