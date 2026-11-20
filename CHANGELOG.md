@@ -1,11 +1,18 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.10
+
+Hotfix for 1.14.9.
 
 Fixed
 - Settings, the welcome page and What's new: rows take the height their
   text needs, so text no longer runs into the next row on setups that
   draw the font larger. Fewer rows then fit, and the page scrolls.
+
+Changed
+- What's new shows once for 1.14.10, with the switches for seeing
+  friends and guild on the map, sharing where you are, and group
+  progress right on the page.
 
 ## 1.14.9
 
