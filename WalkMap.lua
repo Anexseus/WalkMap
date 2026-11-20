@@ -3480,7 +3480,7 @@ setWaypoint = function(mapID, x, y, label)
         label = tostring(label or "Waypoint"):sub(1, 40)})
     waypointPin.px = nil
     positionWaypoint()
-    say(string.format("Waypoint set: %s (%.1f, %.1f). Right-click the star to clear it.",
+    say(string.format("Waypoint set: %s (%.1f, %.1f). Right-click the star (or A on it in map control) to clear it.",
         tostring(label or "Waypoint"), x * 100, y * 100))
 end
 
@@ -3495,6 +3495,22 @@ local function clearWaypoint(message)
     nextNearestAt = 0
     if message then say(message) end
 end
+
+-- A in map control: on the waypoint's star (within its size) A clears it;
+-- anywhere else it sets one.
+local function padWaypointAt(x, y)
+    local waypoint = WalkMapExtras.Waypoint()
+    if waypoint and waypoint.mapID == currentMap then
+        local dx = (x - waypoint.x) * canvas:GetWidth()
+        local dy = (y - waypoint.y) * canvas:GetHeight()
+        if dx * dx + dy * dy <= 16 * 16 then
+            clearWaypoint("Waypoint cleared.")
+            return
+        end
+    end
+    setWaypoint(currentMap, x, y, "Map point")
+end
+WalkMapWaypoint.PadAt = function(x, y) padWaypointAt(x, y) end
 
 waypointPin:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
@@ -4377,7 +4393,14 @@ local function navigationRows()
     local top, view, _, _, _, questButton = WalkMapExtras.ControllerControls()
     if not top then return {} end
     return {{padToggle, mapPickerButton, dbBadge, closeButton},
-        {top[1], top[2], top[3], top[4], WalkMapQuestLog and WalkMapQuestLog.Tab and WalkMapQuestLog.Tab()},
+        (function()
+            local row = {top[1], top[2], top[3], top[4]}
+            local social = WalkMapFriends and WalkMapFriends.Tab and WalkMapFriends.Tab()
+            if social then row[#row + 1] = social end
+            local log = WalkMapQuestLog and WalkMapQuestLog.Tab and WalkMapQuestLog.Tab()
+            if log then row[#row + 1] = log end
+            return row
+        end)(),
         WalkMapSimpleButton and {view, WalkMapSimpleButton, questButton, resumeButton, centerButton,
             miniZoomInButton, miniZoomOutButton}
             or {view, questButton, resumeButton, centerButton, miniZoomInButton, miniZoomOutButton}}
@@ -4912,7 +4935,7 @@ frame:SetScript("OnGamePadButtonDown", function(_, button)
                 return
             end
             if currentMap and x and y and x >= 0 and x <= 1 and y >= 0 and y <= 1 then
-                setWaypoint(currentMap, x, y, "Map point")
+                padWaypointAt(x, y)
             end
         else padActivate(focusTarget) end
         return
@@ -5024,7 +5047,7 @@ WalkMapNativeController.Init(frame, {
             return
         end
         if currentMap and x and y and x >= 0 and x <= 1 and y >= 0 and y <= 1 then
-            setWaypoint(currentMap, x, y, "Map point")
+            padWaypointAt(x, y)
         end
     end,
     PanMode = function(active)

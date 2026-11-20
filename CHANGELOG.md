@@ -8,15 +8,19 @@ New
   them. Settings > Map > Unexplored areas (off by default). The map data
   comes from OpenMap (MIT).
 - Friends and guild on the map: online friends (and Battle.net friends in
-  this game, of your faction) and guild members show by zone - a badge on
-  the zone with who is there. Settings > Map > Friends on the map and Guild
-  on the map (on by default).
+  this game, of your faction) and guild members by zone. A new button left
+  of the quest log button shows who is in the zone you are looking at
+  (mouse over it, or move to it with the controller); on the continent and
+  world maps each zone with people gets a badge. Settings > Map > Friends
+  on the map and Guild on the map (on by default).
 - Share where you are (off by default): your guild and your friends who use
   WalkMap or OpenMap see a class-coloured dot where you stand, and you see
   theirs. It uses OpenMap's messages, so WalkMap and OpenMap players see
   each other. Never shared from dungeons, raids or battlegrounds.
 - Places > Rare mobs: rare mobs and rare elites from QuestieDB, with their
   level. Off unless chosen.
+- A in map control on your waypoint's star clears it again; A anywhere
+  else still sets (or moves) it.
 - What's new shows once for this update, where friends, guild, sharing and
   unexplored areas can be turned on right away. The welcome page for new
   players offers friends, guild and sharing too.

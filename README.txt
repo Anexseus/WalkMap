@@ -53,8 +53,9 @@ THE MAP
   forgotten when you close the map.
 - Settings > Map > Unexplored areas (off by default) shows the parts of a
   zone you have not explored yet, dimmed in red.
-- Friends and guild: online friends and guild members show by zone, a badge
-  with who is there (Settings > Map > Friends on the map / Guild on the
+- Friends and guild: the button left of the quest log button shows who is
+  online in the zone you are looking at; on the continent and world maps
+  each zone with people gets a badge (Settings > Map > Friends on the map / Guild on the
   map). With Share where you are (off by default) your guild and friends
   who use WalkMap or OpenMap see a dot where you stand, and you see theirs;
   never shared from dungeons, raids or battlegrounds.

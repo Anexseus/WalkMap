@@ -2578,6 +2578,18 @@ function extras.Resize()
         logButton:SetPoint("TOPRIGHT", owner, "TOPRIGHT", -8, -WalkMapUI.MapLayout.toolbarTop)
         logButton:SetSize(logWidth - 3, WalkMapUI.MapLayout.toolbarHeight)
     end
+    -- Friends and guild button, left of the quest log button.
+    local social = WalkMapFriends and WalkMapFriends.Tab and WalkMapFriends.Tab()
+    if social then
+        local wanted = WalkMapFriends.TabWanted()
+        social:SetShown(wanted)
+        if wanted then
+            social:ClearAllPoints()
+            social:SetPoint("TOPRIGHT", owner, "TOPRIGHT", -8 - logWidth, -WalkMapUI.MapLayout.toolbarTop)
+            social:SetSize(27, WalkMapUI.MapLayout.toolbarHeight)
+            logWidth = logWidth + 30
+        end
+    end
     local slot = (owner:GetWidth() - 16 - logWidth) / #buttons
     for i, button in ipairs(buttons) do
         button:ClearAllPoints()
@@ -2685,7 +2697,7 @@ local settingsPages = {
         {"turnInWaypoint", nil, "Waypoint to turn-ins", "When a quest is ready to turn in, set the waypoint where the game says to hand it in."},
         {"rightClickUp", nil, "Right-click goes a map level up", "Right-click a zone map to open the continent instead of setting a waypoint. Waypoints are then set with middle-click or Alt-click."},
         {"unexplored", nil, "Unexplored areas", "Show the parts of a zone you have not explored yet, dimmed in red."},
-        {"friendsOnMap", nil, "Friends on the map", "Online friends (and Battle.net friends in this game) by zone: a badge on the zone with who is there."},
+        {"friendsOnMap", nil, "Friends on the map", "Online friends (and Battle.net friends in this game) by zone. The button left of the quest log button shows who is in the zone you are looking at; on the continent and world maps each zone gets a badge."},
         {"guildOnMap", nil, "Guild on the map", "Online guild members by zone, the same way."},
         {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and your friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never shared from dungeons, raids or battlegrounds."},
     }},
@@ -2757,7 +2769,7 @@ local settingsPages = {
         {"selectKeepsReleased", nil, "Select keeps the map released", "Off: the map takes the controller every time it opens. On: press Select to leave the map and it stays out of your way - when you open it again you keep control of your character. Press Select to take the map back.",
             when = function() return extras.PlayStyle() ~= "mouse" end},
         {"__trackerScope", nil, "Quest tracker", "WalkMap's own tracker: off, this zone only, this zone plus nearby quests, or all zones."},
-        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone: a badge on the zone with who is there. On the zone you are looking at it sits in the map's top-right corner."},
+        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone. The button left of the quest log button shows who is in the zone you are looking at; on the continent and world maps each zone gets a badge."},
         {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
         {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."},
     }, hidden = true},
@@ -2766,7 +2778,7 @@ local settingsPages = {
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
     {"What's new in WalkMap 1.14.8", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
-        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone: a badge on the zone with who is there. On the zone you are looking at it sits in the map's top-right corner."},
+        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone. The button left of the quest log button shows who is in the zone you are looking at; on the continent and world maps each zone gets a badge."},
         {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
         {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."},
         {"unexplored", nil, "Unexplored areas", "Show the parts of a zone you have not explored yet, dimmed in red, so you can see where to go to reveal them."},

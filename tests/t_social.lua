@@ -68,24 +68,41 @@ return {
                 {"Cid-TestRealm", 12, "MAGE", "Westfall", false},
                 {"Me-TestRealm", 20, "MAGE", "Westfall", true}})
         end)
+        env.C_Map.GetMapRectOnMap = function(zone, on)
+            if zone == 1436 and on == 1415 then return 0.2, 0.4, 0.5, 0.7 end
+        end
         env.WalkMapFriends.Scan()
         openMap(env)
         env.WalkMapFriends.Refresh(1436)
-        local pins = env.WalkMapFriends.Pins()
-        local shown
-        for _, p in ipairs(pins) do if p:IsShown() then shown = p end end
-        Mock.ok(shown, "a zone badge on Westfall")
-        Mock.eq(shown.lines[1].text, "Westfall (1)", "one online guild member here (not you, not offline)")
-        Mock.eq(shown.lines[2].text, "Anna  18", "name and level")
-        Mock.eq(shown.lines[2].right, "Guild", "tagged Guild")
-        local point, relative = shown:GetPoint(1)
-        Mock.eq(point, "TOPRIGHT", "the zone you look at: badge in the map's top-right corner")
-        Mock.eq(relative, env.WalkMapCore.viewport, "on the map window, not on the map art")
+        -- The zone you look at: no badge on the map; the toolbar button lists them.
+        for _, p in ipairs(env.WalkMapFriends.Pins()) do
+            Mock.ok(not p:IsShown(), "no badge in the middle of Westfall")
+        end
+        local tab = env.WalkMapFriends.Tab()
+        Mock.ok(tab and tab:IsShown(), "friends button on the toolbar")
+        local point, _, _, x = tab:GetPoint(1)
+        Mock.eq(point, "TOPRIGHT", "at the toolbar's end")
+        Mock.eq(x, -38, "left of the quest log button")
+        local lines = tab.walkmapLines()
+        Mock.eq(lines[1].text, "Westfall (1)", "one online guild member here (not you, not offline)")
+        Mock.eq(lines[2].text, "Anna  18", "name and level")
+        Mock.eq(lines[2].right, "Guild", "tagged Guild")
+        Mock.eq(tab.count:GetText(), 1, "count on the button")
+        -- On the continent: a badge where Westfall is.
+        env.WalkMapFriends.Refresh(1415)
+        local badge
+        for _, p in ipairs(env.WalkMapFriends.Pins()) do if p:IsShown() then badge = p end end
+        Mock.ok(badge, "badge on the continent map")
+        Mock.ok(math.abs(badge.mapPercentX - 0.3) < 1e-9, "in the middle of Westfall")
+        Mock.eq(badge.lines[1].text, "Westfall (1)", "who is there")
+        -- Off: no button, no badge.
         env.WalkMapCharacterSettings.guildOnMap = false
-        env.WalkMapFriends.Refresh(1436)
+        env.WalkMapCharacterSettings.friendsOnMap = false
+        env.WalkMapFriends.SettingChanged("guildOnMap")
         local any = false
         for _, p in ipairs(env.WalkMapFriends.Pins()) do if p:IsShown() then any = true end end
-        Mock.eq(any, false, "Guild on the map off: no badge")
+        Mock.eq(any, false, "no badge")
+        Mock.eq(tab:IsShown(), false, "no button")
     end},
     {"Sharing is off by default: nothing sent, nobody's dot shown", function(Mock)
         local env = start(Mock, nil, function(env) guild(env, {}) end)
@@ -142,5 +159,17 @@ return {
         env.tick(2, 10)
         Mock.eq(#env.__sent, after, "nothing more")
         Mock.ok(after > count, "L0 was sent")
+    end},
+    {"A in map control on the waypoint clears it; elsewhere sets it", function(Mock)
+        local env = start(Mock)
+        openMap(env)
+        env.WalkMapWaypoint.PadAt(0.5, 0.5)
+        local waypoint = env.WalkMapExtras.Waypoint()
+        Mock.ok(waypoint and waypoint.x == 0.5, "set")
+        env.WalkMapWaypoint.PadAt(0.5005, 0.5005)
+        Mock.eq(env.WalkMapExtras.Waypoint(), nil, "A on the star clears it")
+        env.WalkMapWaypoint.PadAt(0.5, 0.5)
+        env.WalkMapWaypoint.PadAt(0.8, 0.2)
+        Mock.eq(env.WalkMapExtras.Waypoint().x, 0.8, "A elsewhere moves it")
     end},
 }

@@ -52,6 +52,7 @@ local function split(text)
     for part in (text .. "\t"):gmatch("([^\t]*)\t") do parts[#parts + 1] = part end
     return parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
 end
+local unpack = unpack or table.unpack
 local function look(texture, atlas, file)
     if not (texture.SetAtlas and pcall(texture.SetAtlas, texture, atlas)) then
         texture:SetTexture(file)
@@ -369,12 +370,12 @@ local function project(from, x, y, to)
     return px, py
 end
 
-local function pin(pool, index, size, parent)
-    local canvas = parent or (WalkMapCore and WalkMapCore.canvas)
+local function pin(pool, index, size)
+    local canvas = WalkMapCore and WalkMapCore.canvas
     local p = pool[index]
     if not p then
         p = CreateFrame("Frame", nil, canvas)
-        p:SetFrameLevel((canvas:GetFrameLevel() or 1) + (parent and 20 or 4))
+        p:SetFrameLevel((canvas:GetFrameLevel() or 1) + 4)
         p:EnableMouse(true)
         if p.EnableGamePadButton then p:EnableGamePadButton(false) end
         p.texture = p:CreateTexture(nil, "OVERLAY")
@@ -408,18 +409,34 @@ local function place(p, x, y)
     p:Show()
 end
 
--- The zone you are looking at gets its badge in the map's top-right corner
--- (not in the middle of the map, under everything else).
-local herePins = {}
+-- The zone you are looking at has no badge on the map: the toolbar button
+-- left of the quest log button lists who is there (mouse over, or controller
+-- focus). Other zones get badges where they are (continent and world maps).
+local hereList = {}
 
 local function hideAll()
-    for _, p in ipairs(herePins) do p:Hide() end
     for _, p in ipairs(zonePins) do p:Hide() end
     for _, p in ipairs(dotPins) do p:Hide() end
 end
 friendsMod.Hide = hideAll
 
 local function tag(guild) return guild and "Guild" or "Friend" end
+
+local function zoneLines(zone, people)
+    table.sort(people, function(a, c) return a.name < c.name end)
+    local info = C_Map.GetMapInfo and C_Map.GetMapInfo(zone)
+    local lines = {{text = (info and info.name or "?") .. " (" .. #people .. ")"}}
+    for i, r in ipairs(people) do
+        if i > LIST_MAX then
+            lines[#lines + 1] = {text = ("... and %d more"):format(#people - LIST_MAX), r = 0.6, g = 0.6, b = 0.6}
+            break
+        end
+        local cr, cg, cb = classColor(r.class)
+        lines[#lines + 1] = {text = r.level and r.level > 0 and ("%s  %d"):format(r.name, r.level) or r.name,
+            right = tag(r.guild), r = cr, g = cg, b = cb}
+    end
+    return lines
+end
 
 function friendsMod.Refresh(mapID)
     currentMapShown = mapID
@@ -464,52 +481,24 @@ function friendsMod.Refresh(mapID)
             end
         end
     end
-    local badges, hereShown = 0, false
+    local badges = 0
+    wipe(hereList)
     for _, zone in ipairs(order) do
         local x, y = project(zone, 0.5, 0.5, mapID)
-        if x then
-            local here = zone == mapID and WalkMapCore.viewport
-            local b
-            if here then
-                b = pin(herePins, 1, 22, WalkMapCore.viewport)
-                hereShown = true
-            else
-                badges = badges + 1
-                b = pin(zonePins, badges, 20)
-            end
+        if zone == mapID then
+            for _, r in ipairs(zones[zone]) do hereList[#hereList + 1] = r end
+        elseif x then
+            badges = badges + 1
+            local b = pin(zonePins, badges, 20)
             look(b.texture, "socialqueuing-icon-group", "Interface\\FriendsFrame\\UI-Toast-FriendOnlineIcon")
             b.texture:SetVertexColor(1, 1, 1, 1)
-            local people = zones[zone]
-            table.sort(people, function(a, c) return a.name < c.name end)
-            local info = C_Map.GetMapInfo and C_Map.GetMapInfo(zone)
-            local lines = {{text = (info and info.name or "?") .. " (" .. #people .. ")"}}
-            for i, r in ipairs(people) do
-                if i > LIST_MAX then
-                    lines[#lines + 1] = {text = ("... and %d more"):format(#people - LIST_MAX), r = 0.6, g = 0.6, b = 0.6}
-                    break
-                end
-                local cr, cg, cb = classColor(r.class)
-                lines[#lines + 1] = {text = r.level and r.level > 0 and ("%s  %d"):format(r.name, r.level) or r.name,
-                    right = tag(r.guild), r = cr, g = cg, b = cb}
-            end
+            local lines = zoneLines(zone, zones[zone])
             b.lines, b.pinName = lines, lines[1].text
-            if here then
-                if not b.count then
-                    b.count = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-                    b.count:SetPoint("RIGHT", b, "LEFT", -2, 0)
-                end
-                b.count:SetText(#people)
-                b.mapPercentX, b.mapPercentY = nil, nil
-                b:ClearAllPoints()
-                b:SetPoint("TOPRIGHT", WalkMapCore.viewport, "TOPRIGHT", -8, -8)
-                b:Show()
-            else
-                place(b, x, y)
-            end
+            place(b, x, y)
         end
     end
     for i = badges + 1, #zonePins do zonePins[i]:Hide() end
-    if not hereShown and herePins[1] then herePins[1]:Hide() end
+    if friendsMod.UpdateTab then friendsMod.UpdateTab() end
 end
 
 function friendsMod.Reposition()
@@ -529,17 +518,94 @@ end
 -- Controller browsing (WalkMap.lua visiblePins).
 function friendsMod.Pins()
     local list = {}
-    for _, pool in ipairs({dotPins, zonePins, herePins}) do
+    for _, pool in ipairs({dotPins, zonePins}) do
         for _, p in ipairs(pool) do list[#list + 1] = p end
     end
     return list
 end
+
+-- =========================================================
+-- Toolbar button (left of the quest log button; WalkMapExtras.Resize places
+-- it): who is in the zone you are looking at, on mouse-over or controller
+-- focus. Shown while Friends or Guild on the map is on.
+-- =========================================================
+local tab
+local function tabLines()
+    local zone = currentMapShown
+    local info = zone and C_Map.GetMapInfo and C_Map.GetMapInfo(zone)
+    if #hereList > 0 then return zoneLines(zone, {unpack(hereList)}) end
+    local lines = {{text = info and info.name or "Friends and guild"}}
+    lines[#lines + 1] = {text = "No friends or guild members online here.", r = 0.8, g = 0.8, b = 0.8}
+    local elsewhere = 0
+    for _, r in pairs(roster) do
+        if (r.guild and WalkMapExtras.GuildOnMap()) or (r.friend and WalkMapExtras.FriendsOnMap()) then
+            elsewhere = elsewhere + 1
+        end
+    end
+    if elsewhere > 0 then
+        lines[#lines + 1] = {text = ("%d online elsewhere: see the world or continent map."):format(elsewhere),
+            r = 0.6, g = 0.8, b = 1}
+    end
+    return lines
+end
+
+function friendsMod.Tab()
+    if tab or not (WalkMapCore and WalkMapCore.frame) then return tab end
+    local owner = WalkMapCore.frame
+    tab = CreateFrame("Button", "WalkMapFriendsTab", owner)
+    tab:SetFrameLevel(owner:GetFrameLevel() + 4)
+    tab:EnableMouse(true)
+    WalkMapExtras.StyleButton(tab)
+    tab.icon = tab:CreateTexture(nil, "OVERLAY")
+    tab.icon:SetSize(16, 16)
+    tab.icon:SetPoint("CENTER", tab, "CENTER", -3, 0)
+    look(tab.icon, "socialqueuing-icon-group", "Interface\\FriendsFrame\\UI-Toast-FriendOnlineIcon")
+    tab.count = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    tab.count:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -3, 3)
+    local function show(self)
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+        for i, line in ipairs(tabLines()) do
+            if line.right then
+                GameTooltip:AddDoubleLine(line.text, line.right, line.r, line.g, line.b, 0.6, 0.8, 1)
+            elseif i == 1 then
+                GameTooltip:SetText(line.text, 1, 0.82, 0)
+            else
+                GameTooltip:AddLine(line.text, line.r or 1, line.g or 1, line.b or 1, true)
+            end
+        end
+        GameTooltip:Show()
+    end
+    tab:SetScript("OnEnter", show)
+    tab:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    tab:SetScript("OnClick", function(self) askRosters() show(self) end)
+    if WalkMapCombat and WalkMapCombat.AllowInCombat then WalkMapCombat.AllowInCombat(tab) end
+    tab.walkmapLines = tabLines
+    friendsMod.UpdateTab()
+    return tab
+end
+
+function friendsMod.UpdateTab()
+    if not tab then return end
+    tab.count:SetText(#hereList > 0 and #hereList or "")
+    if tab.icon.SetDesaturated then tab.icon:SetDesaturated(#hereList == 0) end
+end
+
+-- Shown while either list is on (WalkMapExtras.Resize asks).
+function friendsMod.TabWanted() return wantZones() end
 
 function friendsMod.SettingChanged(field)
     if field == "shareLocation" and not wantShare() then stopSharing() end
     if field == "shareLocation" and wantShare() then last.at = -math.huge; pcall(tick) end
     if wantZones() or wantShare() then askRosters() end
     if currentMapShown then friendsMod.Refresh(currentMapShown) end
+    if (field == "friendsOnMap" or field == "guildOnMap") and WalkMapExtras.Resize
+        and not (InCombatLockdown and InCombatLockdown()) then
+        WalkMapExtras.Resize()
+        if WalkMapNativeController and WalkMapNativeController.RequestRefresh then
+            WalkMapNativeController.RequestRefresh()
+        end
+    end
 end
 
 function friendsMod.Status()
