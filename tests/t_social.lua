@@ -88,6 +88,15 @@ return {
         Mock.eq(lines[2].text, "Anna  18", "name and level")
         Mock.eq(lines[2].right, "Guild", "tagged Guild")
         Mock.eq(tab.count:GetText(), 1, "count on the button")
+        -- Click: a list of who is here; picking one invites them.
+        local invited
+        env.C_PartyInfo = {InviteUnit = function(name) invited = name end}
+        local options = env.WalkMapFriends.InviteOptions()
+        Mock.eq(#options, 1, "Anna to invite")
+        Mock.ok(options[1][2]:find("Invite", 1, true) and options[1][2]:find("Anna", 1, true), "row says Invite Anna")
+        Mock.eq(options[1][3], "Guild", "tagged")
+        options[1].run()
+        Mock.eq(invited, "Anna-TestRealm", "invited")
         -- On the continent: a badge where Westfall is.
         env.WalkMapFriends.Refresh(1415)
         local badge
@@ -196,7 +205,7 @@ return {
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L0", "GUILD", "Anna-TestRealm")
         env.WalkMapFriends.Refresh(1436)
         local lines = env.WalkMapFriends.Tab().walkmapLines()
-        Mock.eq(#lines, 2, "one line for her")
+        Mock.eq(#lines, 3, "title, one line for her, the invite hint")
         Mock.eq(lines[2].right, "Friend", "Friend before Guild")
     end},
     {"A on a quest marker focuses the quest instead of setting a waypoint", function(Mock)

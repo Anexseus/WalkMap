@@ -2155,7 +2155,14 @@ local function showSubmenu(group, parentRow)
 end
 
 local buttonsMenu
-local function openMenu(button, options, field)
+local openMenu
+-- A menu of actions under a button (the friends button's invite list):
+-- options = {{key, label, detail, colour, run = function, separator = bool}}.
+function extras.OpenActions(button, options)
+    if openMenu and #options > 0 then openMenu(button, options, "actions") end
+end
+function extras.ActionsOpen(button) return menu and menu:IsShown() and menu.from == button end
+openMenu = function(button, options, field)
     if menu:IsShown() and menu.from == button then setControllerPanelVisible(menu, false) return end
     setControllerPanelVisible(menu, false)
     menu.from = button
@@ -2164,11 +2171,14 @@ local function openMenu(button, options, field)
     menu:ClearAllPoints()
     if field == "view" or field == "questfocus" or field == "hidebuttons" then
         menu:SetPoint("BOTTOMLEFT", button, "TOPLEFT", 0, 2)
+    elseif field == "actions" then
+        -- From a button at the toolbar's right end: open towards the left.
+        menu:SetPoint("TOPRIGHT", button, "BOTTOMRIGHT", 0, -2)
     else
         menu:SetPoint("TOPLEFT", button, "BOTTOMLEFT", 0, -2)
     end
     menu:SetSize(field == "maps" and 245 or field == "questfocus" and 270
-        or field == "places" and 205 or 178, #options * 21 + 8)
+        or field == "places" and 205 or field == "actions" and 250 or 178, #options * 21 + 8)
     for i, option in ipairs(options) do
         local row = menu.rows[i]
         if not row then
@@ -2295,6 +2305,22 @@ local function openMenu(button, options, field)
                         showCheckbox(other, true, not provider.IsHidden(key))
                     end
                 end
+            end)
+        elseif field == "actions" then
+            -- A list of things to do (extras.OpenActions): label, detail on
+            -- the right, run() on click. Rows without run() are plain text.
+            row.label:SetText(option[2])
+            decor.detail, decor.detailColor = option[3], option[4]
+            decor.separator = option.separator
+            showCheckbox(row, false, false)
+            setRowEnter(row, function(self)
+                self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
+                setControllerPanelVisible(submenu, false)
+            end)
+            row:SetScript("OnClick", function()
+                if not option.run then return end
+                extras.CloseMenus()
+                option.run()
             end)
         elseif field == "questfocus" then
             local group = value == "__other" and questFocusGroup

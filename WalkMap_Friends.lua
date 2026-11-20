@@ -600,7 +600,11 @@ local tab
 local function tabLines()
     local zone = currentMapShown
     local info = zone and C_Map.GetMapInfo and C_Map.GetMapInfo(zone)
-    if #hereList > 0 then return zoneLines(zone, {unpack(hereList)}) end
+    if #hereList > 0 then
+        local lines = zoneLines(zone, {unpack(hereList)})
+        lines[#lines + 1] = {text = "Click (A): invite someone here to your group", r = 0.6, g = 0.8, b = 1}
+        return lines
+    end
     local lines = {{text = info and info.name or "Friends and guild"}}
     lines[#lines + 1] = {text = "No friends or guild members online here.", r = 0.8, g = 0.8, b = 0.8}
     local elsewhere = 0
@@ -645,7 +649,13 @@ function friendsMod.Tab()
     end
     tab:SetScript("OnEnter", show)
     tab:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
-    tab:SetScript("OnClick", function(self) askRosters() show(self) end)
+    -- Click (A with the controller): a list of who is here - pick one to
+    -- invite them to your group.
+    tab:SetScript("OnClick", function(self)
+        askRosters()
+        if GameTooltip then GameTooltip:Hide() end
+        WalkMapExtras.OpenActions(self, friendsMod.InviteOptions())
+    end)
     if WalkMapCombat and WalkMapCombat.AllowInCombat then WalkMapCombat.AllowInCombat(tab) end
     tab.walkmapLines = tabLines
     friendsMod.UpdateTab()
@@ -656,6 +666,37 @@ function friendsMod.UpdateTab()
     if not tab then return end
     tab.count:SetText(#hereList > 0 and #hereList or "")
     if tab.icon.SetDesaturated then tab.icon:SetDesaturated(#hereList == 0) end
+end
+
+local function invite(full)
+    local short = full:match("^([^%-]+)") or full
+    local target = samePool(full) and full or short
+    local fn = C_PartyInfo and C_PartyInfo.InviteUnit or InviteUnit
+    if fn and pcall(fn, target) then
+        if WalkMapCore and WalkMapCore.Say then WalkMapCore.Say("Invited " .. Shown(full) .. " to your group.") end
+    end
+end
+friendsMod.Invite = invite
+
+-- Rows for the friends button's menu: everyone here (not already in your
+-- group), name and level, Friend/Guild on the right; click invites.
+function friendsMod.InviteOptions()
+    local options = {}
+    local people = {unpack(hereList)}
+    table.sort(people, function(a, c) return a.name < c.name end)
+    for _, r in ipairs(people) do
+        if r.full and not inGroup(r.full) then
+            local cr, cg, cb = classColor(r.class)
+            local name = ("|cff%02x%02x%02x%s|r"):format(cr * 255, cg * 255, cb * 255, r.name)
+            options[#options + 1] = {r.full, "Invite " .. name .. (r.level and r.level > 0 and ("  " .. r.level) or ""),
+                tag(r.guild, r.friend), nil, run = function() invite(r.full) end}
+        end
+        if #options >= 20 then break end
+    end
+    if #options == 0 then
+        options[1] = {"__none", "|cffa0a0a0No friends or guild members here to invite|r"}
+    end
+    return options
 end
 
 -- Shown while either list is on (WalkMapExtras.Resize asks).
