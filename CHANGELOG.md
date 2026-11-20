@@ -1,5 +1,12 @@
 # WalkMap changelog
 
+## Unreleased
+
+Fixed
+- Quest log: button labels (Show on map, Full text, the zone filter ...)
+  and long zone headers shrink to stay inside on setups that draw the
+  font larger, like a handheld at 720p.
+
 ## 1.14.10
 
 Hotfix for 1.14.9.

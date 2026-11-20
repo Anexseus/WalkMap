@@ -378,6 +378,31 @@ function ui.ApplyHeader(texture)
     return true
 end
 
+-- Shrink a font string's font until its text fits maxWidth (and maxHeight,
+-- if given), down to 7 pt; back to its own size when the text is short
+-- again. Some setups (a handheld at 720p, upscaled) draw fonts larger than
+-- the frames were made for.
+function ui.FitText(fontString, maxWidth, maxHeight)
+    if not (fontString and fontString.GetFont and fontString.SetFont) then return end
+    local file, size, flags = fontString:GetFont()
+    if not fontString.walkmapFont then
+        if not file or not size then return end
+        fontString.walkmapFont = {file, size, flags}
+    end
+    local base = fontString.walkmapFont
+    if size ~= base[2] then fontString:SetFont(base[1], base[2], base[3]) end
+    size = base[2]
+    local function tooBig()
+        local width = tonumber(fontString:GetStringWidth()) or 0
+        local height = fontString.GetStringHeight and tonumber(fontString:GetStringHeight()) or 0
+        return (maxWidth and width > maxWidth) or (maxHeight and height > maxHeight)
+    end
+    while tooBig() and size > 7 do
+        size = size - 0.5
+        fontString:SetFont(base[1], size, base[3])
+    end
+end
+
 -- Three pieces of a vertical texture on `parent`: fixed caps (cap share of
 -- the texture, capSize on screen) and a stretched middle.
 local function threeSliceV(parent, file, cap, capSize, layer, coords)

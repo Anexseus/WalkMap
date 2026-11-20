@@ -64,8 +64,14 @@ function W:GetStringHeight()
     if width <= 0 or not self.__text or self.__text == "" then return 12 end
     return 12 * math.max(1, math.ceil(#tostring(self.__text) * 6 / width))
 end
-function W:GetStringWidth() return #tostring(self.__text or "") * 6 end
-function W:GetFont() return "Fonts\\FRIZQT__.TTF", 12, "" end
+-- 6 px a character at size 12; SetFont scales it (tests can set
+-- env.__fontScale to draw everything larger, like a small screen).
+function W:GetStringWidth()
+    local scale = (self.__fontSize or 12) / 12 * ((self.__env and self.__env.__fontScale) or 1)
+    return #tostring(self.__text or "") * 6 * scale
+end
+function W:GetFont() return "Fonts\\FRIZQT__.TTF", self.__fontSize or 12, "" end
+function W:SetFont(_, size) self.__fontSize = size return true end
 function W:GetFrameLevel() return self.__level end
 function W:SetFrameLevel(level) self.__level = level end
 function W:GetFrameStrata() return self.__strata or "MEDIUM" end

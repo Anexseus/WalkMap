@@ -294,7 +294,13 @@ local function makeButton(parent, width, height, text)
     WalkMapExtras.StyleButton(button)
     button.label = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     button.label:SetPoint("CENTER")
+    -- The label shrinks to stay inside the button (WalkMapUI.FitText),
+    -- whoever sets its text.
+    local function fit() WalkMapUI.FitText(button.label, width - 6, height) end
+    if hooksecurefunc then pcall(hooksecurefunc, button.label, "SetText", fit) end
+    button.walkmapFit = fit
     button.label:SetText(text)
+    fit()
     return button
 end
 
@@ -988,6 +994,10 @@ refresh = function()
         or MAX_QUESTLOG_QUESTS or 20
     panel.count:SetText(quests .. "/" .. maxQuests)
     filterButton.label:SetText(settings.questLogZoneOnly and "This zone" or "All zones")
+    filterButton.walkmapFit()
+    for _, button in ipairs(actions) do
+        if button.walkmapFit then button.walkmapFit() end
+    end
     if settings.questLogZoneOnly then filterButton.label:SetTextColor(0.4, 1, 0.8)
     else filterButton.label:SetTextColor(1, 1, 1) end
     visible = visibleEntries()
@@ -1056,6 +1066,9 @@ refresh = function()
             local collapsed = settings.questLogCollapsed[entry.title] == true
             header.text:SetText(entry.title .. (entry.gameCollapsed and "  (collapsed in game)" or ""))
             header.count:SetText(collapsed and tostring(counts[entry.title] or 0) or "")
+            -- Long zone names shrink to stay inside the list.
+            local room = (tonumber(header:GetWidth()) or 0) - 30 - (tonumber(header.count:GetStringWidth()) or 0)
+            if room > 40 then WalkMapUI.FitText(header.text, room) end
             -- Arrow points right when folded in, down when open.
             if header.arrow.SetRotation then header.arrow:SetRotation(collapsed and 0 or -math.pi / 2) end
             header:Show()

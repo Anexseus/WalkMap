@@ -145,4 +145,28 @@ return {
         rows[102]:Click()
         Mock.eq(log.SelectedID(), 102, "click selects")
     end},
+    {"Larger font (handheld at 720p): button labels shrink to stay inside", function(Mock)
+        local env, log = open(Mock)
+        env.__fontScale = 1.6
+        log.Refresh()
+        local checked = 0
+        for _, child in ipairs(log.Panel().__children) do
+            if child.__kind == "Button" and child.label and child.walkmapFit and child:IsShown() then
+                local text = tostring(child.label:GetText() or "")
+                if text ~= "" then
+                    checked = checked + 1
+                    Mock.ok(child.label:GetStringWidth() <= child:GetWidth() - 6,
+                        "\"" .. text .. "\" fits its button")
+                end
+            end
+        end
+        Mock.ok(checked >= 4, "the action buttons and the zone filter were checked")
+        env.__fontScale = 1
+        log.Refresh()
+        for _, child in ipairs(log.Panel().__children) do
+            if child.__kind == "Button" and child.label and child.walkmapFit and child.label.walkmapFont then
+                Mock.eq(select(2, child.label:GetFont()), child.label.walkmapFont[2], "back to full size when it fits")
+            end
+        end
+    end},
 }
