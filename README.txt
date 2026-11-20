@@ -156,7 +156,10 @@ buttons, A chooses, B goes back or closes. Choose Controller or Both under
 How you play (or turn on Pad focus) if you want the D-pad on WalkMap
 straight away.
 - X: control the map itself. D-pad pans, LB/RB zooms, Y steps through
-  markers, A sets a waypoint (on the selected marker or at the crosshair),
+  the markers around the crosshair (nearest first; move it to browse
+  elsewhere), the crosshair shows the tooltip of what it is over, A sets a
+  waypoint (on the selected marker or at the crosshair; A on the waypoint
+  clears it),
   X or B returns. Zoomed all the way out, LB once more opens the map one
   level up (the corner button then reads "LB: ...").
   Tap the D-pad to nudge the crosshair a tiny bit; hold it to move

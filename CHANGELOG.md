@@ -24,6 +24,8 @@ New
 - Map control: whatever the crosshair is over shows its tooltip, as with
   the mouse - quest markers, givers, places, rare mobs, friends, the
   waypoint.
+- Map control: Y steps only through the markers around the crosshair,
+  nearest first (up to 12). Move the crosshair to browse another spot.
 - What's new shows once for this update, where friends, guild, sharing and
   unexplored areas can be turned on right away. The welcome page for new
   players offers friends, guild and sharing too.

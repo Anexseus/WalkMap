@@ -1860,7 +1860,7 @@ function extras.Guide()
         "Right-click or Shift-click a quest giver to hide it; /walkmap givers reset restores all.",
         "WalkMap mini can use zone artwork or live game terrain; choose under Settings > Minimap.",
         "Native controller: use the game's navigation and Change Focus Frame binding.",
-        "X takes control of the map: D-pad pans, LB/RB zooms, Y steps through markers, A sets a waypoint (on the selected marker or at the crosshair), X or B returns.",
+        "X takes control of the map: D-pad pans, LB/RB zooms, Y steps through the markers around the crosshair, A sets a waypoint (on the selected marker or at the crosshair), X or B returns.",
         "Quests (footer) shows one quest's icons and areas, or All quests.",
         "Right-click, middle-click or Alt-click the map to set a waypoint; right-click the star to clear it. Click a quest's marker to focus that quest, and again to show all quests. Escape closes the map.",
         "Macros: /click WalkMapCloseMacro closes the map (also in combat); /click WalkMapKeyboardToggle toggles it.",

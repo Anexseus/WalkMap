@@ -5038,16 +5038,27 @@ WalkMapNativeController.Init(frame, {
         -- A nudge now; the cross's OnUpdate keeps it moving while held.
         crosshair.walkmapQueue(dx, dy)
     end,
-    -- Map control: Y steps through markers nearest the view's centre.
+    -- Map control: Y steps through the markers around the cross, nearest
+    -- first: only those within a circle of a fifth of the view (at least
+    -- 60 px) around it, at most 12. Move the cross to browse elsewhere.
     NextMarker = function()
         if not markerCycle then
-            local list = visiblePins()
+            local all = visiblePins()
             local cx, cy = viewport:GetCenter()
             -- Nearest the cross, which may have left the middle of the view.
             if cx then cx, cy = cx + (crosshair.walkmapX or 0), cy + (crosshair.walkmapY or 0) end
+            local list = {}
+            if cx then
+                local radius = math.max(60, math.min(viewport:GetWidth(), viewport:GetHeight()) * 0.2)
+                for _, pin in ipairs(all) do
+                    local px, py = pin:GetCenter()
+                    if px and (px - cx) ^ 2 + (py - cy) ^ 2 <= radius * radius then list[#list + 1] = pin end
+                end
+            end
             if #list == 0 or not cx then
                 if WalkMapNativeController.SetPanHint then
-                    WalkMapNativeController.SetPanHint("No markers in view   D-pad: pan   X/B: back")
+                    WalkMapNativeController.SetPanHint((#all == 0 and "No markers in view"
+                        or "No markers near the cross - move closer") .. "   D-pad: pan   X/B: back")
                 end
                 return
             end
@@ -5056,6 +5067,7 @@ WalkMapNativeController.Init(frame, {
                 local bx, by = b:GetCenter()
                 return (ax - cx) ^ 2 + (ay - cy) ^ 2 < (bx - cx) ^ 2 + (by - cy) ^ 2
             end)
+            for i = #list, 13, -1 do list[i] = nil end
             markerCycle, markerIndex = list, 0
         end
         closePinDetails()
