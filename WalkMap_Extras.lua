@@ -116,6 +116,8 @@ if settings.guildOnMap == nil then settings.guildOnMap = true end
 settings.shareLocation = settings.shareLocation == true
 -- Those who share where they are, also on the minimaps; on unless turned off.
 if settings.friendsOnMinimap == nil then settings.friendsOnMinimap = true end
+-- Party members' quest progress in the tracker (WalkMap_GroupProgress.lua).
+if settings.groupProgress == nil then settings.groupProgress = true end
 -- Focus waypoint on the minimaps (WalkMap.lua); on unless turned off.
 if settings.focusWaypoint == nil then settings.focusWaypoint = true end
 settings.rightClickUp = settings.rightClickUp == true
@@ -589,6 +591,7 @@ function extras.FriendsOnMap() return settings.friendsOnMap ~= false end
 function extras.GuildOnMap() return settings.guildOnMap ~= false end
 function extras.ShareLocation() return settings.shareLocation == true end
 function extras.FriendsOnMinimap() return settings.friendsOnMinimap ~= false end
+function extras.GroupProgress() return settings.groupProgress ~= false end
 
 function extras.FocusWaypoint()
     return settings.focusWaypoint ~= false
@@ -917,6 +920,7 @@ function extras.DebugReport()
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
     add("Friends and guild", WalkMapFriends and WalkMapFriends.Status() or "unavailable")
+    add("Group progress", WalkMapGroupProgress and WalkMapGroupProgress.Status() or "unavailable")
     add("Unexplored areas", settings.unexplored and ("on, " .. (WalkMapRevealData and "data loaded" or "no data")) or "off")
     add("Map/quest log keys", on(settings.useGameMapKeys)
         .. (WalkMapQuestLog and WalkMapQuestLog.KeyStatus and ("; " .. WalkMapQuestLog.KeyStatus()) or "")
@@ -2755,6 +2759,7 @@ local settingsPages = {
     {"Quest tracker", "WalkMap's on-screen list of quests, and messages to your group.", {
         {"__trackerScope", nil, "Quest tracker", "Off, this zone only, this zone plus nearby quests from neighbouring zones, or all zones. Alt-drag its header to move it, or use the game's Edit Mode to move it and set its size."},
         {"trackerObjectives", nil, "Show objectives", "List each quest's objectives. Off: quest titles only."},
+        {"groupProgress", nil, "Group progress", "In a party, under each quest you share, how far the others are with it (\"Anna  3/8, 0/1\"). Needs WalkMap for them too; your progress is shared with your party the same way. Off: nothing sent or shown."},
         {"showQuestXP", nil, "Quest XP", "Show the experience each quest gives at your level, here, in the quest log list and on quest givers."},
         {"hideGameTracker", nil, "Hide game quest tracker", "Hide Forever's own tracker while this one is on, and stop the game adding new quests to it. Turn off if error popups appear."},
         {"__trackerBgAlpha", nil, "Background", "Cycle off (text only), light, medium, dark and solid."},

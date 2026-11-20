@@ -591,6 +591,15 @@ local function render()
                 if used >= 6 then break end
             end
         end
+        -- Party members' progress on this quest (WalkMap_GroupProgress.lua).
+        if opts.objectives ~= false and WalkMapGroupProgress then
+            for _, row in ipairs(WalkMapGroupProgress.Lines(quest.id)) do
+                used = used + 1
+                local line = lineFor(block, used)
+                line:SetText(row[1])
+                line:SetTextColor(row[2], row[3], row[4])
+            end
+        end
         local xpText = WalkMapQuestInfo and WalkMapQuestInfo.XPText(quest.id) or ""
         block.xp:ClearAllPoints()
         if xpText ~= "" and used > 0 then

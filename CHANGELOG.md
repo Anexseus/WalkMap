@@ -3,6 +3,10 @@
 ## 1.14.9
 
 New
+- Group progress: in a party, the tracker shows under each quest you
+  share how far the others are with it ("Anna  3/8, 0/1", or "ready").
+  Needs WalkMap for them too. Settings, Quest tracker, Group progress
+  turns it off (then nothing is sent or shown).
 - Invite from the friends button: click it (A with the controller) for a
   list of the friends and guild members in the zone you are looking at,
   and pick one to invite them to your group. People already in your group

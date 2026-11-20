@@ -170,11 +170,13 @@ return {
         Mock.eq(edges.down, true, "the last row can scroll down")
         Mock.eq(panel.walkmapScroll(edges.first, "down"), false, "Down on another row does not scroll")
         Mock.eq(panel.walkmapScroll(edges.last, "down"), true, "controller Down scrolls")
+        while panel.walkmapScroll(panel.walkmapScrollEdges.last, "down") do end
         Mock.ok(rowStarting(panel, "Tell group about quest progress"), "last setting now shown")
         Mock.eq(panel.walkmapScroll(panel.walkmapScrollEdges.last, "down"), false, "nothing more below")
         Mock.eq(panel.walkmapScrollEdges.up, true, "the first row can scroll up")
+        local before = panel.scroll
         panel:GetScript("OnMouseWheel")(panel, 1)
-        Mock.eq(panel.scroll, 0, "mouse wheel scrolls back up")
+        Mock.eq(panel.scroll, before - 1, "mouse wheel scrolls back up")
         page(env, "Look")
         Mock.ok(not panel.scrollBar:IsShown(), "short page: no scroll bar")
         Mock.eq(panel.walkmapScroll(panel.walkmapScrollEdges.last, "down"), false, "short page does not scroll")
