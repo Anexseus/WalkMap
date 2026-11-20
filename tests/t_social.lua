@@ -152,6 +152,10 @@ return {
         for _, p in ipairs(env.WalkMapFriends.Pins()) do if p:IsShown() and p.pinName == "Anna" then dot = p end end
         Mock.ok(dot, "Anna's dot")
         Mock.eq(dot.mapPercentX, 0.3, "x") Mock.eq(dot.mapPercentY, 0.4, "y")
+        -- Your own message back from the guild, with a sibling realm's name:
+        -- no dot for yourself.
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me-TestRealm4")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me-Test Realm")
         -- The same dot for the minimaps, with the large map's tooltip lines.
         local mini = env.WalkMapFriends.MiniPins(1436)
         Mock.eq(#mini, 1, "one minimap dot")

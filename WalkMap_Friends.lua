@@ -129,7 +129,9 @@ local function isMe(full)
     if type(me) ~= "string" then return false end
     local name, rlm = full:match("^([^%-]+)%-?(.*)$")
     if name ~= me then return false end
-    return rlm == "" or plain(rlm) == plain(Realm())
+    -- Forever's numbered realms share one pool, and your own guild message
+    -- can come back with a sibling realm's name (a dot for yourself).
+    return rlm == "" or Realm() == "" or pool(rlm) == pool(Realm())
 end
 
 local function classFile(name)
@@ -528,7 +530,7 @@ function friendsMod.Refresh(mapID)
     if wantShare() then
         for full, p in pairs(live) do
             local x, y = project(p.map, p.x, p.y, mapID)
-            if x and not inGroup(full) then
+            if x and not inGroup(full) and not isMe(full) then
                 dots = dots + 1
                 local d = pin(dotPins, dots, 12)
                 look(d.texture, "WhiteCircle-RaidBlips", "Interface\\Minimap\\PartyRaidBlips")
@@ -611,7 +613,7 @@ function friendsMod.MiniPins(mapID)
     if type(mapID) == "number" and wantShare() and WalkMapExtras.FriendsOnMinimap() then
         local t = now()
         for full, p in pairs(live) do
-            if t - p.at <= GONE_AFTER and not inGroup(full) then
+            if t - p.at <= GONE_AFTER and not inGroup(full) and not isMe(full) then
                 local x, y = project(p.map, p.x, p.y, mapID)
                 if not x then x, y = throughWorld(p.map, p.x, p.y, mapID) end
                 if x then
