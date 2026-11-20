@@ -1,6 +1,8 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.11
+
+Hotfix for 1.14.10.
 
 Fixed
 - Quest log: button labels (Show on map, Full text, the zone filter ...)
