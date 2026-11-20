@@ -123,12 +123,30 @@ local function Shown(full)
     return name
 end
 
+-- Your own names as the game gives them. On Forever a character can carry a
+-- second name ("Anexseus Brightblade"), and not every call includes it.
+local function myNames()
+    local names = {}
+    for _, n in ipairs({call(UnitName, "player") or false, call(GetUnitName, "player", false) or false,
+        (call(UnitFullName, "player")) or false}) do
+        if type(n) == "string" and n ~= "" and not secret(n) then names[#names + 1] = n end
+    end
+    return names
+end
+
 local function isMe(full)
     if type(full) ~= "string" then return false end
-    local me = call(UnitName, "player")
-    if type(me) ~= "string" then return false end
     local name, rlm = full:match("^([^%-]+)%-?(.*)$")
-    if name ~= me then return false end
+    if not name then return false end
+    local mine = false
+    for _, me in ipairs(myNames()) do
+        me = me:match("^([^%-]+)") or me
+        -- The same name, or one is the other plus a second name.
+        if name == me or name:sub(1, #me + 1) == me .. " " or me:sub(1, #name + 1) == name .. " " then
+            mine = true
+        end
+    end
+    if not mine then return false end
     -- Forever's numbered realms share one pool, and your own guild message
     -- can come back with a sibling realm's name (a dot for yourself).
     return rlm == "" or Realm() == "" or pool(rlm) == pool(Realm())
@@ -401,6 +419,13 @@ local function onAddonMessage(prefix, text, channel, from)
     if channel ~= "GUILD" and channel ~= "WHISPER" then return end
     local full = Full(from)
     if not full or isMe(full) then return end
+    -- Your own place coming back from the guild under a name the checks
+    -- above did not know: the very text just sent, from your class and level.
+    if channel == "GUILD" and text == last.text then
+        local _, _, _, _, class, level = split(text)
+        local _, mine = call(UnitClass, "player")
+        if class == mine and tonumber(level) == tonumber(call(UnitLevel, "player")) then return end
+    end
     heard(full, text, channel == "GUILD")
 end
 

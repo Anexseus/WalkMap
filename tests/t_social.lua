@@ -156,6 +156,9 @@ return {
         -- no dot for yourself.
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me-TestRealm4")
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me-Test Realm")
+        -- With a second name (Forever), and as the exact text just sent.
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5000\t0.5000\tMAGE\t20", "GUILD", "Me Brightblade-TestRealm")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", env.WalkMapFriends.LastSent(), "GUILD", "Someone-OtherPool")
         -- The same dot for the minimaps, with the large map's tooltip lines.
         local mini = env.WalkMapFriends.MiniPins(1436)
         Mock.eq(#mini, 1, "one minimap dot")
