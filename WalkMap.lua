@@ -3858,9 +3858,54 @@ end
 -- Map control's A uses the crosshair position for a waypoint.
 crosshair.ViewCenter = viewCenter
 
+-- What the cross is over shows its tooltip, as the mouse would: the marker
+-- under the cross (closest to its middle) gets OnEnter, and OnLeave when the
+-- cross moves off. Not while Y steps through markers (that shows its own).
+-- crosshair.walkmapHoverPins and walkmapBrowsing are set further down.
+local hoverPin, hoverAt = nil, 0
+local function leaveHover()
+    if not hoverPin then return end
+    local leave = hoverPin:GetScript("OnLeave")
+    hoverPin = nil
+    if leave then pcall(leave) end
+end
+crosshair.walkmapLeaveHover = leaveHover
+crosshair:HookScript("OnHide", leaveHover)
+local function updateHover(elapsed)
+    hoverAt = hoverAt - (elapsed or 0)
+    if hoverAt > 0 then return end
+    hoverAt = 0.1
+    if crosshair.walkmapBrowsing and crosshair.walkmapBrowsing() then
+        hoverPin = nil
+        return
+    end
+    local mx, my = mark:GetCenter()
+    local found, best
+    if mx and crosshair.walkmapHoverPins then
+        for _, pin in ipairs(crosshair.walkmapHoverPins()) do
+            local left, right = pin:GetLeft(), pin:GetRight()
+            local top, bottom = pin:GetTop(), pin:GetBottom()
+            if left and top and mx >= left - 3 and mx <= right + 3 and my <= top + 3 and my >= bottom - 3 then
+                local cx, cy = pin:GetCenter()
+                local d = (cx - mx) ^ 2 + (cy - my) ^ 2
+                if not best or d < best then found, best = pin, d end
+            end
+        end
+    end
+    if found == hoverPin then return end
+    leaveHover()
+    if found then
+        hoverPin = found
+        local enter = found:GetScript("OnEnter")
+        if enter then pcall(enter, found) end
+    end
+end
+crosshair.walkmapHoverPin = function() return hoverPin end
+
 crosshair:SetScript("OnUpdate", function(_, elapsed)
     -- Carry out queued D-pad movement a little each frame (see walkmapGlide).
     if crosshair.walkmapGlide then crosshair.walkmapGlide(elapsed) end
+    updateHover(elapsed)
     local x, y = viewCenter()
     if not x then return end
     local child = viewport.walkmapChildAt(x, y)
@@ -4474,7 +4519,10 @@ local function exitPinMode()
     end
 end
 
-local function visiblePins()
+local visiblePins
+crosshair.walkmapBrowsing = function() return markerCycle ~= nil end
+crosshair.walkmapHoverPins = function() return visiblePins and visiblePins() or {} end
+visiblePins = function()
     local list = {}
     local left, right, top, bottom = viewport:GetLeft(), viewport:GetRight(),
         viewport:GetTop(), viewport:GetBottom()

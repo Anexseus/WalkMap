@@ -21,6 +21,9 @@ New
   level. Off unless chosen.
 - A in map control on your waypoint's star clears it again; A anywhere
   else still sets (or moves) it.
+- Map control: whatever the crosshair is over shows its tooltip, as with
+  the mouse - quest markers, givers, places, rare mobs, friends, the
+  waypoint.
 - What's new shows once for this update, where friends, guild, sharing and
   unexplored areas can be turned on right away. The welcome page for new
   players offers friends, guild and sharing too.
