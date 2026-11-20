@@ -17,6 +17,9 @@ New
   each other. Never shared from dungeons, raids or battlegrounds.
 - Places > Rare mobs: rare mobs and rare elites from QuestieDB, with their
   level. Off unless chosen.
+- What's new shows once for this update, where friends, guild, sharing and
+  unexplored areas can be turned on right away. The welcome page for new
+  players offers friends, guild and sharing too.
 
 Fixed
 - Select keeps the map released: taking the map back with Select no longer

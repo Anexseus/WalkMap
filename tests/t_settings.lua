@@ -30,25 +30,20 @@ end
 local function click(row) row:GetScript("OnClick")(row) end
 
 return {
-    {"What's new 1.14.7: Try it turns on Select keeps released; highlights", function(Mock)
+    {"What's new 1.14.8: friends, guild and sharing can be turned on right there", function(Mock)
         local env, panel = start(Mock)
         local s = env.WalkMapCharacterSettings
-        s.playStyle = "both"
-        local labels = page(env, "What's new in WalkMap 1.14.7")
-        Mock.eq(#labels, 6, "six rows")
-        Mock.ok(labels[1]:find("|cffffd24aTry it: Select keeps the map released", 1, true), "Try it first, in gold")
-        Mock.ok(labels[2]:find("|cffffd24aQuest tracker in Edit Mode", 1, true), "Edit Mode row in gold")
-        Mock.ok(labels[6]:find("CurseForge", 1, true) == nil and labels[6]:find("Found a bug", 1, true), "bug report row last")
-        local row = panel.options[1]
-        Mock.eq(row.walkmapActionButton.text:GetText(), "Try it", "button says Try it")
-        row.walkmapActionButton:GetScript("OnClick")(row.walkmapActionButton)
-        Mock.eq(s.selectKeepsReleased, true, "turned on")
-        Mock.eq(panel.options[1].walkmapActionButton.text:GetText(), "Turn off", "button offers to turn it off")
-        s.playStyle = "mouse"
-        labels = page(env, "What's new in WalkMap 1.14.7")
-        Mock.eq(#labels, 5, "no Try it row for mouse and keyboard")
+        local labels = page(env, "What's new in WalkMap 1.14.8")
+        Mock.eq(#labels, 7, "seven rows")
+        Mock.ok(labels[1]:find("See friends on the map", 1, true), "friends first")
+        Mock.ok(labels[3]:find("Share where you are", 1, true), "sharing")
+        Mock.ok(labels[7]:find("Found a bug", 1, true), "bug report row last")
+        Mock.eq(s.shareLocation, false, "sharing off by default")
+        local row = panel.options[3]
+        row:GetScript("OnClick")(row, "LeftButton")
+        Mock.eq(s.shareLocation, true, "turned on from What's new")
     end},
-    {"Players who saw 1.14's news get 1.14.7's on the next map open", function(Mock)
+    {"Players who saw 1.14's news get 1.14.8's on the next map open", function(Mock)
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14"}, {})
         env.fire("PLAYER_LOGIN")
@@ -56,13 +51,13 @@ return {
         env.tick(1, 5)
         env.WalkMap_Toggle()
         env.tick(1, 5)
-        Mock.eq(env.WalkMapSettings.newsSeen, "1.14.7", "What's new shown and marked seen")
+        Mock.eq(env.WalkMapSettings.newsSeen, "1.14.8", "What's new shown and marked seen")
         local panel = env.WalkMapExtras.SettingsPanel()
         Mock.ok(panel:IsShown(), "settings window open on What's new")
     end},
     {"Tracker place and size per interface, both starting from the old one", function(Mock)
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.7"},
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.8"},
             {zoneTrackerPos = {point = "TOPRIGHT", x = -10, y = -200, h = 300}})
         local x = env.WalkMapExtras
         Mock.eq(x.TrackerInterface(), "mouse", "mouse and keyboard interface")

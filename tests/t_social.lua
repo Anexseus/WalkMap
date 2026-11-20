@@ -22,7 +22,7 @@ local function start(Mock, character, setup)
     if setup then setup(env) end
     local chars = {welcomeSeen = true}
     for k, v in pairs(character or {}) do chars[k] = v end
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.7"}, chars)
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.8"}, chars)
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     env.tick(1, 5)

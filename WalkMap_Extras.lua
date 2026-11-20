@@ -2503,7 +2503,7 @@ end
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE
-local NEWS_VERSION = "1.14.7"
+local NEWS_VERSION = "1.14.8"
 
 -- Welcome page: opens the map (if needed) with settings on that page.
 -- Out of combat only.
@@ -2757,18 +2757,21 @@ local settingsPages = {
         {"selectKeepsReleased", nil, "Select keeps the map released", "Off: the map takes the controller every time it opens. On: press Select to leave the map and it stays out of your way - when you open it again you keep control of your character. Press Select to take the map back.",
             when = function() return extras.PlayStyle() ~= "mouse" end},
         {"__trackerScope", nil, "Quest tracker", "WalkMap's own tracker: off, this zone only, this zone plus nearby quests, or all zones."},
+        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone: a badge on the zone with who is there. On the zone you are looking at it sits in the map's top-right corner."},
+        {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
+        {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."},
     }, hidden = true},
     -- Shown once after an update, the first time the map is opened (see
     -- NEWS_VERSION). Only for releases with significant changes: then
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
-    {"What's new in WalkMap 1.14.7", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
-        {"__trySelect", nil, "Try it: Select keeps the map released", "No extra controller buttons? Select releases the map - even if you close and open it - until Select takes it back.",
-            when = function() return extras.PlayStyle() ~= "mouse" end},
-        {"__newsStar", nil, "Quest tracker in Edit Mode", "Open the game's Edit Mode: drag the tracker to move it, drag its corner to size it. Quests that don't fit are counted at the bottom. The gamepad and the mouse interface each keep their own."},
-        {"__news", nil, "Focus waypoint", "A purple diamond on the minimap shows where to go for the focused quest, or where to turn it in. Settings > Minimap."},
-        {"__news", nil, "Map free in combat", "With the game's mouse and keyboard interface, the map no longer locks during a fight."},
-        {"__news", nil, "Follows your interface", "Switch between the game's gamepad and mouse interface and WalkMap follows: How you play and the map's combat lock match the new interface."},
+    {"What's new in WalkMap 1.14.8", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
+        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone: a badge on the zone with who is there. On the zone you are looking at it sits in the map's top-right corner."},
+        {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
+        {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."},
+        {"unexplored", nil, "Unexplored areas", "Show the parts of a zone you have not explored yet, dimmed in red, so you can see where to go to reveal them."},
+        {"__news", nil, "Rare mobs", "Places > Other > Rare mobs shows rare mobs and rare elites with their level."},
+        {"__news", nil, "Select in a group", "With the map open, the controller no longer jumps to the game's group window."},
         {"__reportBugs", nil, "Found a bug? Tell us", "Please write in the comments on WalkMap's CurseForge page. A screenshot or the Debug report (Settings > Controller & help) helps a lot."},
     }, hidden = true},
 }

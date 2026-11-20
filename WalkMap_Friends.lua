@@ -222,11 +222,10 @@ local function tick()
     if not m then stopSharing() return end
     local moved = m ~= last.map or math.abs(x - (last.x or 0)) > MOVED or math.abs(y - (last.y or 0)) > MOVED
     if now() - last.at < (moved and SEND_EVERY or STILL_EVERY) then return end
-    local _, class = UnitClass("player")
-    class = value(class)
+    local _, class = call(UnitClass, "player")
     last.map, last.x, last.y, last.at = m, x, y, now()
     last.text = ("L1\t%d\t%.4f\t%.4f\t%s\t%d"):format(m, x, y, type(class) == "string" and class or "",
-        tonumber(value(UnitLevel("player"))) or 0)
+        tonumber(call(UnitLevel, "player")) or 0)
     sharing = true
     broadcast(last.text)
 end
@@ -538,7 +537,7 @@ end
 
 function friendsMod.SettingChanged(field)
     if field == "shareLocation" and not wantShare() then stopSharing() end
-    if field == "shareLocation" and wantShare() then last.at = -math.huge; tick() end
+    if field == "shareLocation" and wantShare() then last.at = -math.huge; pcall(tick) end
     if wantZones() or wantShare() then askRosters() end
     if currentMapShown then friendsMod.Refresh(currentMapShown) end
 end
