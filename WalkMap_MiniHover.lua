@@ -78,6 +78,13 @@ function hover.Describe(pin, kind)
             title = rawget(pin, "objectiveName")
             add(rawget(pin, "questTitle"), 0.8, 0.8, 0.8)
         end
+    elseif kind == "friend" then
+        -- The same lines as the dot on the large map (WalkMap_Friends.lua).
+        title = rawget(pin, "pinName")
+        local rows = rawget(pin, "lines")
+        if type(rows) == "table" then
+            for index = 2, #rows do add(rows[index].text, rows[index].r or 0.9, rows[index].g or 0.9, rows[index].b or 0.9) end
+        end
     elseif kind == "waypoint" then
         title = rawget(pin, "pinName") or rawget(pin, "label") or "Waypoint"
         add(rawget(pin, "detail"))

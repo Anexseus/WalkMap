@@ -838,7 +838,7 @@ local function pinArt(pin, kind)
         return pin.miniArt or (pin.icon and pin.icon:GetTexture())
     elseif kind == "service" or kind == "giver" or kind == "resource" then
         return pin.texture and pin.texture:GetTexture()
-    elseif kind == "party" then
+    elseif kind == "party" or kind == "friend" then
         return "Interface\\CHARACTERFRAME\\TempPortraitAlphaMask"
     elseif kind == "waypoint" then
         return pin.miniArt
@@ -879,12 +879,12 @@ local function positionPin(pin, index, copies, kind, playerX, playerY,
                 and math.abs(dy) < visibleRadius
                 or not square and dx * dx + dy * dy
                     < visibleRadius * visibleRadius)
-            and (kind == "party" or kind == "waypoint" or dx * dx + dy * dy
+            and (kind == "party" or kind == "friend" or kind == "waypoint" or dx * dx + dy * dy
                 < (visibleRadius * iconRange) ^ 2 or iconRange >= 1) then
             local file = pinArt(pin, kind)
-            if file and (kind == "party" or kind == "waypoint" or allowMarker(dx, dy, false)) then
+            if file and (kind == "party" or kind == "friend" or kind == "waypoint" or allowMarker(dx, dy, false)) then
                 if not marker then
-                    local priority = kind == "waypoint" and 6 or kind == "party" and 5
+                    local priority = kind == "waypoint" and 6 or (kind == "party" or kind == "friend") and 5
                         or (kind == "quest" or kind == "objective") and 4
                         or kind == "giver" and 3 or 2
                     marker = layer:CreateTexture(nil, "OVERLAY", nil, priority)
@@ -893,7 +893,7 @@ local function positionPin(pin, index, copies, kind, playerX, playerY,
                         marker:SetVertexColor(0.2, 0.6, 1)
                     end
                 end
-                local size = math.floor((kind == "party" and 9 or kind == "waypoint" and 15 or 12)
+                local size = math.floor(((kind == "party" or kind == "friend") and 9 or kind == "waypoint" and 15 or 12)
                     * iconScale + 0.5)
                 if marker.iconSize ~= size then
                     marker:SetSize(size, size)
@@ -903,8 +903,8 @@ local function positionPin(pin, index, copies, kind, playerX, playerY,
                     marker:SetTexture(file)
                     marker.iconFile = file
                 end
-                if kind == "objective" then
-                    -- Match the large map's per-kind objective tint.
+                if kind == "objective" or kind == "friend" then
+                    -- Objectives: the large map's per-kind tint. Friends: class colour.
                     local color = pin.miniColor
                     if marker.tint ~= color then
                         if color then marker:SetVertexColor(color[1], color[2], color[3], 1)
@@ -943,7 +943,7 @@ local function positionPin(pin, index, copies, kind, playerX, playerY,
                 -- For the hover tooltips (WalkMap_MiniHover.lua).
                 marker.walkmapPin, marker.walkmapKind = pin, kind
                 if not marker:IsShown() then marker:Show() end
-                if kind ~= "party" and kind ~= "waypoint" then allowMarker(dx, dy, true) end
+                if kind ~= "party" and kind ~= "friend" and kind ~= "waypoint" then allowMarker(dx, dy, true) end
             elseif marker then
                 marker:Hide()
             end
@@ -1097,7 +1097,8 @@ local function refreshMarkers(original)
     local iconScale, iconGap, iconRange = WalkMapExtras.MiniIconStyle(not liveTerrain)
     local allowMarker = WalkMapExtras.MarkerGrid(iconGap)
     local waypoints = source.MiniWaypoints and source.MiniWaypoints() or {}
-    for _, entry in ipairs({{waypoints, "waypoint"}, {quests, "quest"}, {objectives, "objective"},
+    local sharers = WalkMapFriends and WalkMapFriends.MiniPins and WalkMapFriends.MiniPins(mapID) or {}
+    for _, entry in ipairs({{waypoints, "waypoint"}, {sharers, "friend"}, {quests, "quest"}, {objectives, "objective"},
         {givers, "giver"}, {services, "service"}, {resources, "resource"},
         {party, "party"}}) do
         local ok, message = pcall(positionPool, entry[1], entry[2],

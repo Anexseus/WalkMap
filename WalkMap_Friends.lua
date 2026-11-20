@@ -499,6 +499,23 @@ local function zoneLines(zone, people)
     return lines
 end
 
+-- Tooltip lines for someone who shares where they are, and their class colour.
+local function dotLines(full, p, t)
+    local r, g, b = classColor(p.class or (roster[full] and roster[full].class))
+    local lines = {{text = Shown(full), r = r, g = g, b = b}}
+    if p.level and p.level > 0 then lines[#lines + 1] = {text = "Level " .. p.level} end
+    local friend = friends[full] or (roster[full] and roster[full].friend)
+    lines[#lines + 1] = {text = tag(p.guild, friend), r = 0.6, g = 0.8, b = 1}
+    local same = layerFor(full, p.map)
+    if same ~= nil then
+        lines[#lines + 1] = same and {text = "Same layer as you", r = 0.4, g = 1, b = 0.4}
+            or {text = "Other layer than you", r = 1, g = 0.6, b = 0.2}
+    end
+    local ago = t - p.at
+    if ago >= 20 then lines[#lines + 1] = {text = ("Updated %d s ago"):format(ago), r = 0.6, g = 0.6, b = 0.6} end
+    return lines, r, g, b
+end
+
 function friendsMod.Refresh(mapID)
     currentMapShown = mapID
     if not (WalkMapCore and WalkMapCore.canvas) or type(mapID) ~= "number" then hideAll() return end
@@ -515,19 +532,8 @@ function friendsMod.Refresh(mapID)
                 dots = dots + 1
                 local d = pin(dotPins, dots, 12)
                 look(d.texture, "WhiteCircle-RaidBlips", "Interface\\Minimap\\PartyRaidBlips")
-                local r, g, b = classColor(p.class or (roster[full] and roster[full].class))
+                local lines, r, g, b = dotLines(full, p, t)
                 d.texture:SetVertexColor(r, g, b, 1)
-                local lines = {{text = Shown(full), r = r, g = g, b = b}}
-                if p.level and p.level > 0 then lines[#lines + 1] = {text = "Level " .. p.level} end
-                local friend = friends[full] or (roster[full] and roster[full].friend)
-                lines[#lines + 1] = {text = tag(p.guild, friend), r = 0.6, g = 0.8, b = 1}
-                local same = layerFor(full, p.map)
-                if same ~= nil then
-                    lines[#lines + 1] = same and {text = "Same layer as you", r = 0.4, g = 1, b = 0.4}
-                        or {text = "Other layer than you", r = 1, g = 0.6, b = 0.2}
-                end
-                local ago = t - p.at
-                if ago >= 20 then lines[#lines + 1] = {text = ("Updated %d s ago"):format(ago), r = 0.6, g = 0.6, b = 0.6} end
                 d.lines, d.pinName = lines, Shown(full)
                 place(d, x, y)
                 placed[full] = true
@@ -583,6 +589,48 @@ function friendsMod.Reposition()
 end
 
 -- Controller browsing (WalkMap.lua visiblePins).
+-- A point on map `from` on map `to` through world coordinates, for
+-- neighbouring zones (GetMapRectOnMap only knows parents and children).
+local function throughWorld(from, x, y, to)
+    if not (C_Map and C_Map.GetWorldPosFromMapPos and C_Map.GetMapPosFromWorldPos and CreateVector2D) then return nil end
+    local ok, instance, world = pcall(C_Map.GetWorldPosFromMapPos, from, CreateVector2D(x, y))
+    if not ok or type(instance) ~= "number" or not world then return nil end
+    local ok2, onMap, pos = pcall(C_Map.GetMapPosFromWorldPos, instance, world, to)
+    if not ok2 or onMap ~= to or not pos or not pos.GetXY then return nil end
+    local px, py = pos:GetXY()
+    if type(px) ~= "number" or type(py) ~= "number" or px < 0 or px > 1 or py < 0 or py > 1 then return nil end
+    return px, py
+end
+
+-- Dots for the minimaps (WalkMap_Mini.lua and WalkMap_MiniNative.lua):
+-- those who share where they are, on map mapID, not in your group. Plain
+-- tables the minimaps read like their other pins (kind "friend").
+local miniPins = {}
+function friendsMod.MiniPins(mapID)
+    local count = 0
+    if type(mapID) == "number" and wantShare() and WalkMapExtras.FriendsOnMinimap() then
+        local t = now()
+        for full, p in pairs(live) do
+            if t - p.at <= GONE_AFTER and not inGroup(full) then
+                local x, y = project(p.map, p.x, p.y, mapID)
+                if not x then x, y = throughWorld(p.map, p.x, p.y, mapID) end
+                if x then
+                    count = count + 1
+                    local entry = miniPins[count] or {}
+                    miniPins[count] = entry
+                    local lines, r, g, b = dotLines(full, p, t)
+                    entry.mapPercentX, entry.mapPercentY, entry.miniVisible = x, y, true
+                    entry.pinName, entry.lines = Shown(full), lines
+                    entry.miniColor = entry.miniColor or {}
+                    entry.miniColor[1], entry.miniColor[2], entry.miniColor[3] = r, g, b
+                end
+            end
+        end
+    end
+    for i = #miniPins, count + 1, -1 do miniPins[i] = nil end
+    return miniPins
+end
+
 function friendsMod.Pins()
     local list = {}
     for _, pool in ipairs({dotPins, zonePins}) do

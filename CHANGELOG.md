@@ -7,6 +7,10 @@ New
   list of the friends and guild members in the zone you are looking at,
   and pick one to invite them to your group. People already in your group
   are left out.
+- Friends and guild members who share where they are now also show on
+  the minimap (WalkMap's own and the game's), as a dot in their class
+  colour with the same tooltip as on the large map. Settings, Minimap,
+  Friends and guild turns it off.
 - The friends button can be hidden from the footer's Buttons menu
   (Friends and guild), per character like the other buttons.
 - Same layer or not: with Share where you are on, WalkMap learns your layer

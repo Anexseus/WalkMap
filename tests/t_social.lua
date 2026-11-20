@@ -152,6 +152,18 @@ return {
         for _, p in ipairs(env.WalkMapFriends.Pins()) do if p:IsShown() and p.pinName == "Anna" then dot = p end end
         Mock.ok(dot, "Anna's dot")
         Mock.eq(dot.mapPercentX, 0.3, "x") Mock.eq(dot.mapPercentY, 0.4, "y")
+        -- The same dot for the minimaps, with the large map's tooltip lines.
+        local mini = env.WalkMapFriends.MiniPins(1436)
+        Mock.eq(#mini, 1, "one minimap dot")
+        Mock.eq(mini[1].mapPercentX, 0.3, "minimap x")
+        Mock.eq(mini[1].pinName, "Anna", "minimap name")
+        local title, lines = env.WalkMapMiniHover.Describe(mini[1], "friend")
+        Mock.eq(title, "Anna", "minimap tooltip title")
+        Mock.eq(lines[1][1], "Level 18", "minimap tooltip level")
+        Mock.eq(#env.WalkMapFriends.MiniPins(1415 + 9999), 0, "not on an unrelated map")
+        env.WalkMapCharacterSettings.friendsOnMinimap = false
+        Mock.eq(#env.WalkMapFriends.MiniPins(1436), 0, "minimap dots can be turned off")
+        env.WalkMapCharacterSettings.friendsOnMinimap = true
         -- Into a dungeon: stop, and say so.
         env.__instance = true
         env.WalkMapFriends.Tick()
@@ -162,6 +174,17 @@ return {
         env.WalkMapFriends.Refresh(1436)
         for _, p in ipairs(env.WalkMapFriends.Pins()) do
             Mock.ok(not (p:IsShown() and p.pinName == "Anna"), "dot gone after L0")
+        end
+    end},
+    {"Minimaps draw a sharing friend without errors (zone art and game minimap)", function(Mock)
+        for _, mode in ipairs({{miniMap = true, miniTerrain = "zone"}, {nativeIcons = true}}) do
+            mode.shareLocation = true
+            local env = start(Mock, mode, function(env) guild(env, {}) end)
+            env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.5010\t0.5010\tPRIEST\t18", "GUILD", "Anna-TestRealm")
+            env.tick(1, 10)
+            for _, event in ipairs(env.WalkMapCharacterSettings.debugEvents or {}) do
+                Mock.ok(not tostring(event.message):find("friend") and not tostring(event.message):find("error"), "no minimap error: " .. tostring(event.message))
+            end
         end
     end},
     {"Turning sharing off says L0 and stops sending", function(Mock)

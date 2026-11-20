@@ -114,6 +114,8 @@ settings.unexplored = settings.unexplored == true
 if settings.friendsOnMap == nil then settings.friendsOnMap = true end
 if settings.guildOnMap == nil then settings.guildOnMap = true end
 settings.shareLocation = settings.shareLocation == true
+-- Those who share where they are, also on the minimaps; on unless turned off.
+if settings.friendsOnMinimap == nil then settings.friendsOnMinimap = true end
 -- Focus waypoint on the minimaps (WalkMap.lua); on unless turned off.
 if settings.focusWaypoint == nil then settings.focusWaypoint = true end
 settings.rightClickUp = settings.rightClickUp == true
@@ -586,6 +588,7 @@ function extras.Unexplored() return settings.unexplored == true end
 function extras.FriendsOnMap() return settings.friendsOnMap ~= false end
 function extras.GuildOnMap() return settings.guildOnMap ~= false end
 function extras.ShareLocation() return settings.shareLocation == true end
+function extras.FriendsOnMinimap() return settings.friendsOnMinimap ~= false end
 
 function extras.FocusWaypoint()
     return settings.focusWaypoint ~= false
@@ -1922,7 +1925,8 @@ end
 function extras.ZoneLevelText(name)
     local text, color = zoneLevelDetail(name)
     if not text then return "" end
-    return string.format("  |cff%02x%02x%02x(%s)|r", color[1] * 255, color[2] * 255, color[3] * 255, text)
+    return string.format("  |cff%02x%02x%02x(%s)|r", math.floor(color[1] * 255 + 0.5),
+        math.floor(color[2] * 255 + 0.5), math.floor(color[3] * 255 + 0.5), text)
 end
 
 local function questLevelColor(level, questID)
@@ -2732,6 +2736,8 @@ local settingsPages = {
         {"__miniType", nil, "WalkMap minimap", "Off, zone artwork (a larger, independently zoomed zone preview) or game terrain (the live game minimap with WalkMap's markers)."},
         {"nativeIcons", nil, "Game minimap icons", "Add WalkMap's markers to the game's own minimap.",
             when = function() return not settings.miniMap end},
+        {"friendsOnMinimap", nil, "Friends and guild", "Friends and guild members who share where they are also show as a dot in their class colour on the minimap, when they are near. Needs Share where you are (Map settings).",
+            when = function() return settings.shareLocation == true end},
         {"focusWaypoint", nil, "Focus waypoint", "While a quest is focused, a purple diamond on the minimap shows where to go: its nearest unfinished objective, or where to turn it in. It stays on the edge when out of range and is gone when you stop focusing.",
             when = function() return settings.miniMap or settings.nativeIcons end},
         {"__miniIconScale", nil, "Marker size", "Compact, normal or large icons on WalkMap's minimap.", when = miniMarkersFor("mini")},

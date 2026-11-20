@@ -187,7 +187,7 @@ local function pinArt(pin, kind)
         return pin.miniArt or (pin.icon and pin.icon:GetTexture()), 12
     elseif kind == "service" or kind == "giver" or kind == "resource" then
         return pin.texture:GetTexture(), 12
-    elseif kind == "party" then
+    elseif kind == "party" or kind == "friend" then
         return "Interface\\CHARACTERFRAME\\TempPortraitAlphaMask", 9
     elseif kind == "waypoint" then
         return pin.miniArt, 15
@@ -216,11 +216,11 @@ local function copyPin(pin, index, copies, kind, offsetX, offsetY,
                 and y >= -14 and y <= viewH + 14
                 and (iconRange >= 1 or (x - playerX) ^ 2 + (y - playerY) ^ 2
                     <= (math.min(viewW, viewH) * 0.5 * iconRange) ^ 2
-                    or kind == "party" or kind == "waypoint") then
+                    or kind == "party" or kind == "friend" or kind == "waypoint") then
                 local file, size = pinArt(pin, kind)
-                if file and (kind == "party" or kind == "waypoint" or allowMarker(x, y, false)) then
+                if file and (kind == "party" or kind == "friend" or kind == "waypoint" or allowMarker(x, y, false)) then
                     if not copy then
-                        local priority = kind == "waypoint" and 6 or kind == "party" and 5
+                        local priority = kind == "waypoint" and 6 or (kind == "party" or kind == "friend") and 5
                             or (kind == "quest" or kind == "objective") and 4
                             or kind == "giver" and 3 or 2
                         copy = markerLayer:CreateTexture(nil, "OVERLAY", nil, priority)
@@ -244,8 +244,8 @@ local function copyPin(pin, index, copies, kind, offsetX, offsetY,
                         copy:SetTexture(file)
                         copy.sourceFile = file
                     end
-                    if kind == "objective" then
-                        -- Match the large map's per-kind objective tint.
+                    if kind == "objective" or kind == "friend" then
+                        -- Objectives: the large map's per-kind tint. Friends: class colour.
                         local color = pin.miniColor
                         if copy.tint ~= color then
                             if color then copy:SetVertexColor(color[1], color[2], color[3], 1)
@@ -280,7 +280,7 @@ local function copyPin(pin, index, copies, kind, offsetX, offsetY,
                     -- For the hover tooltips (WalkMap_MiniHover.lua).
                     copy.walkmapPin, copy.walkmapKind = pin, kind
                     if not copy:IsShown() then copy:Show() end
-                    if kind ~= "party" and kind ~= "waypoint" then allowMarker(x, y, true) end
+                    if kind ~= "party" and kind ~= "friend" and kind ~= "waypoint" then allowMarker(x, y, true) end
                 elseif copy and copy:IsShown() then
                     copy:Hide()
                 end
@@ -445,7 +445,8 @@ local function refresh()
     local focusID = source.FocusedQuestID and source.FocusedQuestID() or 0
     if type(focusID) ~= "number" then focusID = 0 end
     local waypoints = source.MiniWaypoints and source.MiniWaypoints() or {}
-    local pinPools = {{waypoints, "waypoint"}, {quests, "quest"}, {objectives, "objective"},
+    local sharers = WalkMapFriends and WalkMapFriends.MiniPins and WalkMapFriends.MiniPins(mapID) or {}
+    local pinPools = {{waypoints, "waypoint"}, {sharers, "friend"}, {quests, "quest"}, {objectives, "objective"},
         {givers, "giver"}, {services, "service"},
         {resources, "resource"}, {party, "party"}}
     local iconScale, iconGap, iconRange = WalkMapExtras.MiniIconStyle(false)
