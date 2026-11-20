@@ -164,6 +164,50 @@ def glow_tex(w=128, h=32):
     d.rounded_rectangle([7, 7, w - 8, h - 8], radius=3, outline=(255, 238, 160, 255), width=1)
     return img
 
+def scroll_track_tex(skin, w=16, h=64):
+    """Scroll bar groove: dark, sunk into the window, with a metal rim."""
+    mat = material(skin)[:h, :w] * 0.38
+    img = to_img(mat)
+    d = ImageDraw.Draw(img)
+    dk, md, lt = METALS[skin]
+    d.rectangle([0, 0, w - 1, h - 1], outline=(8, 6, 3, 255))
+    d.rectangle([1, 1, w - 2, h - 2], outline=md + (170,))
+    d.line([(2, 2), (2, h - 3)], fill=(0, 0, 0, 170)); d.line([(2, 2), (w - 3, 2)], fill=(0, 0, 0, 170))
+    return img
+
+def scroll_thumb_tex(skin, w=16, h=64):
+    """Scroll bar thumb: a bevelled metal bar (caps 8 px top and bottom)."""
+    dk, md, lt = [np.array(c, float) for c in METALS[skin]]
+    x = np.arange(w)[None, :] * np.ones((h, 1))
+    t = x / (w - 1)
+    shade = np.clip(1 - np.abs(t - 0.35) / 0.65, 0, 1)
+    rgb = dk[None, None, :] * (1 - shade[..., None]) + lt[None, None, :] * shade[..., None]
+    rgb = rgb * 0.7 + md[None, None, :] * 0.3
+    img = to_img(rgb)
+    # Rounded ends: clear the four corners.
+    a = np.array(img)
+    for (cx, cy) in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)):
+        for dy in range(3):
+            for dx in range(3 - dy):
+                a[abs(cy - dy), abs(cx - dx), 3] = 0
+    img = Image.fromarray(a, "RGBA")
+    d = ImageDraw.Draw(img)
+    d.line([(3, 0), (w - 4, 0)], fill=(10, 7, 4, 255)); d.line([(3, h - 1), (w - 4, h - 1)], fill=(10, 7, 4, 255))
+    d.line([(0, 3), (0, h - 4)], fill=(10, 7, 4, 255)); d.line([(w - 1, 3), (w - 1, h - 4)], fill=(10, 7, 4, 255))
+    d.line([(3, 1), (w - 4, 1)], fill=tuple(int(c) for c in lt) + (200,))
+    # No grip lines: the middle stretches with the page length.
+    return img
+
+def scroll_arrow_tex(skin, size=16):
+    """Up arrow (flipped for down): a metal triangle with a dark outline."""
+    dk, md, lt = METALS[skin]
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.polygon([(size / 2 - 0.5, 2), (size - 2, size - 4), (1, size - 4)], fill=(10, 7, 4, 255))
+    d.polygon([(size / 2 - 0.5, 4), (size - 4, size - 5), (3, size - 5)], fill=md + (255,))
+    d.polygon([(size / 2 - 0.5, 4), (size / 2 - 0.5, size - 5), (3, size - 5)], fill=lt + (255,))
+    return img
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     glow_tex().save(os.path.join(OUT, "glow.tga"))
@@ -176,6 +220,15 @@ def main():
         header_tex(skin).save(os.path.join(folder, "header.tga"))
         button_tex(skin).save(os.path.join(folder, "button.tga"))
         close_tex(skin).save(os.path.join(folder, "close.tga"))
+    # Added in 1.14.9, after the others with their own seed, so the files
+    # above come out exactly as before.
+    global rng
+    rng = np.random.default_rng(1149)
+    for skin in ("stone", "wood", "leather"):
+        folder = os.path.join(OUT, skin)
+        scroll_track_tex(skin).save(os.path.join(folder, "scrolltrack.tga"))
+        scroll_thumb_tex(skin).save(os.path.join(folder, "scrollthumb.tga"))
+        scroll_arrow_tex(skin).save(os.path.join(folder, "scrollarrow.tga"))
     print("skins written to", OUT)
 
 if __name__ == "__main__":

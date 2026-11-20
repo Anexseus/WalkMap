@@ -378,6 +378,66 @@ function ui.ApplyHeader(texture)
     return true
 end
 
+-- Three pieces of a vertical texture on `parent`: fixed caps (cap share of
+-- the texture, capSize on screen) and a stretched middle.
+local function threeSliceV(parent, file, cap, capSize, layer, coords)
+    local l, r, t, b = 0, 1, 0, 1
+    if coords then l, r, t, b = coords[1], coords[2], coords[3], coords[4] end
+    local function y(share) return t + (b - t) * share end
+    local top = parent:CreateTexture(nil, layer)
+    top:SetTexture(file); top:SetTexCoord(l, r, y(0), y(cap))
+    top:SetPoint("TOPLEFT"); top:SetPoint("TOPRIGHT"); top:SetHeight(capSize)
+    local bottom = parent:CreateTexture(nil, layer)
+    bottom:SetTexture(file); bottom:SetTexCoord(l, r, y(1 - cap), y(1))
+    bottom:SetPoint("BOTTOMLEFT"); bottom:SetPoint("BOTTOMRIGHT"); bottom:SetHeight(capSize)
+    local middle = parent:CreateTexture(nil, layer)
+    middle:SetTexture(file); middle:SetTexCoord(l, r, y(cap), y(1 - cap))
+    middle:SetPoint("TOPLEFT", top, "BOTTOMLEFT"); middle:SetPoint("BOTTOMRIGHT", bottom, "TOPRIGHT")
+    return {top, middle, bottom}
+end
+
+-- Scroll bar art in the window's look: the groove (bar), the thumb (a frame
+-- the caller sizes and places) and the up/down arrow buttons. Classic uses
+-- the game's own scroll bar knob and arrows.
+function ui.ScrollBar(bar, thumb, up, down)
+    if activeLook == "classic" then
+        local track = bar:CreateTexture(nil, "BACKGROUND")
+        track:SetAllPoints(bar)
+        track:SetColorTexture(0, 0, 0, 0.45)
+        threeSliceV(thumb, "Interface\\Buttons\\UI-ScrollBar-Knob", 0.35, 8, "ARTWORK",
+            {0.2, 0.8, 0.125, 0.875})
+        for _, pair in ipairs({{up, "Up"}, {down, "Down"}}) do
+            local button, way = pair[1], pair[2]
+            local base = "Interface\\Buttons\\UI-ScrollBar-Scroll" .. way .. "Button-"
+            button:SetNormalTexture(base .. "Up")
+            button:SetPushedTexture(base .. "Down")
+            button:SetDisabledTexture(base .. "Disabled")
+            button:SetHighlightTexture(base .. "Highlight", "ADD")
+            for _, art in ipairs({button:GetNormalTexture(), button:GetPushedTexture(),
+                button:GetDisabledTexture(), button:GetHighlightTexture()}) do
+                if art then art:SetTexCoord(0.2, 0.8, 0.25, 0.75) end
+            end
+        end
+        return
+    end
+    threeSliceV(bar, skinFile("scrolltrack.tga"), 0.125, 6, "BACKGROUND")
+    threeSliceV(thumb, skinFile("scrollthumb.tga"), 0.125, 6, "ARTWORK")
+    for _, pair in ipairs({{up, false}, {down, true}}) do
+        local button, flip = pair[1], pair[2]
+        local file = skinFile("scrollarrow.tga")
+        button:SetNormalTexture(file)
+        button:SetPushedTexture(file)
+        button:SetHighlightTexture(file, "ADD")
+        for _, art in ipairs({button:GetNormalTexture(), button:GetPushedTexture(), button:GetHighlightTexture()}) do
+            if art and flip then art:SetTexCoord(0, 1, 1, 0) end
+        end
+        local pushed = button:GetPushedTexture()
+        if pushed then pushed:SetVertexColor(0.7, 0.7, 0.7) end
+        local lit = button:GetHighlightTexture()
+        if lit then lit:SetAlpha(0.4) end
+    end
+end
+
 function ui.CloseButton(button)
     if activeLook ~= "classic" then
         -- The skin's X fills its square (the game's art sits low and needs a

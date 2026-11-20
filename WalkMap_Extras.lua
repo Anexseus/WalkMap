@@ -3376,32 +3376,28 @@ local function createSettingsPanel()
     -- track right of the options with arrows; wheel, the arrows or clicking
     -- the track scroll, and the controller scrolls at the first/last row.
     local bar = CreateFrame("Frame", nil, settingsPanel)
-    bar:SetWidth(10)
-    bar:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -12, -122)
-    bar:SetPoint("BOTTOMRIGHT", settingsPanel, "TOPRIGHT", -12, -110 - 8 * 44 + 13)
-    bar.walkmapTrack = 8 * 44 - 13 - 12
+    bar:SetWidth(12)
+    bar:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -12, -124)
+    bar:SetPoint("BOTTOMRIGHT", settingsPanel, "TOPRIGHT", -12, -110 - 8 * 44 + 15)
+    bar.walkmapTrack = 8 * 44 - 13 - 16
     bar:EnableMouse(true)
-    local track = bar:CreateTexture(nil, "BACKGROUND")
-    track:SetAllPoints(bar)
-    track:SetColorTexture(0, 0, 0, 0.45)
-    bar.thumb = bar:CreateTexture(nil, "ARTWORK")
-    bar.thumb:SetWidth(8)
-    bar.thumb:SetColorTexture(0.95, 0.78, 0.35, 0.85)
+    -- The thumb is a frame so the look can draw it in pieces (WalkMapUI.ScrollBar).
+    bar.thumb = CreateFrame("Frame", nil, bar)
+    bar.thumb:SetWidth(12)
+    bar.thumb:EnableMouse(false)
     local function arrow(direction)
         local button = CreateFrame("Button", nil, bar)
-        button:SetSize(14, 12)
+        button:SetSize(14, 14)
         if direction < 0 then
             button:SetPoint("BOTTOM", bar, "TOP", 0, 1)
         else
             button:SetPoint("TOP", bar, "BOTTOM", 0, -1)
         end
-        local art = button:CreateTexture(nil, "ARTWORK")
-        art:SetAllPoints(button)
-        art:SetTexture("Interface\\Buttons\\Arrow-" .. (direction < 0 and "Up" or "Down") .. "-Up")
         button:SetScript("OnClick", function() settingsPanel.walkmapScrollBy(direction) end)
         return button
     end
     bar.up, bar.down = arrow(-1), arrow(1)
+    WalkMapUI.ScrollBar(bar, bar.thumb, bar.up, bar.down)
     bar:SetScript("OnMouseDown", function(self)
         local _, y = GetCursorPosition()
         local scale = self:GetEffectiveScale()

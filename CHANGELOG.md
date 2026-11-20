@@ -26,6 +26,8 @@ Changed
   on pages that have more rows than fit, so it is clear they scroll. Mouse
   wheel, the arrows or a click on the bar scroll; with a controller Up on
   the first row or Down on the last row scrolls, as before.
+  The bar matches the window look: the game's own knob and arrows in
+  Classic, and gold, brass or bronze in Stone, Wood and Leather.
 
 ## 1.14.8
 
