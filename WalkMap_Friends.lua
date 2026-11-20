@@ -420,7 +420,9 @@ local function hideAll()
 end
 friendsMod.Hide = hideAll
 
-local function tag(guild) return guild and "Guild" or "Friend" end
+-- Someone who is both your friend and in your guild is shown once (one dot,
+-- one line - everything is keyed by name), as Friend.
+local function tag(guild, friend) return (friend or not guild) and "Friend" or "Guild" end
 
 local function zoneLines(zone, people)
     table.sort(people, function(a, c) return a.name < c.name end)
@@ -433,7 +435,7 @@ local function zoneLines(zone, people)
         end
         local cr, cg, cb = classColor(r.class)
         lines[#lines + 1] = {text = r.level and r.level > 0 and ("%s  %d"):format(r.name, r.level) or r.name,
-            right = tag(r.guild), r = cr, g = cg, b = cb}
+            right = tag(r.guild, r.friend), r = cr, g = cg, b = cb}
     end
     return lines
 end
@@ -458,7 +460,8 @@ function friendsMod.Refresh(mapID)
                 d.texture:SetVertexColor(r, g, b, 1)
                 local lines = {{text = Shown(full), r = r, g = g, b = b}}
                 if p.level and p.level > 0 then lines[#lines + 1] = {text = "Level " .. p.level} end
-                lines[#lines + 1] = {text = tag(p.guild), r = 0.6, g = 0.8, b = 1}
+                local friend = friends[full] or (roster[full] and roster[full].friend)
+                lines[#lines + 1] = {text = tag(p.guild, friend), r = 0.6, g = 0.8, b = 1}
                 local ago = t - p.at
                 if ago >= 20 then lines[#lines + 1] = {text = ("Updated %d s ago"):format(ago), r = 0.6, g = 0.6, b = 0.6} end
                 d.lines, d.pinName = lines, Shown(full)

@@ -172,4 +172,31 @@ return {
         env.WalkMapWaypoint.PadAt(0.8, 0.2)
         Mock.eq(env.WalkMapExtras.Waypoint().x, 0.8, "A elsewhere moves it")
     end},
+    {"Friend and guild member at once: one dot, one line, shown as Friend", function(Mock)
+        local env = start(Mock, {shareLocation = true}, function(env)
+            guild(env, {{"Anna-TestRealm", 18, "PRIEST", "Westfall", true}})
+            env.C_FriendList = {GetNumFriends = function() return 1 end,
+                GetFriendInfoByIndex = function() return {name = "Anna", connected = true, level = 18,
+                    area = "Westfall", className = "Priest"} end}
+        end)
+        env.WalkMapFriends.Scan()
+        openMap(env)
+        -- Her place arrives twice: through the guild and as a whisper.
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.3000\t0.4000\tPRIEST\t18", "GUILD", "Anna-TestRealm")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.3100\t0.4000\tPRIEST\t18", "WHISPER", "Anna")
+        env.WalkMapFriends.Refresh(1436)
+        local dots = 0
+        local dot
+        for _, p in ipairs(env.WalkMapFriends.Pins()) do
+            if p:IsShown() and p.pinName == "Anna" then dots = dots + 1 dot = p end
+        end
+        Mock.eq(dots, 1, "one dot")
+        Mock.eq(dot.lines[#dot.lines].text, "Friend", "shown as Friend")
+        -- Not sharing herself: listed once on the toolbar button, as Friend.
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L0", "GUILD", "Anna-TestRealm")
+        env.WalkMapFriends.Refresh(1436)
+        local lines = env.WalkMapFriends.Tab().walkmapLines()
+        Mock.eq(#lines, 2, "one line for her")
+        Mock.eq(lines[2].right, "Friend", "Friend before Guild")
+    end},
 }
