@@ -1,5 +1,13 @@
 # WalkMap changelog
 
+## 1.14.9
+
+Changed
+- Settings, the welcome page and What's new show a scroll bar with arrows
+  on pages that have more rows than fit, so it is clear they scroll. Mouse
+  wheel, the arrows or a click on the bar scroll; with a controller Up on
+  the first row or Down on the last row scrolls, as before.
+
 ## 1.14.8
 
 New

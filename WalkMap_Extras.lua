@@ -2842,6 +2842,24 @@ refreshSettingsRows = function()
         if below > 0 then parts[#parts + 1] = below .. " more below" end
         settingsPanel.more:SetText(#parts > 0 and (table.concat(parts, ", ") .. " (scroll)") or "")
     end
+    -- Scroll bar beside the options: only on pages that scroll. The thumb's
+    -- size is the share of the page you see, its place where you are.
+    local bar = settingsPanel.scrollBar
+    if bar then
+        if scrollMax > 0 then
+            local trackHeight = bar.walkmapTrack
+            local thumbHeight = math.max(24, trackHeight * slots / #items)
+            local offset = (trackHeight - thumbHeight) * settingsPanel.scroll / scrollMax
+            bar.thumb:SetHeight(thumbHeight)
+            bar.thumb:ClearAllPoints()
+            bar.thumb:SetPoint("TOP", bar, "TOP", 0, -offset)
+            bar.up:SetAlpha(settingsPanel.scroll > 0 and 1 or 0.3)
+            bar.down:SetAlpha(settingsPanel.scroll < scrollMax and 1 or 0.3)
+            bar:Show()
+        else
+            bar:Hide()
+        end
+    end
     for i in ipairs(settingsPages) do
         local row = settingsPanel.categories[i]
         if row then
@@ -3310,7 +3328,7 @@ local function createSettingsPanel()
         local row = CreateFrame("CheckButton", nil, settingsPanel)
         row:SetHeight(43)
         row:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 186, -110 - (i - 1) * 44)
-        row:SetPoint("RIGHT", settingsPanel, "RIGHT", -21, 0)
+        row:SetPoint("RIGHT", settingsPanel, "RIGHT", -28, 0)
         row:EnableMouse(true)
         styleRow(row)
         row.label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -3321,6 +3339,46 @@ local function createSettingsPanel()
         row.description:SetWordWrap(true)
         settingsPanel.options[i] = row
     end
+    -- Scroll bar (refreshSettingsRows shows it on pages that scroll): a
+    -- track right of the options with arrows; wheel, the arrows or clicking
+    -- the track scroll, and the controller scrolls at the first/last row.
+    local bar = CreateFrame("Frame", nil, settingsPanel)
+    bar:SetWidth(10)
+    bar:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -12, -122)
+    bar:SetPoint("BOTTOMRIGHT", settingsPanel, "TOPRIGHT", -12, -110 - 8 * 44 + 13)
+    bar.walkmapTrack = 8 * 44 - 13 - 12
+    bar:EnableMouse(true)
+    local track = bar:CreateTexture(nil, "BACKGROUND")
+    track:SetAllPoints(bar)
+    track:SetColorTexture(0, 0, 0, 0.45)
+    bar.thumb = bar:CreateTexture(nil, "ARTWORK")
+    bar.thumb:SetWidth(8)
+    bar.thumb:SetColorTexture(0.95, 0.78, 0.35, 0.85)
+    local function arrow(direction)
+        local button = CreateFrame("Button", nil, bar)
+        button:SetSize(14, 12)
+        if direction < 0 then
+            button:SetPoint("BOTTOM", bar, "TOP", 0, 1)
+        else
+            button:SetPoint("TOP", bar, "BOTTOM", 0, -1)
+        end
+        local art = button:CreateTexture(nil, "ARTWORK")
+        art:SetAllPoints(button)
+        art:SetTexture("Interface\\Buttons\\Arrow-" .. (direction < 0 and "Up" or "Down") .. "-Up")
+        button:SetScript("OnClick", function() settingsPanel.walkmapScrollBy(direction) end)
+        return button
+    end
+    bar.up, bar.down = arrow(-1), arrow(1)
+    bar:SetScript("OnMouseDown", function(self)
+        local _, y = GetCursorPosition()
+        local scale = self:GetEffectiveScale()
+        local thumbTop = bar.thumb:GetTop()
+        if y and thumbTop then
+            settingsPanel.walkmapScrollBy(y / scale > thumbTop and -1 or 1)
+        end
+    end)
+    bar:Hide()
+    settingsPanel.scrollBar = bar
     settingsPanel.more = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     settingsPanel.more:SetPoint("BOTTOMRIGHT", settingsPanel, "BOTTOMRIGHT", -92, 17)
     settingsPanel.more:SetTextColor(0.95, 0.78, 0.35)

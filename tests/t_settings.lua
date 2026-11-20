@@ -293,4 +293,17 @@ return {
         routes = env.WalkMapNavigation.Settings(panel)
         Mock.ok(routes[panel.options[3]].down ~= panel.options[3], "nothing to scroll: Down leaves the list")
     end},
+    {"Scroll bar only on pages that scroll, thumb follows the scroll", function(Mock)
+        local env, panel = start(Mock)
+        page(env, "Map")
+        local bar = panel.scrollBar
+        Mock.ok(bar:IsShown(), "Map has more rows than fit: scroll bar")
+        local before = select(5, bar.thumb:GetPoint(1))
+        panel.walkmapScrollBy(1)
+        local after = select(5, bar.thumb:GetPoint(1))
+        Mock.ok(after < before, "thumb moved down")
+        bar.down:GetScript("OnClick")(bar.down)
+        page(env, "Look")
+        Mock.eq(bar:IsShown(), false, "a short page: no scroll bar")
+    end},
 }

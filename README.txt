@@ -1,4 +1,4 @@
-WalkMap 1.14.8 - a controller-friendly map for WoW Forever
+WalkMap 1.14.9 - a controller-friendly map for WoW Forever
 =======================================================
 By Anexseus and Underbuks. Free software under the GNU GPL v3 or later.
 
