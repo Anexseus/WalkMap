@@ -6,6 +6,8 @@ Fixed
 - Quest log: button labels (Show on map, Full text, the zone filter ...)
   and long zone headers shrink to stay inside on setups that draw the
   font larger, like a handheld at 720p.
+- Select keeps the map released: talking to an NPC (or any game window
+  opening and closing) no longer selects the map again. Only Select does.
 
 ## 1.14.10
 

@@ -929,6 +929,12 @@ function native.Init(frame, handlers, ignore, firstButton, controlsButton)
         elseif wasFocused and m and m.isUIFocused == false then
             WalkMapExtras.SetMapReleased(true)
             wasFocused = false
+            -- Out of the game's window list until Select asks for it, as
+            -- when the map opens released. Otherwise the game hands focus
+            -- back to the map when another window closes (talking to an
+            -- NPC), and the map was selected again.
+            for i = #windows, 1, -1 do unregister(windows[i].frame) end
+            unregister(owner)
         end
     end
     native.WatchRelease = watchRelease

@@ -217,4 +217,28 @@ return {
         press(env.WalkMapCore.frame, "PADBACK")
         Mock.eq(env.WalkMapExtras.MapReleased(), false, "Select takes it back")
     end},
+    {"Native: released map stays released after talking to an NPC", function(Mock)
+        local env, m = start(Mock, {controllerMode = true, nativeController = true, selectKeepsReleased = true})
+        open(env)
+        Mock.eq(env.WalkMapNativeController.HasFocus(), true, "the map takes focus when it opens")
+        m:ToggleUIFocus()  -- Select: back to the game
+        env.tick(0.3, 3)
+        Mock.eq(env.WalkMapExtras.MapReleased(), true, "released")
+        -- Talk to an NPC: the game's window takes focus, then closes.
+        local gossip = env.CreateFrame("Frame", "GossipFrame")
+        gossip:Show()
+        m:FrameShown(gossip, false, true)
+        env.tick(0.3, 3)
+        gossip:Hide()
+        m:FrameHidden(gossip)
+        env.tick(0.3, 5)
+        Mock.ok(m.focusedFrame ~= env.WalkMapCore.frame or not m.isUIFocused, "the map is not selected again")
+        Mock.eq(env.WalkMapNativeController.HasFocus(), false, "no focus on the map")
+        Mock.eq(env.WalkMapExtras.MapReleased(), true, "still released")
+        -- Select still takes the map.
+        m:ToggleUIFocus()
+        env.WalkMapNativeController.AfterToggle()
+        env.tick(0.3, 3)
+        Mock.eq(env.WalkMapNativeController.HasFocus(), true, "Select takes the map")
+    end},
 }
