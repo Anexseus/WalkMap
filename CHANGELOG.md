@@ -3,46 +3,47 @@
 ## 1.14.8
 
 New
-- Unexplored areas: the parts of a zone you have not explored yet show
-  dimmed in red on the large map, so you can see where to go to reveal
-  them. Settings > Map > Unexplored areas (off by default). The map data
-  comes from OpenMap (MIT).
 - Friends and guild on the map: online friends (and Battle.net friends in
   this game, of your faction) and guild members by zone. A new button left
   of the quest log button shows who is in the zone you are looking at
   (mouse over it, or move to it with the controller); on the continent and
-  world maps each zone with people gets a badge. Settings > Map > Friends
+  world maps each zone with people gets a badge. Someone who is both a
+  friend and in your guild shows once, as Friend. Settings > Map > Friends
   on the map and Guild on the map (on by default).
 - Share where you are (off by default): your guild and your friends who use
   WalkMap or OpenMap see a class-coloured dot where you stand, and you see
   theirs. It uses OpenMap's messages, so WalkMap and OpenMap players see
   each other. Never shared from dungeons, raids or battlegrounds.
+- Unexplored areas: the parts of a zone you have not explored yet show
+  dimmed in red on the large map, so you can see where to go to reveal
+  them. Settings > Map > Unexplored areas (off by default). The map data
+  comes from OpenMap (MIT).
 - Places > Rare mobs: rare mobs and rare elites from QuestieDB, with their
   level. Off unless chosen.
-- A in map control on your waypoint's star clears it again; A anywhere
-  else still sets (or moves) it.
-- Map control: whatever the crosshair is over shows its tooltip, as with
-  the mouse - quest markers, givers, places, rare mobs, friends, the
-  waypoint.
-- Map control: Y steps only through the markers around the crosshair,
-  nearest first (up to 12). Move the crosshair to browse another spot.
-- Map control: A on a quest or objective marker focuses that quest, as a
-  click does (again to step through or turn focus off). A elsewhere still
-  sets a waypoint.
 - What's new shows once for this update, where friends, guild, sharing and
   unexplored areas can be turned on right away. The welcome page for new
   players offers friends, guild and sharing too.
 
+Map control (X with a controller)
+- The crosshair shows the tooltip of whatever it is over, as the mouse
+  does: quest markers, givers, places, rare mobs, friends, the waypoint.
+- A on a quest or objective marker focuses that quest, as a click does
+  (again to step through its quests or turn focus off).
+- A on your waypoint's star clears it. A anywhere else still sets (or
+  moves) the waypoint.
+- Y steps only through the markers around the crosshair, nearest first
+  (up to 12). Move the crosshair to browse another spot.
+
 Fixed
 - Select keeps the map released: taking the map back with Select no longer
-  shows the game's red "No interface frame to focus!" message.
+  leaves the game's red "No interface frame to focus!" message.
 - In a group, the controller no longer jumps to the game's group window
   (the raid/party manager on the left) while the map is open - not with
-  Select, and not when the group changes. Focus stays on the map; close
-  the map to use the group window. (During combat the game decides.)
-- Select keeps the map released: after closing and reopening the map in a
-  group, Select takes the map again. Before, with the group window folded
-  in, the game used that Select to open the group window instead.
+  Select, and not when the group changes. Close the map to use the group
+  window. (During combat the game decides.)
+- In a group, after the map was released with Select, closed and reopened,
+  Select takes the map again. Before, with the group window folded in, the
+  game used that Select to open the group window instead.
 - Should the group window get the controller anyway, it opens in front of
   the map instead of behind it.
 
