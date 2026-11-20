@@ -10,6 +10,13 @@ Fixed
   font larger, like a handheld at 720p.
 - Select keeps the map released: talking to an NPC (or any game window
   opening and closing) no longer selects the map again. Only Select does.
+- Quest log: zone headings are light parchment on a faint band, so they
+  stand apart from quest titles; "(collapsed in game)" is gone (the
+  game's own quest log does not matter to WalkMap's).
+- Quest log: "Show on map" is now "On map", so it fits its button on
+  every screen.
+- Quest tracker: an objective line next to the XP leaves room for the XP
+  as wide as it is drawn, so they no longer overlap with larger fonts.
 
 ## 1.14.10
 

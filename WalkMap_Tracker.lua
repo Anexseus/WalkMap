@@ -613,7 +613,9 @@ local function render()
         for n = 1, used do
             local line = block.lines[n]
             -- The first line makes room for the XP on its right.
-            line:SetWidth(WIDTH - 10 - ((n == 1 and block.xp:IsShown()) and 56 or 0))
+            -- (as wide as the XP text really is: larger fonts draw it wider).
+            local xpRoom = math.max(56, (tonumber(block.xp:GetStringWidth()) or 0) + 8)
+            line:SetWidth(WIDTH - 10 - ((n == 1 and block.xp:IsShown()) and xpRoom or 0))
             line:ClearAllPoints()
             line:SetPoint("TOPLEFT", block, "TOPLEFT", 10, -height)
             line:Show()

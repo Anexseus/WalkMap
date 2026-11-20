@@ -549,7 +549,7 @@ local function buildPanel()
         end
         return "Add this quest to, or remove it from, the game's quest tracker."
     end)
-    actions.map = action(3, "Show on map", function(entry)
+    actions.map = action(3, "On map", function(entry)
         local mapID = questMap(entry)
         if not mapID or not WalkMapMaps then return end
         WalkMapMaps.Choose(mapID ~= WalkMapMaps.CurrentZone() and mapID or nil)
@@ -854,6 +854,11 @@ local function headerFor(i)
     header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     header.text:SetPoint("LEFT", header.arrow, "RIGHT", 4, 0)
     header.text:SetJustifyH("LEFT")
+    -- Zones in light parchment on a faint band, so they stand apart from
+    -- quest titles (coloured by difficulty, often the same gold).
+    header.text:SetTextColor(0.93, 0.88, 0.78)
+    header.band = fill(header, "BACKGROUND", 1, 1, 1, 0.07)
+    header.band:SetAllPoints(header)
     header.count = header:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     header.count:SetPoint("RIGHT", header, "RIGHT", -6, 0)
     header.count:SetTextColor(0.85, 0.78, 0.6)
@@ -1064,7 +1069,9 @@ refresh = function()
             header:SetPoint("RIGHT", panel, "RIGHT", -12, 0)
             header.zone = entry.title
             local collapsed = settings.questLogCollapsed[entry.title] == true
-            header.text:SetText(entry.title .. (entry.gameCollapsed and "  (collapsed in game)" or ""))
+            -- (Whether the zone is folded in the game's own quest log does
+            -- not matter here: WalkMap lists its quests either way.)
+            header.text:SetText(entry.title)
             header.count:SetText(collapsed and tostring(counts[entry.title] or 0) or "")
             -- Long zone names shrink to stay inside the list.
             -- Long zone names shrink to stay inside the list; if even the
