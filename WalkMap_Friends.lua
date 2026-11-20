@@ -18,7 +18,7 @@
 --   "L1\t<uiMapID>\t<x>\t<y>\t<CLASS>\t<level>"  (x, y 0..1 on that map)
 --   "L0"  stopped sharing;  "H1" hello to a friend who comes online,
 --   answered with "H2" (or your place when you share it).
---   "W1\t<uiMapID>\t<zoneUID>"  WalkMap only: your layer in that zone (OpenMap
+--   "W1\t<uiMapID>\t<layer>"  WalkMap only: your layer in that zone (OpenMap
 --   ignores it), sent with L1 when known. See "Layers" below.
 -- Every few seconds while you move, each minute while you stand still. The
 -- realm handling (Forever's numbered realms share one pool) follows
@@ -203,11 +203,14 @@ end
 
 -- =========================================================
 -- Layers. The game does not say which layer (copy of a zone) you are on,
--- but every creature's GUID carries the zone copy it lives in:
--- "Creature-0-<server>-<instance>-<zoneUID>-<npcID>-<spawn>". Targeting,
--- mouse-over or a nameplate of any creature gives yours. Two players in
--- the same zone are on the same layer when their zoneUIDs match. Nothing is
--- shown when either side does not know (or the game hides the GUID).
+-- but every creature's GUID carries it:
+-- "Creature-0-<server>-<instance>-<zoneUID>-<npcID>-<spawn>". On Forever the
+-- layer is the <server> part (as LayerETA by Rasmus reads it, MIT; it shows
+-- the same layer the LayerSwap hosts use). Targeting, mouse-over or a
+-- nameplate of any creature gives yours; pets and totems are skipped (they
+-- carry the id of where they were made). Two players in the same zone are
+-- on the same layer when the parts match. Nothing is shown when either
+-- side does not know (or the game hides the GUID).
 -- =========================================================
 local LAYER_FRESH = 30 * 60
 local mine = {}           -- {map, uid, at}
@@ -220,9 +223,10 @@ local function readLayer(unit)
     if value(IsInInstance and IsInInstance()) then return end
     local guid = call(UnitGUID, unit)
     if type(guid) ~= "string" then return end
-    local kind, _, _, _, uid = strsplit and strsplit("-", guid)
-    if not strsplit then kind, uid = guid:match("^(%a+)%-%d+%-%d+%-%d+%-(%d+)%-") end
+    local kind, _, uid = guid:match("^(%a+)%-(%d+)%-(%d+)%-")
     if (kind ~= "Creature" and kind ~= "Vehicle") or not uid or uid == "0" then return end
+    local controlled = call(UnitPlayerControlled, unit)
+    if controlled == true then return end
     local m = zoneNow()
     if not m then return end
     if mine.uid ~= uid or mine.map ~= m then last.at = -math.huge end   -- tell the others soon

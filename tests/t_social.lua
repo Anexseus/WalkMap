@@ -226,19 +226,19 @@ return {
         end
         openMap(env)
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.3000\t0.4000\tPRIEST\t18", "GUILD", "Anna-TestRealm")
-        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "W1\t1436\t1234", "GUILD", "Anna-TestRealm")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "W1\t1436\t5250", "GUILD", "Anna-TestRealm")
         Mock.eq(has(dotLines(), "Same layer as you"), false, "my layer unknown: nothing shown")
         -- Targeting a creature tells WalkMap my layer; it goes out with my place.
         env.UnitGUID = function() return "Creature-0-5250-0-1234-299-0000ABCDEF" end
         env.fire("PLAYER_TARGET_CHANGED")
-        Mock.eq(env.WalkMapFriends.MyLayer(), "1234", "my layer read from the creature")
+        Mock.eq(env.WalkMapFriends.MyLayer(), "5250", "my layer: the creature's server part (as LayerETA)")
         env.WalkMapFriends.Tick()
         env.tick(3, 15)
         local sent = {}
         for _, m in ipairs(env.__sent) do sent[m.text] = true end
-        Mock.ok(sent["W1\t1436\t1234"], "my layer sent")
+        Mock.ok(sent["W1\t1436\t5250"], "my layer sent")
         Mock.ok(has(dotLines(), "Same layer as you"), "same layer")
-        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "W1\t1436\t5678", "GUILD", "Anna-TestRealm")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "W1\t1436\t6843", "GUILD", "Anna-TestRealm")
         Mock.ok(has(dotLines(), "Other layer than you"), "other layer")
         -- An OpenMap user sends no layer: nothing about layers is shown.
         env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L0", "GUILD", "Anna-TestRealm")
@@ -249,6 +249,11 @@ return {
         -- A player's GUID is no layer.
         env.UnitGUID = function() return "Player-5250-0ABCDEF" end
         env.fire("PLAYER_TARGET_CHANGED")
-        Mock.eq(env.WalkMapFriends.MyLayer(), "1234", "unchanged by a player target")
+        Mock.eq(env.WalkMapFriends.MyLayer(), "5250", "unchanged by a player target")
+        -- A pet carries the layer where it was made: skipped.
+        env.UnitGUID = function() return "Creature-0-7777-0-1234-416-0000ABCDEF" end
+        env.UnitPlayerControlled = function() return true end
+        env.fire("PLAYER_TARGET_CHANGED")
+        Mock.eq(env.WalkMapFriends.MyLayer(), "5250", "unchanged by a pet")
     end},
 }

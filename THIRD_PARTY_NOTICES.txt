@@ -40,6 +40,13 @@ Modifications: the table is renamed WalkMapRevealData; the data is unchanged.
 The location sharing in WalkMap_Friends.lua follows OpenMap's message format
 (prefix "OpenMapLoc", MIT) so WalkMap and OpenMap users can see each other.
 
+Layer detection (idea from LayerETA)
+------------------------------------
+WalkMap_Friends.lua reads your layer from a creature's GUID the way
+LayerETA by Rasmus (MIT) describes it for WoW Forever: the <server> part of
+"Creature-0-<server>-<instance>-<zoneUID>-...", skipping player-controlled
+units. No LayerETA code is included.
+
 Separate dependencies (not bundled)
 -----------------------------------
 QuestieDB by the Questie contributors supplies runtime location records.
