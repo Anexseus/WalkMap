@@ -58,7 +58,12 @@ function W:Click(button) fire(self, "OnClick", button or "LeftButton") end
 function W:SetText(text) self.__text = text end
 function W:SetFormattedText(fmt, ...) self.__text = string.format(fmt, ...) end
 function W:GetText() return self.__text end
-function W:GetStringHeight() return 12 end
+-- 12 px a line; with a width set, the text wraps at 6 px a character.
+function W:GetStringHeight()
+    local width = tonumber(self.__w) or 0
+    if width <= 0 or not self.__text or self.__text == "" then return 12 end
+    return 12 * math.max(1, math.ceil(#tostring(self.__text) * 6 / width))
+end
 function W:GetStringWidth() return #tostring(self.__text or "") * 6 end
 function W:GetFont() return "Fonts\\FRIZQT__.TTF", 12, "" end
 function W:GetFrameLevel() return self.__level end

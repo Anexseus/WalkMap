@@ -2865,31 +2865,14 @@ refreshSettingsRows = function()
     if settingsPanel.scrollPage ~= settingsPanel.categoryIndex then
         settingsPanel.scrollPage, settingsPanel.scroll = settingsPanel.categoryIndex, 0
     end
+    -- Rows take the height their text needs (some setups draw the font
+    -- larger, so descriptions wrap to more lines); as many as fit are shown
+    -- from the scroll position, at most one frame per slot.
     local slots = #settingsPanel.options
-    local scrollMax = math.max(0, #items - slots)
-    settingsPanel.scroll = math.max(0, math.min(settingsPanel.scroll or 0, scrollMax))
-    settingsPanel.scrollMax = scrollMax
+    settingsPanel.scroll = math.max(0, math.min(settingsPanel.scroll or 0, math.max(0, #items - 1)))
     local shownItems = {}
     for n = 1, math.min(slots, #items - settingsPanel.scroll) do
         shownItems[n] = items[settingsPanel.scroll + n]
-    end
-    -- Scroll bar beside the options: only on pages that scroll. The thumb's
-    -- size is the share of the page you see, its place where you are.
-    local bar = settingsPanel.scrollBar
-    if bar then
-        if scrollMax > 0 then
-            local trackHeight = bar.walkmapTrack
-            local thumbHeight = math.max(24, trackHeight * slots / #items)
-            local offset = (trackHeight - thumbHeight) * settingsPanel.scroll / scrollMax
-            bar.thumb:SetHeight(thumbHeight)
-            bar.thumb:ClearAllPoints()
-            bar.thumb:SetPoint("TOP", bar, "TOP", 0, -offset)
-            bar.up:SetAlpha(settingsPanel.scroll > 0 and 1 or 0.3)
-            bar.down:SetAlpha(settingsPanel.scroll < scrollMax and 1 or 0.3)
-            bar:Show()
-        else
-            bar:Hide()
-        end
     end
     for i in ipairs(settingsPages) do
         local row = settingsPanel.categories[i]
@@ -2901,6 +2884,8 @@ refreshSettingsRows = function()
             settingsPanel.rows[#settingsPanel.rows + 1] = row
         end
     end
+    local y, bottom = -110, -(110 + 8 * 44)
+    local fitted = #shownItems
     for i, option in ipairs(shownItems) do
         local row = settingsPanel.options[i]
         row.option = {option[1]}
@@ -3268,17 +3253,63 @@ refreshSettingsRows = function()
                 setOption(field, value)
             end
         end)
+        -- The row's height from its text, so rows never overlap.
+        local width = row:GetWidth() or 0
+        if width <= 0 then width = 446 end
+        local left = selectable and 26 or 5
+        row.description:ClearAllPoints()
+        row.description:SetPoint("TOPLEFT", row.label, "BOTTOMLEFT", 0, -2)
+        row.description:SetWidth(width - left - (isButton and 108 or 4))
+        local textHeight = (tonumber(row.label:GetStringHeight()) or 12)
+        if description and description ~= "" then
+            textHeight = textHeight + 2 + (tonumber(row.description:GetStringHeight()) or 0)
+        end
+        local height = math.max(43, math.ceil(textHeight + 8))
+        if i > 1 and y - height < bottom then
+            fitted = i - 1
+            break
+        end
+        row:SetHeight(height)
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 186, y)
+        row:SetPoint("RIGHT", settingsPanel, "RIGHT", -28, 0)
+        row.walkmapTop = y
+        y = y - height - 1
         row:Show()
         settingsPanel.rows[#settingsPanel.rows + 1] = row
     end
-    for i = #shownItems + 1, #settingsPanel.options do
+    for i = fitted + 1, #settingsPanel.options do
         settingsPanel.options[i]:Hide()
+    end
+    -- Scrolling ends when the last row is shown.
+    local lastShown = settingsPanel.scroll + fitted
+    local scrollMax = lastShown >= #items and settingsPanel.scroll or #items - 1
+    settingsPanel.scrollMax = scrollMax
+    -- Scroll bar beside the options: only on pages that scroll. The thumb's
+    -- size is the share of the page you see, its place where you are.
+    local bar = settingsPanel.scrollBar
+    if bar then
+        if settingsPanel.scroll > 0 or lastShown < #items then
+            local trackHeight = bar.walkmapTrack
+            local thumbHeight = math.max(24, trackHeight * fitted / math.max(1, #items))
+            local range = math.max(1, #items - fitted)
+            local offset = (trackHeight - thumbHeight) * math.min(1, settingsPanel.scroll / range)
+            if lastShown >= #items then offset = trackHeight - thumbHeight end
+            bar.thumb:SetHeight(thumbHeight)
+            bar.thumb:ClearAllPoints()
+            bar.thumb:SetPoint("TOP", bar, "TOP", 0, -offset)
+            bar.up:SetAlpha(settingsPanel.scroll > 0 and 1 or 0.3)
+            bar.down:SetAlpha(lastShown < #items and 1 or 0.3)
+            bar:Show()
+        else
+            bar:Hide()
+        end
     end
     -- Controller scrolling: Up on the first row / Down on the last row
     -- (WalkMap_Navigation.lua and WalkMap_ControllerNative.lua).
     settingsPanel.walkmapScrollEdges = {
-        first = settingsPanel.options[1], last = settingsPanel.options[#shownItems],
-        up = settingsPanel.scroll > 0, down = settingsPanel.scroll < scrollMax,
+        first = settingsPanel.options[1], last = settingsPanel.options[fitted],
+        up = settingsPanel.scroll > 0, down = lastShown < #items,
     }
 end
 

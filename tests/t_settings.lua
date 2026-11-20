@@ -163,7 +163,19 @@ return {
     {"Scrolling: mouse wheel and controller edges", function(Mock)
         local env, panel = start(Mock)
         local labels = page(env, "Quest tracker")
-        Mock.eq(#labels, 8, "eight rows fit")
+        Mock.ok(#labels >= 4 and #labels <= 8, "as many rows as fit")
+        -- Rows take the height of their text and never overlap.
+        local previous
+        for _, row in ipairs(panel.options) do
+            if row:IsShown() then
+                if previous then
+                    Mock.ok(row.walkmapTop <= previous.walkmapTop - previous:GetHeight(), "row below the one before")
+                end
+                Mock.ok(row:GetHeight() >= 12 + 2 + row.description:GetStringHeight(), "tall enough for its text")
+                Mock.ok(row.walkmapTop - row:GetHeight() >= -(110 + 8 * 44), "inside the page")
+                previous = row
+            end
+        end
         Mock.ok(panel.scrollBar:IsShown(), "scroll bar shows there is more")
         Mock.eq(panel.more, nil, "no \"more below\" text: the bar says it")
         local edges = panel.walkmapScrollEdges

@@ -1,5 +1,12 @@
 # WalkMap changelog
 
+## Unreleased
+
+Fixed
+- Settings, the welcome page and What's new: rows take the height their
+  text needs, so text no longer runs into the next row on setups that
+  draw the font larger. Fewer rows then fit, and the page scrolls.
+
 ## 1.14.9
 
 New
