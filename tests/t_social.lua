@@ -78,6 +78,9 @@ return {
         Mock.eq(shown.lines[1].text, "Westfall (1)", "one online guild member here (not you, not offline)")
         Mock.eq(shown.lines[2].text, "Anna  18", "name and level")
         Mock.eq(shown.lines[2].right, "Guild", "tagged Guild")
+        local point, relative = shown:GetPoint(1)
+        Mock.eq(point, "TOPRIGHT", "the zone you look at: badge in the map's top-right corner")
+        Mock.eq(relative, env.WalkMapCore.viewport, "on the map window, not on the map art")
         env.WalkMapCharacterSettings.guildOnMap = false
         env.WalkMapFriends.Refresh(1436)
         local any = false

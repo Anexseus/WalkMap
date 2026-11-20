@@ -370,12 +370,12 @@ local function project(from, x, y, to)
     return px, py
 end
 
-local function pin(pool, index, size)
-    local canvas = WalkMapCore and WalkMapCore.canvas
+local function pin(pool, index, size, parent)
+    local canvas = parent or (WalkMapCore and WalkMapCore.canvas)
     local p = pool[index]
     if not p then
         p = CreateFrame("Frame", nil, canvas)
-        p:SetFrameLevel((canvas:GetFrameLevel() or 1) + 4)
+        p:SetFrameLevel((canvas:GetFrameLevel() or 1) + (parent and 20 or 4))
         p:EnableMouse(true)
         if p.EnableGamePadButton then p:EnableGamePadButton(false) end
         p.texture = p:CreateTexture(nil, "OVERLAY")
@@ -409,7 +409,12 @@ local function place(p, x, y)
     p:Show()
 end
 
+-- The zone you are looking at gets its badge in the map's top-right corner
+-- (not in the middle of the map, under everything else).
+local herePins = {}
+
 local function hideAll()
+    for _, p in ipairs(herePins) do p:Hide() end
     for _, p in ipairs(zonePins) do p:Hide() end
     for _, p in ipairs(dotPins) do p:Hide() end
 end
@@ -460,12 +465,19 @@ function friendsMod.Refresh(mapID)
             end
         end
     end
-    local badges = 0
+    local badges, hereShown = 0, false
     for _, zone in ipairs(order) do
         local x, y = project(zone, 0.5, 0.5, mapID)
         if x then
-            badges = badges + 1
-            local b = pin(zonePins, badges, 20)
+            local here = zone == mapID and WalkMapCore.viewport
+            local b
+            if here then
+                b = pin(herePins, 1, 22, WalkMapCore.viewport)
+                hereShown = true
+            else
+                badges = badges + 1
+                b = pin(zonePins, badges, 20)
+            end
             look(b.texture, "socialqueuing-icon-group", "Interface\\FriendsFrame\\UI-Toast-FriendOnlineIcon")
             b.texture:SetVertexColor(1, 1, 1, 1)
             local people = zones[zone]
@@ -482,10 +494,23 @@ function friendsMod.Refresh(mapID)
                     right = tag(r.guild), r = cr, g = cg, b = cb}
             end
             b.lines, b.pinName = lines, lines[1].text
-            place(b, x, y)
+            if here then
+                if not b.count then
+                    b.count = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+                    b.count:SetPoint("RIGHT", b, "LEFT", -2, 0)
+                end
+                b.count:SetText(#people)
+                b.mapPercentX, b.mapPercentY = nil, nil
+                b:ClearAllPoints()
+                b:SetPoint("TOPRIGHT", WalkMapCore.viewport, "TOPRIGHT", -8, -8)
+                b:Show()
+            else
+                place(b, x, y)
+            end
         end
     end
     for i = badges + 1, #zonePins do zonePins[i]:Hide() end
+    if not hereShown and herePins[1] then herePins[1]:Hide() end
 end
 
 function friendsMod.Reposition()
@@ -505,7 +530,7 @@ end
 -- Controller browsing (WalkMap.lua visiblePins).
 function friendsMod.Pins()
     local list = {}
-    for _, pool in ipairs({dotPins, zonePins}) do
+    for _, pool in ipairs({dotPins, zonePins, herePins}) do
         for _, p in ipairs(pool) do list[#list + 1] = p end
     end
     return list
