@@ -30,10 +30,10 @@ end
 local function click(row) row:GetScript("OnClick")(row) end
 
 return {
-    {"What's new 1.14.10: friends, guild and sharing can be turned on right there", function(Mock)
+    {"What's new 1.14.11: friends, guild and sharing can be turned on right there", function(Mock)
         local env, panel = start(Mock)
         local s = env.WalkMapCharacterSettings
-        local labels = page(env, "What's new in WalkMap 1.14.10")
+        local labels = page(env, "What's new in WalkMap 1.14.11")
         Mock.ok(#labels >= 3, "rows shown")
         Mock.ok(labels[1]:find("See friends on the map", 1, true), "friends first")
         Mock.ok(labels[3]:find("Share where you are", 1, true), "sharing")
@@ -47,21 +47,31 @@ return {
             end
         end
         Mock.ok(found, "group progress on the page")
-        page(env, "What's new in WalkMap 1.14.10")
+        page(env, "What's new in WalkMap 1.14.11")
         Mock.eq(s.shareLocation, false, "sharing off by default")
         local row = panel.options[3]
         row:GetScript("OnClick")(row, "LeftButton")
         Mock.eq(s.shareLocation, true, "turned on from What's new")
     end},
-    {"Players who saw 1.14.8's news get 1.14.10's on the next map open", function(Mock)
+    {"Players who saw no news since friends came (1.14.8) get 1.14.11's; the others do not", function(Mock)
+        for _, seen in ipairs({"1.14.8", "1.14.10"}) do
+            local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+            env.loadAddon({welcomeSeen = true, newsSeen = seen}, {})
+            env.fire("PLAYER_LOGIN")
+            env.fire("PLAYER_ENTERING_WORLD")
+            env.tick(1, 5)
+            env.WalkMap_Toggle()
+            env.tick(1, 5)
+            Mock.eq(env.WalkMapSettings.newsSeen, seen, "already saw friends in " .. seen .. ": no popup")
+        end
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.8"}, {})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14"}, {})
         env.fire("PLAYER_LOGIN")
         env.fire("PLAYER_ENTERING_WORLD")
         env.tick(1, 5)
         env.WalkMap_Toggle()
         env.tick(1, 5)
-        Mock.eq(env.WalkMapSettings.newsSeen, "1.14.10", "What's new shown and marked seen")
+        Mock.eq(env.WalkMapSettings.newsSeen, "1.14.11", "What's new shown and marked seen")
         local panel = env.WalkMapExtras.SettingsPanel()
         Mock.ok(panel:IsShown(), "settings window open on What's new")
     end},

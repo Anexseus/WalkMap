@@ -4,6 +4,11 @@
 
 Hotfix for 1.14.10.
 
+Changed
+- What's new shows once for players who have not seen it since friends
+  and guild came to the map (1.14.8), with the switches for friends,
+  guild, sharing where you are and group progress on the page.
+
 Fixed
 - Quest log: button labels (Show on map, Full text, the zone filter ...)
   and long zone headers shrink to stay inside on setups that draw the

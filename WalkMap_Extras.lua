@@ -2538,7 +2538,10 @@ end
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE
-local NEWS_VERSION = "1.14.10"
+local NEWS_VERSION = "1.14.11"
+-- Earlier What's new pages that already showed friends, guild and sharing:
+-- players who saw one of them do not get this one.
+local NEWS_ALREADY_SEEN = {["1.14.8"] = true, ["1.14.10"] = true}
 
 -- Welcome page: opens the map (if needed) with settings on that page.
 -- Out of combat only.
@@ -2578,7 +2581,8 @@ function extras.ShowNews() showHiddenPage("news") end
 -- (never by itself, never in combat, once per NEWS_VERSION).
 function extras.MapOpened()
     local saved = WalkMapSettings
-    if type(saved) ~= "table" or not saved.welcomeSeen or saved.newsSeen == NEWS_VERSION then return end
+    if type(saved) ~= "table" or not saved.welcomeSeen or saved.newsSeen == NEWS_VERSION
+        or NEWS_ALREADY_SEEN[saved.newsSeen] then return end
     if WalkMapCombat and WalkMapCombat.Locked() then return end
     if settingsPanel and settingsPanel:IsShown() then return end
     extras.ShowNews()
@@ -2815,12 +2819,12 @@ local settingsPages = {
     -- NEWS_VERSION). Only for releases with significant changes: then
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
-    {"What's new in WalkMap 1.14.10", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
+    {"What's new in WalkMap 1.14.11", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
         {"friendsOnMap", nil, "See friends on the map", "Online friends by zone. The button left of the quest log button shows who is in the zone you are looking at - click it to invite them to your group; on the continent and world maps each zone gets a badge."},
         {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
         {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs - on the map and on the minimap, with \"Same layer\" or \"Other layer\". Never from dungeons, raids or battlegrounds."},
         {"groupProgress", nil, "Group progress", "In a party, the quest tracker shows under each quest you share how far the others are with it (they need WalkMap too)."},
-        {"__news", nil, "Easier to read", "Settings pages scroll with a bar in the window's look, and rows no longer run into each other when the font is drawn larger."},
+        {"__news", nil, "Easier to read", "Settings pages scroll with a bar in the window's look; zones stand apart from quests in the quest log; text stays inside its rows and buttons when the font is drawn larger."},
         {"__reportBugs", nil, "Found a bug? Tell us", "Please write in the comments on WalkMap's CurseForge page. A screenshot or the Debug report (Settings > Controller & help) helps a lot."},
     }, hidden = true},
 }
