@@ -1,5 +1,12 @@
 # WalkMap changelog
 
+## Unreleased
+
+Fixed
+- Quest objective tooltips name the mob that drops an item, and its
+  level, also when QuestieDB has no drop rate for it ("Dropped by
+  Slark", "Level 15-16"). Before, both were left out then.
+
 ## 1.14.11
 
 Hotfix for 1.14.10.

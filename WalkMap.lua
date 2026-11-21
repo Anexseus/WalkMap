@@ -1322,9 +1322,9 @@ end
 
 local function addObjectiveTooltip(entry)
     local label = entry.objectiveName or "Objective"
-    if entry.dropSource then label = label .. " (" .. entry.dropSource .. ")" end
     if entry.progress then label = label .. "  " .. entry.progress end
     GameTooltip:AddLine(label, 1, 0.9, 0.65)
+    if entry.dropSource then GameTooltip:AddLine("Dropped by " .. entry.dropSource, 0.85, 0.85, 0.85) end
     local levels = type(entry.levels) == "table" and entry.levels or nil
     if levels or RANK_LABELS[entry.rank] then
         -- "Level 15-16", coloured like quest difficulty for your level.

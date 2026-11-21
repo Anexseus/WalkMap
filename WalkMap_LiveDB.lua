@@ -493,7 +493,10 @@ local function buildObjective(questID)
                     for _, source in ipairs(sources) do
                         local rate = kind == 3 and source[1] == "Npc"
                             and dropRate(entityID, source[2]) or nil
-                        local npcName = rate and db.Npc.GetByIndex(source[2], 1) or nil
+                        -- The mob that drops it, named even when QuestieDB
+                        -- has no drop rate for it.
+                        local npcName = kind == 3 and source[1] == "Npc"
+                            and db.Npc.GetByIndex(source[2], 1) or nil
                         local rank = source[1] == "Npc" and npcRank(source[2]) or nil
                         -- Levels for kill targets, and for drop sources we name.
                         local levels = source[1] == "Npc" and (kind == 1 or npcName)
@@ -513,9 +516,9 @@ local function buildObjective(questID)
                             if not occupied[cell] then
                                 occupied[cell] = true
                                 local row = {round(point[1]), round(point[2]), labelIndex, kind}
-                                if point[3] then
-                                    row[5], row[6] = point[3], point[4]
-                                end
+                                -- [5] drop rate (may be unknown), [6] the mob.
+                                if point[3] then row[5] = point[3] end
+                                if point[4] then row[6] = point[4] end
                                 -- [7]: NPC rank (1 elite, 2 rare elite, 3 boss, 4 rare).
                                 if type(point[5]) == "number" and point[5] > 0 then row[7] = point[5] end
                                 -- [8]: NPC level range {min, max}.

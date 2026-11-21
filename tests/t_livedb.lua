@@ -41,8 +41,10 @@ local function setup(Mock)
                 [10] = {nil, {{2843}}}},
             -- Objectives QuestieDB has no locations for.
             [13] = {[1] = "No Locations", [3] = {{234}}, [10] = {{{555555}}}},
+            -- An item dropped by a mob QuestieDB has no drop rate for.
+            [14] = {[1] = "Fangs", [3] = {{234}}, [10] = {nil, nil, {{7073}}}},
         }),
-        Item = entity({}),
+        Item = entity({[7073] = {[1] = "Broken Fang", [2] = {519}, [3] = {}}}),
         Support = {Get = function(name)
             if name == "ZoneDB" then return {private = {uiMapIdToAreaId = "return { [1436] = 40, [1413] = 17, }"}} end
         end},
@@ -115,6 +117,15 @@ return {
         Mock.eq(data[1][1], "Battered Chest", "objective label")
         Mock.eq(#data[2][1436], 2, "objective spots (two close ones merged)")
         Mock.eq(env.WalkMapLiveDB.Objective(13), nil, "objectives without locations: still no markers")
+    end},
+    {"a dropped item names the mob and its level, even without a drop rate", function(Mock)
+        local env = setup(Mock)
+        local data = env.WalkMapLiveDB.Objective(14)
+        Mock.eq(data[1][1], "Broken Fang", "objective label")
+        local point = data[2][1436][1]
+        Mock.eq(point[5], nil, "no drop rate known")
+        Mock.eq(point[6], "Slark", "dropped by Slark")
+        Mock.eq(point[8][1], 15, "his level") Mock.eq(point[8][2], 16, "level range")
     end},
     {"an object whose quest QuestieDB does not know gets no marker", function(Mock)
         local env = setup(Mock)
