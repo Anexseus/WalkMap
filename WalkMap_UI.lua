@@ -403,6 +403,13 @@ function ui.FitText(fontString, maxWidth, maxHeight)
     end
 end
 
+-- Quest giver "!" colours: red for dungeon/raid-only givers, orange for
+-- PvP-only givers, else the icon's own colours. Shared by the large map
+-- and both minimaps.
+local GIVER_TINTS = {instance = {1, 0.25, 0.25}, pvp = {1, 0.6, 0.15}}
+local NO_TINT = {1, 1, 1}
+function ui.GiverTint(tint) return GIVER_TINTS[tint] or NO_TINT end
+
 -- Three pieces of a vertical texture on `parent`: fixed caps (cap share of
 -- the texture, capSize on screen) and a stretched middle.
 local function threeSliceV(parent, file, cap, capSize, layer, coords)

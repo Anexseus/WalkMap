@@ -4,6 +4,11 @@
 
 Hotfix for 1.14.11.
 
+New
+- Quest givers with only PvP quests get an orange "!" (on the map and
+  both minimaps), and their tooltip marks those quests (PvP), as dungeon
+  and raid givers have a red one.
+
 Fixed
 - Quest objective tooltips name the mob that drops an item, and its
   level, also when QuestieDB has no drop rate for it ("Dropped by

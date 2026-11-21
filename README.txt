@@ -82,7 +82,8 @@ THE MAP
 - Quest givers ("!") are NPCs and objects that start a quest (posters,
   notes, crates): hover to see each quest they offer with its level
   (coloured against yours), XP, and (Dungeon) or (Raid) for instance quests. A
-  red "!" means everything that giver offers is a dungeon or raid quest.
+  red "!" means everything that giver offers is a dungeon or raid quest, an
+  orange "!" that it is all PvP quests.
 - Yellow question marks = ready to turn in. These and your arrow are always
   drawn on top.
 - Places (top row): trainers, inns, flight masters, vendors, banks, herbs,
@@ -150,7 +151,7 @@ ordinary minimap instead. M+ / M- zoom the minimap.
 Move the mouse over a marker on any of them to see what it is: the quest
 giver and the quests offered, the place, the objective and its quest, or
 that a quest is ready to turn in. A red "!" is a giver with only dungeon or
-raid quests, as on the large map.
+raid quests, an orange "!" one with only PvP quests, as on the large map.
 
 
 CONTROLLER

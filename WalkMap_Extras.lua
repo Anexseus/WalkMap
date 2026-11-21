@@ -1424,7 +1424,7 @@ local function showGivers(mapID, level)
         for _, entry in ipairs((WalkMapData.givers or {})[mapID] or {}) do
             local giverKey = tostring(mapID) .. "|" .. entry[3]
             if factionOK(entry[4]) and not settings.hiddenGivers[giverKey] then
-                local firstLevel, offered, instanceCount = nil, {}, 0
+                local firstLevel, offered, instanceCount, pvpCount = nil, {}, 0, 0
                 for _, id in ipairs(entry[5]) do
                     if questIsNearLevel(id, level, classBit, raceBit, minQuestLevel) then
                         local quest = WalkMapData.quests[id]
@@ -1439,9 +1439,13 @@ local function showGivers(mapID, level)
                                 math.floor(g * 255), math.floor(b * 255), questLevel)
                         end
                         local instance = WalkMapQuestInfo and WalkMapQuestInfo.InstanceTag(id)
+                        local pvp = not instance and WalkMapQuestInfo and WalkMapQuestInfo.PvPTag
+                            and WalkMapQuestInfo.PvPTag(id)
                         if instance then instanceCount = instanceCount + 1 end
+                        if pvp then pvpCount = pvpCount + 1 end
                         offered[#offered + 1] = levelText .. (quest.name or "Quest")
                             .. (instance and (" |cffff5050(" .. instance .. ")|r") or "")
+                            .. (pvp and " |cffff9933(PvP)|r" or "")
                             .. (WalkMapQuestInfo and WalkMapQuestInfo.XPText(id) ~= ""
                                 and (" " .. WalkMapQuestInfo.XPText(id)) or "")
                             .. " |cff808080[" .. tostring(id) .. "]|r"
@@ -1459,10 +1463,14 @@ local function showGivers(mapID, level)
                         table.concat(lines, "\n"), 14)
                     giverPins[count].giverKey = giverKey
                     -- Red "!" when everything offered here is a dungeon/raid quest.
+                    -- Orange "!" when everything offered is a PvP quest.
                     local instanceOnly = instanceCount > 0 and instanceCount == #offered
-                    if instanceOnly then giverPins[count].texture:SetVertexColor(1, 0.25, 0.25)
-                    else giverPins[count].texture:SetVertexColor(1, 1, 1) end
+                    local pvpOnly = pvpCount > 0 and pvpCount == #offered
+                    local tint = instanceOnly and "instance" or pvpOnly and "pvp" or nil
+                    local color = WalkMapUI.GiverTint(tint)
+                    giverPins[count].texture:SetVertexColor(color[1], color[2], color[3])
                     giverPins[count].instanceOnly = instanceOnly
+                    giverPins[count].giverTint = tint
                     if #examples < 8 then
                         examples[#examples + 1] = entry[3] .. ": " .. table.concat(offered, ", ")
                     end

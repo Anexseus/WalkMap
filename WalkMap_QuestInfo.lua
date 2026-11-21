@@ -87,6 +87,12 @@ function info.InstanceTag(questID)
     return DUNGEON_TAGS[info.TagID(questID) or 0]
 end
 
+-- "PvP" for PvP quests (the game's tag 41: battleground quests and the
+-- like), else nil.
+function info.PvPTag(questID)
+    return info.TagID(questID) == 41 and "PvP" or nil
+end
+
 -- Experience for a quest at your level, from QuestieDB's quest XP table and
 -- the same level scaling Questie uses (cmangos rules); nil at max level or
 -- when the quest is unknown. Temporary XP buffs are not included.

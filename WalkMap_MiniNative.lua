@@ -914,10 +914,11 @@ local function positionPin(pin, index, copies, kind, playerX, playerY,
                 elseif kind == "giver" then
                     -- Red "!" for a giver with only dungeon or raid quests,
                     -- as on the large map.
-                    local tint = rawget(pin, "instanceOnly") == true and "instance" or nil
+                    -- Orange for PvP-only givers.
+                    local tint = rawget(pin, "giverTint")
                     if marker.tint ~= tint then
-                        if tint then marker:SetVertexColor(1, 0.25, 0.25, 1)
-                        else marker:SetVertexColor(1, 1, 1, 1) end
+                        local color = WalkMapUI.GiverTint(tint)
+                        marker:SetVertexColor(color[1], color[2], color[3], 1)
                         marker.tint = tint
                     end
                 end
