@@ -1,6 +1,8 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.12
+
+Hotfix for 1.14.11.
 
 Fixed
 - Quest objective tooltips name the mob that drops an item, and its
