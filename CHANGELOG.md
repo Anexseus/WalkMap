@@ -1,6 +1,8 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.15
+
+Hotfix for 1.14.14.
 
 Fixed
 - Dungeons WalkMap has no map of (Forever's newer ones, such as
