@@ -1,6 +1,6 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.14
 
 New
 - Dungeon maps: inside the classic dungeons (Ragefire Chasm to

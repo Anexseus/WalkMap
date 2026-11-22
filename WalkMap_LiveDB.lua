@@ -274,6 +274,28 @@ local function spawnPoints(kind, id)
     return result
 end
 
+-- For the Debug report: an NPC's spawns as QuestieDB has them, area by area
+-- ("1581: 41.3,77.4 42.0,77.1"), to see whether dungeon bosses carry
+-- coordinates that fit the dungeon maps.
+function live.RawSpawns(npcID)
+    if not (db and db.Npc) then return "QuestieDB not ready" end
+    local ok, spawns = pcall(db.Npc.GetByIndex, npcID, 7)
+    if not ok or type(spawns) ~= "table" then return "none" end
+    local parts = {}
+    for areaID, coords in pairs(spawns) do
+        local points = {}
+        for i, point in ipairs(type(coords) == "table" and coords or {}) do
+            if i > 3 then break end
+            if type(point) == "table" then
+                points[#points + 1] = ("%s,%s"):format(tostring(point[1]), tostring(point[2]))
+            end
+        end
+        parts[#parts + 1] = tostring(areaID) .. ": " .. table.concat(points, " ")
+    end
+    table.sort(parts)
+    return #parts > 0 and table.concat(parts, "; ") or "none"
+end
+
 -- Typed reads first (QuestieDB contract API), positional index as fallback.
 local npcRankCache = {}
 local function npcRank(npcID)

@@ -861,6 +861,12 @@ function extras.DebugReport()
         lines[#lines + 1] = "Browsed map: " .. tostring(WalkMapMaps.Selected() or "automatic current zone")
         lines[#lines + 1] = "Player zone: " .. tostring(WalkMapMaps.CurrentZone() or "unknown")
         lines[#lines + 1] = "Dungeon map: " .. (WalkMapDungeons and WalkMapDungeons.Status() or "unavailable")
+        -- Do QuestieDB's dungeon bosses have spots on the dungeon maps?
+        if WalkMapLiveDB and WalkMapLiveDB.RawSpawns then
+            for _, boss in ipairs({{639, "VanCleef"}, {1716, "Bazil Thredd"}, {4275, "Arugal"}, {3654, "Mutanus"}}) do
+                lines[#lines + 1] = ("Boss %s (%d): %s"):format(boss[2], boss[1], WalkMapLiveDB.RawSpawns(boss[1]))
+            end
+        end
         do
             local inside = IsInInstance and select(2, pcall(IsInInstance))
             local name, kind, _, _, _, _, _, instanceID
