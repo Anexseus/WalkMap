@@ -8,8 +8,7 @@ Fixed
   it only opened the game's map. Now its map entry is greyed out during
   combat, and choosing it says in chat how to open and close WalkMap in
   combat: a key bound to WalkMap, or a macro with /click
-  WalkMapKeyboardToggle. With the game's gamepad UI off, choosing it
-  simply opens or closes WalkMap. After the fight it works as before.
+  WalkMapKeyboardToggle. After the fight it works as before.
 - Settings with a controller: scrolling down a long page (such as Map)
   no longer gets stuck before the bottom when the next settings are
   taller.
