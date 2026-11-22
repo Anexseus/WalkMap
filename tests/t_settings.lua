@@ -92,11 +92,11 @@ return {
         env.InputUtil = nil
         Mock.eq(x.TrackerSettings().h, 180, "mouse layout unchanged")
     end},
-    {"Categories: nine pages, merged ones gone", function(Mock)
+    {"Categories: ten pages, merged ones gone", function(Mock)
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Bags & vendors", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors", "category list")
         local giver = page(env, "Giver level")
         Mock.eq(giver[1], "Automatic", "giver level rows still built")
         Mock.eq(#giver, 7, "Automatic plus six ranges")

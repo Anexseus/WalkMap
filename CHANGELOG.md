@@ -2,13 +2,19 @@
 
 ## 1.14.17
 
+New
+- Settings > Controllers: recommended controllers and how to set them up
+  in Steam Input (Steam Controller back buttons and touchpad radial menu,
+  8BitDo Pro 3 in D-input mode, the Xbox Series Share button).
+
 Fixed
 - The wheel's Quest & Maps in combat (when it opens WalkMap): the game
   does not let addons open or close the map from the wheel in a fight, so
   it only opened the game's map. Now its map entry is greyed out during
   combat, and choosing it says in chat how to open and close WalkMap in
   combat: a key bound to WalkMap, or a macro with /click
-  WalkMapKeyboardToggle. After the fight it works as before.
+  WalkMapKeyboardToggle (and, when it is off, to turn on Close map when
+  combat starts). After the fight it works as before.
 - Settings with a controller: scrolling down a long page (such as Map)
   no longer gets stuck before the bottom when the next settings are
   taller.

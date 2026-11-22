@@ -2879,6 +2879,13 @@ local settingsPages = {
         {"__intro", nil, "Welcome setup", "Show the first-time page with the most important settings again."},
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},
     }},
+    -- Information only: controllers that work well, set up in Steam Input.
+    {"Controllers", "Recommended controllers and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
+        {"__info", nil, "Any controller: keys for the map", "Bind M (the map key) or your WalkMap key to a button. Those also open and close WalkMap during combat, which the gamepad wheel cannot."},
+        {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
+        {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},
+        {"__info", nil, "Xbox Series controller", "Turn on Xbox Extended Feature Support in Steam's controller settings. Then the Share button can be mapped in Steam Input, for example to M."},
+    }},
     {"Bags & vendors", "Bag tools by Underbuks, integrated from SortPants.", {
         {"bagSortEnabled", nil, "Bag sorting", "Allow manual sorting through the button, command or shortcut."},
         {"__autoSell", nil, "Auto-sell junk", "Sell gray-quality items when a vendor opens: off, on with a chat message, or on quietly."},
@@ -3117,7 +3124,7 @@ refreshSettingsRows = function()
             row.description:SetPoint("RIGHT", row, "RIGHT", -108, 0)
         end
         -- What's new highlights: gold heading.
-        if field == "__newsStar" or field == "__reportBugs" then
+        if field == "__newsStar" or field == "__reportBugs" or field == "__info" then
             row.label:SetText("|cffffd24a" .. display .. "|r")
         end
         if row.description.SetMaxLines then row.description:SetMaxLines(isButton and 2 or 0) end
@@ -3210,7 +3217,7 @@ refreshSettingsRows = function()
                 extras.ShowDebug()
             elseif field == "__intro" then
                 extras.ShowWelcome()
-            elseif field == "__news" or field == "__newsStar" or field == "__reportBugs" then
+            elseif field == "__news" or field == "__newsStar" or field == "__reportBugs" or field == "__info" then
                 -- Information only.
                 return
             elseif field == "__trySelect" then
