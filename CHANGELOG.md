@@ -1,6 +1,8 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.16
+
+Hotfix for 1.14.15.
 
 New
 - Forever's new dungeons get maps too: The Hall of Thanes, Ruins of
