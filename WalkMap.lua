@@ -4088,7 +4088,9 @@ local function updatePlayerPosition(mapID)
         local inside, instanceName = false, nil
         if IsInInstance then inside = IsInInstance() == true end
         if inside and GetInstanceInfo then instanceName = GetInstanceInfo() end
-        status:SetText(
+        -- Santiago Reyes' painted maps carry his credit and support link.
+        local credit = WalkMapDungeons and WalkMapDungeons.Credit(currentMap)
+        status:SetText(credit or
             (inside and type(instanceName) == "string" and instanceName ~= "")
                 and ("In " .. instanceName .. " - no position inside")
                 or "Position unavailable."

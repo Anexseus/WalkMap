@@ -3,6 +3,11 @@
 ## Unreleased
 
 New
+- Forever's new dungeons get maps too: The Hall of Thanes, Ruins of
+  Lordaeron, Excavation Site: Wetlands and City of Dalaran (two floors)
+  show the painted maps by Santiago Reyes, used with his permission. His
+  credit and support link are on the map while one is shown. Support his
+  maps: https://www.patreon.com/c/SantiagoReyesMaps
 - Dungeon map from other addons (Settings, shown when DungeonJournal or
   Forever Dungeon Scout is installed; on): inside a dungeon the map key
   and the wheel's Quest & Maps open the game's map, so you see their

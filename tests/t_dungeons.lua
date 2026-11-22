@@ -67,10 +67,10 @@ return {
         local missing = {}
         for id, entry in pairs(env.WalkMapDungeonMapData) do
             for _, floor in ipairs(entry.floors) do
-                Mock.eq(#floor[2], 12, "12 tiles a floor in " .. id)
+                Mock.eq(#floor[2], entry.painted and 1 or 12, "tiles a floor in " .. id)
                 for _, tile in ipairs(floor[2]) do
                     if type(tile) == "string" then
-                        local file = io.open("Maps/Dungeons/" .. tile .. ".blp", "rb")
+                        local file = io.open("Maps/Dungeons/" .. (entry.painted and "Painted/" or "") .. tile .. ".blp", "rb")
                         if file then file:close() else missing[#missing + 1] = tile end
                     end
                 end
@@ -79,7 +79,7 @@ return {
         Mock.eq(table.concat(missing, ", "), "", "no tile missing")
         Mock.eq(env.WalkMapDungeons.Current(), nil, "not in a dungeon: no dungeon map")
     end},
-    {"A dungeon with no map (Excavation Site: Wetlands): the zone outside, not a black map", function(Mock)
+    {"A dungeon with no map (Alcaz Prison): the zone outside, not a black map", function(Mock)
         local env = Mock.new({playerMap = 1436})
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
         env.fire("PLAYER_LOGIN")
@@ -89,7 +89,7 @@ return {
         Mock.eq(env.WalkMapCore.CurrentMap(), 1436, "outside in Westfall")
         -- Into the dungeon: the game's map for it has no position.
         env.IsInInstance = function() return true, "party" end
-        env.GetInstanceInfo = function() return "Excavation Site: Wetlands", "party", 1, "Normal", 5, 0, false, 9999 end
+        env.GetInstanceInfo = function() return "Alcaz Prison", "party", 1, "Normal", 5, 0, false, 9999 end
         env.C_Map.GetBestMapForUnit = function() return 9998 end
         -- The game lists art for it, but nothing to draw (the black map).
         local layers = env.C_Map.GetMapArtLayers
@@ -101,6 +101,28 @@ return {
         env.tick(0.2, 10)
         Mock.eq(env.WalkMapDungeons.Fallback(), 1436, "the zone you came from")
         Mock.eq(env.WalkMapCore.CurrentMap(), 1436, "the map stays on the zone outside")
-        Mock.ok(env.WalkMapCore.status:GetText():find("Excavation Site", 1, true), "status names the dungeon")
+        Mock.ok(env.WalkMapCore.status:GetText():find("Alcaz Prison", 1, true), "status names the dungeon")
+    end},
+    {"Forever's new dungeons: Santiago Reyes' painted maps, with his credit and link", function(Mock)
+        local env = Mock.new({playerMap = 1436})
+        env.IsInInstance = function() return true, "party" end
+        env.GetInstanceInfo = function() return "Excavation Site: Wetlands", "party", 1, "Normal", 5, 0, false, 2984 end
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.fire("PLAYER_LOGIN")
+        env.fire("PLAYER_ENTERING_WORLD")
+        env.C_Map.GetPlayerMapPosition = function() return nil end
+        env.WalkMap_Toggle()
+        env.tick(0.2, 10)
+        local map = env.WalkMapCore.CurrentMap()
+        Mock.eq(env.WalkMapDungeons.Title(map), "Excavation Site: Wetlands", "title")
+        local art = env.WalkMapDungeons.Art(map)
+        Mock.eq(#art.files, 1, "one picture")
+        Mock.ok(art.files[1]:find("Painted\\ExcavationSiteWetlands", 1, true), "the painted map")
+        Mock.ok(math.abs(art.layer.layerHeight / art.layer.tileHeight - 683 / 1024) < 0.001, "whole map, uncropped")
+        local status = env.WalkMapCore.status:GetText()
+        Mock.ok(status:find("Santiago Reyes", 1, true) and status:find("patreon.com/c/SantiagoReyesMaps", 1, true),
+            "credit and support link: " .. tostring(status))
+        local file = io.open("Maps/Dungeons/Painted/ExcavationSiteWetlands.blp", "rb")
+        Mock.ok(file, "shipped") if file then file:close() end
     end},
 }

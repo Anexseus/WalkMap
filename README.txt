@@ -37,6 +37,10 @@ THE MAP
 - Inside a classic dungeon (Deadmines, Scholomance ...) the map shows the
   dungeon itself; pick the floor in the zone menu (click the map title).
   The game gives no position inside, so there is no arrow there.
+- Forever's new dungeons (The Hall of Thanes, Ruins of Lordaeron, Excavation
+  Site: Wetlands, City of Dalaran) show the painted maps by Santiago Reyes,
+  used with his permission. Support his maps:
+  https://www.patreon.com/c/SantiagoReyesMaps - https://ko-fi.com/sr433_20
 - With DungeonJournal or Forever Dungeon Scout installed, the map key and
   the wheel open the game's map inside dungeons, so you see their dungeon
   map (Settings, "Dungeon map from other addons").

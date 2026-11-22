@@ -12,6 +12,11 @@ local dungeons = WalkMapDungeons
 local BASE = 2000000           -- our map IDs: BASE + instance ID * 100 + floor
 local FOLDER = "Interface\\AddOns\\WalkMap\\Maps\\Dungeons\\"
 local LAYER = {layerWidth = 1002, layerHeight = 668, tileWidth = 256, tileHeight = 256}
+-- Painted maps: one 1024 px picture, the map in its top 1024 x 683, shown
+-- whole with its watermark (the tile height makes the renderer use exactly
+-- that part).
+local PAINTED_LAYER = {layerWidth = 1002, layerHeight = 668, tileWidth = 1002, tileHeight = 668 * 1024 / 683}
+local CREDIT = "Map by Santiago Reyes - patreon.com/c/SantiagoReyesMaps"
 local floorChosen = {}         -- instance ID -> floor, for this session
 
 local function call(fn, ...)
@@ -100,10 +105,17 @@ function dungeons.Art(mapID)
     local _, floor, entry = split(mapID)
     if not entry then return nil end
     local files = {}
+    local folder = entry.painted and (FOLDER .. "Painted\\") or FOLDER
     for i, tile in ipairs(entry.floors[floor][2]) do
-        files[i] = type(tile) == "number" and tile or (FOLDER .. tile)
+        files[i] = type(tile) == "number" and tile or (folder .. tile)
     end
-    return {layer = LAYER, files = files}
+    return {layer = entry.painted and PAINTED_LAYER or LAYER, files = files}
+end
+
+-- "Map by Santiago Reyes - ..." on his painted maps, else nil.
+function dungeons.Credit(mapID)
+    local _, _, entry = split(mapID)
+    return entry and entry.painted and CREDIT or nil
 end
 
 -- "Shadowfang Keep - Floor 3"

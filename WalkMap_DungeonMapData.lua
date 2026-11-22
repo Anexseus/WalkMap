@@ -97,4 +97,19 @@ WalkMapDungeonMapData = {
         {"Floor 5", {"DireMaul5_1", "DireMaul5_2", "DireMaul5_3", "DireMaul5_4", "DireMaul5_5", "DireMaul5_6", "DireMaul5_7", "DireMaul5_8", "DireMaul5_9", "DireMaul5_10", "DireMaul5_11", "DireMaul5_12"}},
         {"Floor 6", {"DireMaul6_1", "DireMaul6_2", "DireMaul6_3", "DireMaul6_4", "DireMaul6_5", "DireMaul6_6", "DireMaul6_7", "BlackFathomDeeps3_8", "DireMaul6_9", "DireMaul6_10", "DireMaul6_11", "BlackFathomDeeps3_12"}},
     }},
+    -- WoW Forever's new dungeons: painted maps by Santiago Reyes (Maps/Dungeons/
+    -- Painted, see CREDITS.txt there), one picture per floor. Matched by name.
+    [900001] = {names = {"The Hall of Thanes", "Hall of Thanes"}, painted = true, floors = {
+        {"Floor 1", {"HallOfThanes"}},
+    }},
+    [900002] = {names = {"Ruins of Lordaeron"}, painted = true, floors = {
+        {"Floor 1", {"RuinsOfLordaeron"}},
+    }},
+    [900003] = {names = {"Excavation Site: Wetlands"}, painted = true, floors = {
+        {"Floor 1", {"ExcavationSiteWetlands"}},
+    }},
+    [900004] = {names = {"City of Dalaran", "Dalaran"}, painted = true, floors = {
+        {"The Underbelly", {"CityOfDalaranSewers"}},
+        {"City", {"CityOfDalaranCity"}},
+    }},
 }

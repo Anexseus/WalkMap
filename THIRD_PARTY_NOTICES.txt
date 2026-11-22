@@ -68,3 +68,15 @@ of Warcraft artwork, (c) Blizzard Entertainment. They are not covered by
 WalkMap's GPL license. They are shipped because the WoW Forever client has
 no maps of the classic dungeons. WalkMap_DungeonMapData.lua lists which of
 these tiles makes up each floor.
+
+Painted dungeon maps (Maps/Dungeons/Painted/*.blp)
+--------------------------------------------------
+The maps of The Hall of Thanes, Ruins of Lordaeron, Excavation Site:
+Wetlands and City of Dalaran are by Santiago Reyes, from his project Atlas
+de Azeroth: Forever, used with his permission. They are not covered by
+WalkMap's GPL license and may not be reused from WalkMap. His watermark
+stays on every map; the pictures are only converted to the game's texture
+format, never cropped, altered or drawn into. WalkMap shows his credit and
+support link while one of his maps is on screen.
+Support his maps: https://www.patreon.com/c/SantiagoReyesMaps
+                  https://ko-fi.com/sr433_20
