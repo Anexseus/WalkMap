@@ -149,15 +149,24 @@ return {
         Mock.ok(wraps[1].pre:find("map:Hide()", 1, true) and wraps[1].pre:find("return false", 1, true),
             "hides WalkMap and skips the game's handler")
         Mock.ok(wraps[1].pre:find("state-combat", 1, true), "only in combat")
-        -- A fight: anchored (the button becomes protected), let go after.
+        -- Anchored out of combat (the button becomes protected); nothing is
+        -- moved as a fight begins (the game refuses that).
+        Mock.ok(env.WalkMapWheelClose.Status():find("anchored true", 1, true), "anchored out of combat")
+        local moved = false
+        local header = env.WalkMapWheelCloseHeader
+        local setPoint = header.SetPoint
+        header.SetPoint = function(...) moved = true return setPoint(...) end
+        env.__combat = true
         env.fire("PLAYER_REGEN_DISABLED")
-        Mock.ok(env.WalkMapWheelClose.Status():find("anchored true", 1, true), "anchored for the fight")
+        env.tick(1, 3)
+        Mock.eq(moved, false, "nothing anchored in combat")
+        env.__combat = false
         env.fire("PLAYER_REGEN_ENABLED")
-        Mock.ok(env.WalkMapWheelClose.Status():find("anchored false", 1, true), "let go after it")
-        -- Turned off: unwrapped out of combat.
+        -- Turned off: unwrapped and let go, out of combat.
         env.WalkMapCharacterSettings.wheelClosesInCombat = false
         env.tick(1, 3)
         Mock.eq(unwraps, 1, "unwrapped")
+        Mock.ok(env.WalkMapWheelClose.Status():find("anchored false", 1, true), "let go")
     end},
     {"Wheel closes WalkMap in combat is off by default: nothing is wrapped", function(Mock)
         local env = Mock.new({playerMap = 1436})

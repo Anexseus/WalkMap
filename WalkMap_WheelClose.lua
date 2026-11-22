@@ -14,11 +14,13 @@
 --
 -- The game runs wrap snippets in combat only on protected frames, and the
 -- micro button is not one. A protected frame anchored to a frame makes that
--- frame protected too, so while a fight lasts WalkMap's (invisible, 1 px)
--- secure header is anchored to the button; it is let go when the fight
--- ends. Price: in a fight the micro button cannot be moved by anyone, so a
--- game layout change of the micro menu during combat could be refused.
--- Hence optional, and off by default.
+-- frame protected too, so WalkMap's (invisible, 1 px) secure header is
+-- anchored to the button while the setting is on. That is done out of
+-- combat only: beta2 anchored it as a fight began, which the game refused
+-- ("Interface action failed because of an AddOn") and the button stayed
+-- unprotected. Price: in a fight the micro button cannot be moved by
+-- anyone, so a game layout change of the micro menu during combat could be
+-- refused. Hence optional, and off by default.
 WalkMapWheelClose = {}
 local wheel = WalkMapWheelClose
 
@@ -69,23 +71,17 @@ local function apply()
         local ok, message = pcall(SecureHandlerUnwrapScript, b, "OnClick")
         if ok then wrapped = false else lastError = tostring(message) end
     end
-end
-wheel.Apply = apply
-
--- As a fight begins (still before the combat lock) the header is anchored
--- to the button, which makes the button protected for the fight; it is
--- let go when the fight ends.
-local function anchor(on)
-    local b = button()
-    if not (header and b) then return end
-    if on and wrapped and not anchored then
-        if pcall(header.SetPoint, header, "CENTER", b, "CENTER") then anchored = true end
-    elseif not on and anchored and not inCombat() then
-        pcall(header.ClearAllPoints, header)
-        anchored = false
+    -- Anchored while wrapped (this makes the button protected), out of combat.
+    if header then
+        if wrapped and not anchored then
+            if pcall(header.SetPoint, header, "CENTER", b, "CENTER") then anchored = true end
+        elseif not wrapped and anchored then
+            pcall(header.ClearAllPoints, header)
+            anchored = false
+        end
     end
 end
-wheel.Anchor = anchor
+wheel.Apply = apply
 
 function wheel.Status()
     local b = button()
@@ -97,18 +93,10 @@ end
 function wheel.Snippet() return SNIPPET end
 
 local events = CreateFrame("Frame")
-for _, event in ipairs({"PLAYER_LOGIN", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED"}) do
+for _, event in ipairs({"PLAYER_LOGIN", "PLAYER_REGEN_ENABLED"}) do
     pcall(events.RegisterEvent, events, event)
 end
-events:SetScript("OnEvent", function(_, event)
-    if event == "PLAYER_REGEN_DISABLED" then
-        -- Fires just before the combat lock: last moment to anchor.
-        if wanted() then anchor(true) end
-        return
-    end
-    anchor(false)
-    apply()
-end)
+events:SetScript("OnEvent", function() apply() end)
 -- The setting can change in Settings at any time; apply it out of combat.
 local since = 0
 events:SetScript("OnUpdate", function(_, elapsed)
