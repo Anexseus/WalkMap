@@ -127,59 +127,6 @@ return {
         env.tick(1, 3)
         Mock.eq(overrides.M, "WalkMapKeyboardToggle", "setting off: M opens WalkMap inside too")
     end},
-    {"Wheel closes WalkMap in combat (optional): a secure snippet wraps the quest log button", function(Mock)
-        local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-        env.QuestLogMicroButton = env.CreateFrame("Button", "QuestLogMicroButton", env.UIParent)
-        local wraps, unwraps = {}, 0
-        env.SecureHandlerWrapScript = function(frame, script, header, pre)
-            wraps[#wraps + 1] = {frame = frame, script = script, header = header, pre = pre}
-        end
-        env.SecureHandlerUnwrapScript = function() unwraps = unwraps + 1 end
-        -- WalkMap_Combat.lua's secure header (its "combat-controls").
-        env.RegisterStateDriver = function() end
-        env.GetBindingKey = function() end
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true, wheelClosesInCombat = true})
-        env.WalkMapCombat.Free = function() return false end
-        env.fire("PLAYER_LOGIN")
-        env.fire("PLAYER_ENTERING_WORLD")
-        env.tick(1, 3)
-        Mock.eq(#wraps, 1, "wrapped once, out of combat")
-        Mock.eq(wraps[1].frame, env.QuestLogMicroButton, "the quest log micro button (the wheel clicks it)")
-        Mock.eq(wraps[1].script, "OnClick", "its click")
-        Mock.ok(wraps[1].pre:find("map:Hide()", 1, true) and wraps[1].pre:find("return false", 1, true),
-            "hides WalkMap and skips the game's handler")
-        Mock.ok(wraps[1].pre:find("state-combat", 1, true), "only in combat")
-        -- Anchored out of combat (the button becomes protected); nothing is
-        -- moved as a fight begins (the game refuses that).
-        Mock.ok(env.WalkMapWheelClose.Status():find("anchored true", 1, true), "anchored out of combat")
-        local moved = false
-        local header = env.WalkMapWheelCloseHeader
-        local setPoint = header.SetPoint
-        header.SetPoint = function(...) moved = true return setPoint(...) end
-        env.__combat = true
-        env.fire("PLAYER_REGEN_DISABLED")
-        env.tick(1, 3)
-        Mock.eq(moved, false, "nothing anchored in combat")
-        env.__combat = false
-        env.fire("PLAYER_REGEN_ENABLED")
-        -- Turned off: unwrapped and let go, out of combat.
-        env.WalkMapCharacterSettings.wheelClosesInCombat = false
-        env.tick(1, 3)
-        Mock.eq(unwraps, 1, "unwrapped")
-        Mock.ok(env.WalkMapWheelClose.Status():find("anchored false", 1, true), "let go")
-    end},
-    {"Wheel closes WalkMap in combat is off by default: nothing is wrapped", function(Mock)
-        local env = Mock.new({playerMap = 1436})
-        env.QuestLogMicroButton = env.CreateFrame("Button", "QuestLogMicroButton", env.UIParent)
-        local wrapped = false
-        env.SecureHandlerWrapScript = function() wrapped = true end
-        env.SecureHandlerUnwrapScript = function() end
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
-        env.fire("PLAYER_LOGIN")
-        env.tick(1, 3)
-        env.fire("PLAYER_REGEN_DISABLED")
-        Mock.eq(wrapped, false, "not wrapped")
-    end},
     {"Left/Right paging: moves a page and keeps the row", function(Mock)
         local env, log, focused = openLong(Mock)
         local page, pages = log.PageNumber()

@@ -2,13 +2,11 @@
 
 ## 1.14.17
 
-New
-- Wheel closes WalkMap in combat (Settings, experimental, off by
-  default): in a fight, the wheel's Quest & Maps closes an open WalkMap
-  and the game's map stays shut. A secure snippet on the game's quest log
-  button does it, the same way WalkMap's own key closes the map in combat.
-- Without it, Quest & Maps in combat no longer prints "Use your WalkMap
-  key or the X button..." in chat.
+Fixed
+- In combat, the wheel's Quest & Maps with WalkMap open no longer prints
+  "Use your WalkMap key or the X button..." in chat. The game's map still
+  opens there (addons cannot stop that in combat); B closes it, and your
+  WalkMap key closes WalkMap.
 
 ## 1.14.16
 

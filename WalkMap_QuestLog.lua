@@ -1294,9 +1294,12 @@ local function intercept(frame, isQuestLog)
         if (InCombatLockdown and InCombatLockdown()) or (WalkMapCombat and WalkMapCombat.Locked()) then
             -- In combat the game's window cannot be closed for you. Quest &
             -- Maps with WalkMap open means "close the map": a free window
-            -- (game gamepad UI off) closes here; the protected one only from
-            -- secure code ("Wheel closes WalkMap in combat",
-            -- WalkMap_WheelClose.lua), so it is left alone here.
+            -- (game gamepad UI off) closes here. The protected one only
+            -- closes from secure code (WalkMap key, X, B), so it is left
+            -- alone. 1.14.17 betas tried a secure snippet on the game's quest
+            -- log button, but the game runs wrap snippets only on frames that
+            -- are explicitly protected (GetFrameHandle(frame, true) in
+            -- RestrictedInfrastructure.lua), which addons cannot make it.
             if not isQuestLog and owner:IsShown() and WalkMap_Toggle
                 and WalkMapCombat and WalkMapCombat.Free and WalkMapCombat.Free() then
                 pcall(WalkMap_Toggle)
