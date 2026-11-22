@@ -25,10 +25,22 @@ local hints, lastHint = 0, -10
 
 local function button() return _G.QuestLogMicroButton end
 local function inCombat() return InCombatLockdown and InCombatLockdown() == true end
+local function mapOpen() return WalkMapCore and WalkMapCore.frame and WalkMapCore.frame:IsShown() == true end
+local function free() return WalkMapCombat and WalkMapCombat.Free and WalkMapCombat.Free() == true end
+local function handOff()
+    return WalkMapExtras and WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap() == true
+end
+-- Greyed out in a fight while the wheel would open WalkMap ("Map key and
+-- wheel open"), and always while WalkMap is open (then the wheel would only
+-- open the game's map behind it). Not inside a dungeon whose map another
+-- addon draws in the game's map (the wheel opens that one on purpose).
+-- 1.14.17-beta4/5 also skipped the free window (game gamepad UI off) and
+-- waited for "Map key and wheel open"; beta1 only looked at an open map, and
+-- that one greyed the wheel out for you. Now both count.
 local function wanted()
-    return WalkMapExtras and WalkMapExtras.UseGameMapKeys and WalkMapExtras.UseGameMapKeys()
-        and not (WalkMapCombat and WalkMapCombat.Free and WalkMapCombat.Free())
-        and not (WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap())
+    if handOff() then return false end
+    if mapOpen() then return true end
+    return WalkMapExtras and WalkMapExtras.UseGameMapKeys and WalkMapExtras.UseGameMapKeys() == true
 end
 
 -- The game enables its micro buttons again by itself (EnableMicroButtons,
@@ -69,6 +81,12 @@ function wheel.OnError(message)
     if not disabledByUs or not isWheelLine(message) then return end
     local errors = UIErrorsFrame
     if errors and errors.Clear then pcall(errors.Clear, errors) end
+    -- Free window (game gamepad UI off): addons may open and close it in
+    -- combat, so the wheel's map entry simply opens or closes WalkMap.
+    if free() and WalkMap_Toggle then
+        pcall(WalkMap_Toggle)
+        return
+    end
     local now = GetTime and GetTime() or 0
     if now - lastHint >= 3 then
         lastHint = now
@@ -78,8 +96,11 @@ function wheel.OnError(message)
 end
 
 function wheel.Status()
+    local b = button()
     return (wanted() and "on" or "off") .. (disabledByUs and ", quest log button greyed out" or "")
-        .. ", hints " .. hints
+        .. ", hints " .. hints .. " (map keys " .. tostring(WalkMapExtras and WalkMapExtras.UseGameMapKeys
+        and WalkMapExtras.UseGameMapKeys()) .. ", window " .. (free() and "free" or "protected")
+        .. ", hand-off " .. tostring(handOff()) .. ", button " .. tostring(b and b.IsEnabled and b:IsEnabled()) .. ")"
 end
 
 local hooked = false

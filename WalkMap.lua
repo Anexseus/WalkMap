@@ -4624,8 +4624,8 @@ local function padMoveRow(delta)
         local nextTarget = route and route[delta > 0 and "down" or "up"]
         -- At the first/last row of a list that can scroll: scroll instead.
         if nextTarget == focusTarget and panel.walkmapScroll then
-            panel.walkmapScroll(focusTarget, delta > 0 and "down" or "up")
-            markFocus(focusTarget)
+            local _, refocus = panel.walkmapScroll(focusTarget, delta > 0 and "down" or "up")
+            markFocus(refocus or focusTarget)
         elseif nextTarget and nextTarget ~= true then markFocus(nextTarget) end
         return true
     end

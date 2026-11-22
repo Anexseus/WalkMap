@@ -3541,12 +3541,22 @@ local function createSettingsPanel()
     end
     -- Controller: Up on the first row or Down on the last row scrolls; the
     -- focus stays on the same row, which now shows the next setting.
+    -- Rows have their own heights, so after a scroll fewer rows may fit and
+    -- the focused row can be hidden. Then the focus belongs on the new last
+    -- row; that row is returned as the second value. (Before, the focus sat
+    -- on a hidden row and Down did nothing until you pressed Up first.)
     function settingsPanel.walkmapScroll(row, direction)
         local edges = settingsPanel.walkmapScrollEdges
         if not edges then return false end
-        if direction == "down" and row == edges.last and edges.down then return settingsPanel.walkmapScrollBy(1) end
-        if direction == "up" and row == edges.first and edges.up then return settingsPanel.walkmapScrollBy(-1) end
-        return false
+        local moved = false
+        if direction == "down" and row == edges.last and edges.down then moved = settingsPanel.walkmapScrollBy(1)
+        elseif direction == "up" and row == edges.first and edges.up then moved = settingsPanel.walkmapScrollBy(-1) end
+        if not moved then return false end
+        if row and row.IsShown and not row:IsShown() then
+            local now = settingsPanel.walkmapScrollEdges
+            return true, now and now.last
+        end
+        return true
     end
     settingsPanel:EnableMouseWheel(true)
     settingsPanel:SetScript("OnMouseWheel", function(_, delta) settingsPanel.walkmapScrollBy(delta > 0 and -1 or 1) end)

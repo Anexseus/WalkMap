@@ -192,7 +192,17 @@ local function refreshDirections()
                     for _, option in ipairs(panel.options) do
                         for _, direction in ipairs({"up", "down"}) do
                             outgoingAction(option, direction, function()
-                                if registered[panel] then panel.walkmapScroll(option, direction) end
+                                if not registered[panel] then return end
+                                local _, refocus = panel.walkmapScroll(option, direction)
+                                if refocus and refocus ~= option then
+                                    setTarget(panel, refocus)
+                                    -- Once more after the button groups are rebuilt.
+                                    if C_Timer and C_Timer.After then
+                                        C_Timer.After(0.05, function()
+                                            if registered[panel] and refocus:IsShown() then setTarget(panel, refocus) end
+                                        end)
+                                    end
+                                end
                             end)
                         end
                     end
