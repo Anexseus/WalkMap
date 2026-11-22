@@ -39,6 +39,7 @@ WalkMap_QuestLog.lua
 WalkMap_GameMapGuard.lua
 WalkMap_Tracker.lua
 WalkMap_GroupProgress.lua
+WalkMap_WheelCombat.lua
 WalkMap_Announce.lua
 WalkMap_Corpse.lua
 WalkMap_DialogLayer.lua

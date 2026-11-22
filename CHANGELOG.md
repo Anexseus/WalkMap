@@ -3,10 +3,12 @@
 ## 1.14.17
 
 Fixed
-- In combat, the wheel's Quest & Maps with WalkMap open no longer prints
-  "Use your WalkMap key or the X button..." in chat. The game's map still
-  opens there (addons cannot stop that in combat); B closes it, and your
-  WalkMap key closes WalkMap.
+- The wheel's Quest & Maps in combat (when it opens WalkMap): the game
+  does not let addons open or close the map from the wheel in a fight, so
+  it only opened the game's map. Now its map entry is greyed out during
+  combat, and choosing it says in chat how to open and close WalkMap in
+  combat: a key bound to WalkMap, or a macro with /click
+  WalkMapKeyboardToggle. After the fight it works as before.
 
 ## 1.14.16
 

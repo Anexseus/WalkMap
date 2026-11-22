@@ -127,6 +127,47 @@ return {
         env.tick(1, 3)
         Mock.eq(overrides.M, "WalkMapKeyboardToggle", "setting off: M opens WalkMap inside too")
     end},
+    {"Wheel in combat: the quest log button is greyed out, and a press says how to close WalkMap", function(Mock)
+        local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+        local enabled = true
+        env.QuestLogMicroButton = env.CreateFrame("Button", "QuestLogMicroButton", env.UIParent)
+        env.QuestLogMicroButton.IsEnabled = function() return enabled end
+        env.QuestLogMicroButton.Enable = function() enabled = true end
+        env.QuestLogMicroButton.Disable = function() enabled = false end
+        env.RADIAL_ERROR_FALLBACK = "You can't do that right now."
+        local cleared, printed = 0, {}
+        env.UIErrorsFrame = env.CreateFrame("Frame", "UIErrorsFrame", env.UIParent)
+        env.UIErrorsFrame.Clear = function() cleared = cleared + 1 end
+        env.print = function(text) printed[#printed + 1] = text end
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.WalkMapCombat.Free = function() return false end
+        env.fire("PLAYER_LOGIN")
+        env.tick(0.5, 3)
+        Mock.eq(enabled, true, "out of combat the button is left alone")
+        env.__combat = true
+        env.fire("PLAYER_REGEN_DISABLED")
+        env.tick(0.5, 2)
+        Mock.eq(enabled, false, "greyed out in combat")
+        env.WalkMapWheelCombat.OnError("You can't do that right now.")
+        Mock.eq(cleared, 1, "the red line cleared")
+        Mock.ok(printed[#printed]:find("/click WalkMapKeyboardToggle", 1, true), "chat says how: " .. tostring(printed[#printed]))
+        local count = #printed
+        env.WalkMapWheelCombat.OnError("You can't do that right now.")
+        Mock.eq(#printed, count, "not repeated at once")
+        env.WalkMapWheelCombat.OnError("Not enough rage")
+        Mock.eq(cleared, 2, "only the wheel's line is touched (the repeat above was cleared)")
+        env.__combat = false
+        env.fire("PLAYER_REGEN_ENABLED")
+        env.tick(0.5, 2)
+        Mock.eq(enabled, true, "enabled again after the fight")
+        -- Wheel set to open the game's map: never greyed out.
+        env.WalkMapCharacterSettings.useGameMapKeys = false
+        env.__combat = true
+        env.fire("PLAYER_REGEN_DISABLED")
+        env.tick(0.5, 2)
+        Mock.eq(enabled, true, "game map chosen: left alone")
+        env.__combat = false
+    end},
     {"Left/Right paging: moves a page and keeps the row", function(Mock)
         local env, log, focused = openLong(Mock)
         local page, pages = log.PageNumber()

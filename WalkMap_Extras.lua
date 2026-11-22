@@ -970,6 +970,7 @@ function extras.DebugReport()
     add("Fade while moving", on(settings.fadeWhileMoving) .. string.format(" (%d%%, arrow %s)",
         math.floor(extras.FadeAlpha() * 100 + 0.5), settings.fadeKeepArrow ~= false and "kept" or "fades"))
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
+    add("Wheel in combat", WalkMapWheelCombat and WalkMapWheelCombat.Status() or "unavailable")
     add("Dungeon map addon", tostring(extras.DungeonMapAddon() or "none") .. ", hand-off "
         .. on(settings.dungeonMapHandoff ~= false) .. (extras.HandOffDungeonMap() and " (active)" or ""))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
