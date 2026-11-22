@@ -1,6 +1,8 @@
 # WalkMap changelog
 
-## Unreleased
+## 1.14.13
+
+Hotfix for 1.14.12.
 
 Changed
 - Same layer / Other layer is no longer shown. From game build 71037

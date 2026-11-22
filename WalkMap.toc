@@ -2,7 +2,7 @@
 ## Title: WalkMap
 ## Notes: Controller-friendly zone map using QuestieDB locations.
 ## Author: Anexseus and Underbuks
-## Version: 1.14.12
+## Version: 1.14.13
 ## X-Curse-Project-ID: 1796543
 ## X-License: GPL-3.0-or-later; see LICENSE.txt and THIRD_PARTY_NOTICES.txt
 ## X-Credits: Eric Mauser (Shagu), Questie contributors
