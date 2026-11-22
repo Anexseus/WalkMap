@@ -83,6 +83,7 @@ return {
         env.fire("PLAYER_ENTERING_WORLD")
         env.tick(1, 10)
         env.WalkMapExtras.UseGameMapKeys = function() return true end
+        env.WalkMapCombat.Free = function() return true end  -- free window: closes in combat
         env.WalkMap_Toggle()
         env.tick(0.2, 5)
         Mock.ok(env.WalkMapCore.frame:IsShown(), "WalkMap open")
@@ -126,58 +127,49 @@ return {
         env.tick(1, 3)
         Mock.eq(overrides.M, "WalkMapKeyboardToggle", "setting off: M opens WalkMap inside too")
     end},
-    {"Wheel closes WalkMap in combat (optional): the map button is held, the wheel's press closes WalkMap", function(Mock)
+    {"Wheel closes WalkMap in combat (optional): a secure snippet wraps the quest log button", function(Mock)
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-        local enabled = true
         env.QuestLogMicroButton = env.CreateFrame("Button", "QuestLogMicroButton", env.UIParent)
-        env.QuestLogMicroButton.IsEnabled = function() return enabled end
-        env.QuestLogMicroButton.Enable = function() enabled = true end
-        env.QuestLogMicroButton.Disable = function() enabled = false end
-        env.RADIAL_ERROR_FALLBACK = "You can't do that right now."
-        local cleared = 0
-        env.UIErrorsFrame = env.CreateFrame("Frame", "UIErrorsFrame", env.UIParent)
-        env.UIErrorsFrame.Clear = function() cleared = cleared + 1 end
+        local wraps, unwraps = {}, 0
+        env.SecureHandlerWrapScript = function(frame, script, header, pre)
+            wraps[#wraps + 1] = {frame = frame, script = script, header = header, pre = pre}
+        end
+        env.SecureHandlerUnwrapScript = function() unwraps = unwraps + 1 end
+        -- WalkMap_Combat.lua's secure header (its "combat-controls").
+        env.RegisterStateDriver = function() end
+        env.GetBindingKey = function() end
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true, wheelClosesInCombat = true})
+        env.WalkMapCombat.Free = function() return false end
         env.fire("PLAYER_LOGIN")
         env.fire("PLAYER_ENTERING_WORLD")
-        env.WalkMap_Toggle()
-        env.tick(0.2, 5)
-        Mock.eq(enabled, true, "out of combat the button is left alone")
-        env.__combat = true
+        env.tick(1, 3)
+        Mock.eq(#wraps, 1, "wrapped once, out of combat")
+        Mock.eq(wraps[1].frame, env.QuestLogMicroButton, "the quest log micro button (the wheel clicks it)")
+        Mock.eq(wraps[1].script, "OnClick", "its click")
+        Mock.ok(wraps[1].pre:find("map:Hide()", 1, true) and wraps[1].pre:find("return false", 1, true),
+            "hides WalkMap and skips the game's handler")
+        Mock.ok(wraps[1].pre:find("state-combat", 1, true), "only in combat")
+        -- A fight: anchored (the button becomes protected), let go after.
         env.fire("PLAYER_REGEN_DISABLED")
-        env.tick(0.2, 3)
-        Mock.eq(enabled, false, "WalkMap open in combat: button held")
-        -- The wheel's press on the disabled map entry prints its red line.
-        env.WalkMapWheelClose.OnError("You can't do that right now.")
-        env.tick(0.2, 3)
-        Mock.ok(not env.WalkMapCore.frame:IsShown(), "WalkMap closed")
-        Mock.eq(cleared, 1, "the red line cleared")
-        Mock.eq(enabled, true, "button back as WalkMap closed")
-        -- Other red lines do nothing.
-        env.WalkMap_Toggle()
-        env.tick(0.2, 3)
-        env.WalkMapWheelClose.OnError("Not enough rage")
-        Mock.ok(env.WalkMapCore.frame:IsShown(), "another error leaves WalkMap open")
-        env.__combat = false
+        Mock.ok(env.WalkMapWheelClose.Status():find("anchored true", 1, true), "anchored for the fight")
         env.fire("PLAYER_REGEN_ENABLED")
-        env.tick(0.2, 3)
-        Mock.eq(enabled, true, "after combat the button is back")
+        Mock.ok(env.WalkMapWheelClose.Status():find("anchored false", 1, true), "let go after it")
+        -- Turned off: unwrapped out of combat.
+        env.WalkMapCharacterSettings.wheelClosesInCombat = false
+        env.tick(1, 3)
+        Mock.eq(unwraps, 1, "unwrapped")
     end},
-    {"Wheel closes WalkMap in combat is off by default: the button is never touched", function(Mock)
+    {"Wheel closes WalkMap in combat is off by default: nothing is wrapped", function(Mock)
         local env = Mock.new({playerMap = 1436})
-        local touched = false
         env.QuestLogMicroButton = env.CreateFrame("Button", "QuestLogMicroButton", env.UIParent)
-        env.QuestLogMicroButton.IsEnabled = function() return true end
-        env.QuestLogMicroButton.Disable = function() touched = true end
-        env.QuestLogMicroButton.Enable = function() touched = true end
+        local wrapped = false
+        env.SecureHandlerWrapScript = function() wrapped = true end
+        env.SecureHandlerUnwrapScript = function() end
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
         env.fire("PLAYER_LOGIN")
-        env.WalkMap_Toggle()
-        env.__combat = true
+        env.tick(1, 3)
         env.fire("PLAYER_REGEN_DISABLED")
-        env.tick(0.2, 5)
-        Mock.eq(touched, false, "not touched")
-        env.__combat = false
+        Mock.eq(wrapped, false, "not wrapped")
     end},
     {"Left/Right paging: moves a page and keeps the row", function(Mock)
         local env, log, focused = openLong(Mock)

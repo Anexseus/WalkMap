@@ -1293,9 +1293,14 @@ local function intercept(frame, isQuestLog)
         if not isQuestLog and WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap() then return end
         if (InCombatLockdown and InCombatLockdown()) or (WalkMapCombat and WalkMapCombat.Locked()) then
             -- In combat the game's window cannot be closed for you. Quest &
-            -- Maps with WalkMap open means "close the map": WalkMap closes,
-            -- so the game's map is not left hidden behind it (B closes that).
-            if not isQuestLog and owner:IsShown() and WalkMap_Toggle then pcall(WalkMap_Toggle) end
+            -- Maps with WalkMap open means "close the map": a free window
+            -- (game gamepad UI off) closes here; the protected one only from
+            -- secure code ("Wheel closes WalkMap in combat",
+            -- WalkMap_WheelClose.lua), so it is left alone here.
+            if not isQuestLog and owner:IsShown() and WalkMap_Toggle
+                and WalkMapCombat and WalkMapCombat.Free and WalkMapCombat.Free() then
+                pcall(WalkMap_Toggle)
+            end
             return
         end
         -- Pressing Quest & Maps (or M/L) while WalkMap is open closes it.
