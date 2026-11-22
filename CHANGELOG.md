@@ -2,6 +2,10 @@
 
 ## 1.14.14
 
+Changed
+- New players get "Close map when combat starts" on. Everyone who had
+  WalkMap before keeps their setting.
+
 Fixed
 - In combat, the wheel's Quest & Maps with WalkMap open closes WalkMap.
   Before, the game's own map opened behind it. The game does not let

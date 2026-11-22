@@ -105,6 +105,11 @@ settings.hideGameTracker = settings.hideGameTracker == true
 -- Quests the player removed from WalkMap's tracker: [questID] = true.
 if type(settings.trackerHidden) ~= "table" then settings.trackerHidden = {} end
 settings.combatPad = nil
+-- Close the map when combat starts: on for players new to WalkMap (no
+-- welcome page seen yet), off for everyone who had WalkMap before 1.14.14.
+if settings.closeInCombat == nil then
+    settings.closeInCombat = not (type(WalkMapSettings) == "table" and WalkMapSettings.welcomeSeen == true)
+end
 settings.closeInCombat = settings.closeInCombat == true
 settings.turnInWaypoint = settings.turnInWaypoint == true
 -- Unexplored areas on the large map (WalkMap.lua): off unless turned on.

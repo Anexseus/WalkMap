@@ -340,4 +340,15 @@ return {
         page(env, "Look")
         Mock.eq(bar:IsShown(), false, "a short page: no scroll bar")
     end},
+    {"Close map when combat starts: on for new players, unchanged for existing ones", function(Mock)
+        local env = Mock.new({playerMap = 1436})
+        env.loadAddon({}, {})
+        Mock.eq(env.WalkMapCharacterSettings.closeInCombat, true, "new to WalkMap: on")
+        env = Mock.new({playerMap = 1436})
+        env.loadAddon({welcomeSeen = true}, {})
+        Mock.eq(env.WalkMapCharacterSettings.closeInCombat, false, "had WalkMap before: off")
+        env = Mock.new({playerMap = 1436})
+        env.loadAddon({welcomeSeen = true}, {closeInCombat = true})
+        Mock.eq(env.WalkMapCharacterSettings.closeInCombat, true, "a saved choice stays")
+    end},
 }
