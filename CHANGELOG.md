@@ -1,5 +1,13 @@
 # WalkMap changelog
 
+## 1.14.17
+
+New
+- Wheel closes WalkMap in combat (Settings, experimental, off by
+  default): while WalkMap is open in a fight it holds the game's quest
+  log button, so the wheel's Quest & Maps closes WalkMap without opening
+  the game's map. Meanwhile the wheel's map icon looks greyed out.
+
 ## 1.14.16
 
 Hotfix for 1.14.15.

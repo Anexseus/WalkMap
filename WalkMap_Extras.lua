@@ -158,6 +158,8 @@ if settings.wheelOpensQuestLog == nil then settings.wheelOpensQuestLog = true en
 -- Inside a dungeon, leave the map key and the wheel to the game's map when a
 -- dungeon map addon is installed (see extras.HandOffDungeonMap).
 if settings.dungeonMapHandoff == nil then settings.dungeonMapHandoff = true end
+-- Off unless chosen: see WalkMap_WheelClose.lua.
+settings.wheelClosesInCombat = settings.wheelClosesInCombat == true
 if type(settings.waypoint) ~= "table" or type(settings.waypoint.mapID) ~= "number"
     or type(settings.waypoint.x) ~= "number" or type(settings.waypoint.y) ~= "number" then
     settings.waypoint = nil
@@ -499,6 +501,8 @@ end
 function extras.UseGameMapKeys()
     return settings.useGameMapKeys == true
 end
+
+function extras.WheelClosesInCombat() return settings.wheelClosesInCombat == true end
 
 -- Addons that draw their own dungeon map in the game's map window.
 local DUNGEON_MAP_ADDONS = {
@@ -967,6 +971,7 @@ function extras.DebugReport()
     add("Fade while moving", on(settings.fadeWhileMoving) .. string.format(" (%d%%, arrow %s)",
         math.floor(extras.FadeAlpha() * 100 + 0.5), settings.fadeKeepArrow ~= false and "kept" or "fades"))
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
+    add("Wheel closes in combat", WalkMapWheelClose and WalkMapWheelClose.Status() or "unavailable")
     add("Dungeon map addon", tostring(extras.DungeonMapAddon() or "none") .. ", hand-off "
         .. on(settings.dungeonMapHandoff ~= false) .. (extras.HandOffDungeonMap() and " (active)" or ""))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
@@ -2871,6 +2876,7 @@ local settingsPages = {
         {"__mapKeys", nil, "Map key and wheel open", "What the map and quest log keys and the gamepad wheel's Quest & Maps open: the game's map, WalkMap, or WalkMap with its quest log."},
         {"dungeonMapHandoff", nil, "Dungeon map from other addons", "Inside a dungeon, the map key and the wheel open the game's map, so you see the dungeon map of DungeonJournal or Forever Dungeon Scout (bosses and all). Your WalkMap key still opens WalkMap. Shown when one of them is installed.",
             when = function() return extras.DungeonMapAddon() ~= nil end},
+        {"wheelClosesInCombat", nil, "Wheel closes WalkMap in combat", "Experimental. In combat the game's map cannot be closed for you, so Quest & Maps would open it. With this on, WalkMap holds the game's quest log button while it is open in a fight: the wheel's map icon looks greyed out, but pressing it closes WalkMap and the game's map stays shut."},
         {"controllerHints", nil, "Button hints", "A line at the top of the map says what A, B, X and Y do right now. Only while the controller has focus."},
         {"__intro", nil, "Welcome setup", "Show the first-time page with the most important settings again."},
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},

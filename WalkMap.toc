@@ -2,7 +2,7 @@
 ## Title: WalkMap
 ## Notes: Controller-friendly zone map using QuestieDB locations.
 ## Author: Anexseus and Underbuks
-## Version: 1.14.16
+## Version: 1.14.17
 ## X-Curse-Project-ID: 1796543
 ## X-License: GPL-3.0-or-later; see LICENSE.txt and THIRD_PARTY_NOTICES.txt
 ## X-Credits: Eric Mauser (Shagu), Questie contributors
@@ -39,6 +39,7 @@ WalkMap_QuestLog.lua
 WalkMap_GameMapGuard.lua
 WalkMap_Tracker.lua
 WalkMap_GroupProgress.lua
+WalkMap_WheelClose.lua
 WalkMap_Announce.lua
 WalkMap_Corpse.lua
 WalkMap_DialogLayer.lua
