@@ -31,15 +31,24 @@ local function wanted()
         and not (WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap())
 end
 
+-- The game enables its micro buttons again by itself (EnableMicroButtons,
+-- e.g. when a window closes), also during a fight. So while the fight lasts
+-- WalkMap greys the button out again whenever it finds it enabled, not only
+-- once at the start (1.14.17-beta4 did only that, and the wheel stayed lit).
+local enabling = false
 local function update()
     local b = button()
     if not (b and b.IsEnabled and b.Enable and b.Disable) then return end
     local should = inCombat() and wanted()
-    if should and not disabledByUs then
+    if should then
         if b:IsEnabled() and pcall(b.Disable, b) then disabledByUs = true end
-    elseif not should and disabledByUs then
+    elseif disabledByUs then
         disabledByUs = false
-        if not b:IsEnabled() then pcall(b.Enable, b) end
+        if not b:IsEnabled() then
+            enabling = true
+            pcall(b.Enable, b)
+            enabling = false
+        end
     end
 end
 wheel.Update = update
@@ -82,6 +91,10 @@ events:SetScript("OnEvent", function(_, event)
     if event == "PLAYER_LOGIN" and not hooked and UIErrorsFrame and hooksecurefunc then
         hooked = true
         hooksecurefunc(UIErrorsFrame, "AddMessage", function(_, message) wheel.OnError(message) end)
+        local b = button()
+        if b and b.Enable then
+            hooksecurefunc(b, "Enable", function() if not enabling then update() end end)
+        end
     end
     update()
 end)
