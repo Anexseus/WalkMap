@@ -1287,7 +1287,13 @@ local function intercept(frame, isQuestLog)
     frame.walkmapIntercept = true
     frame:HookScript("OnShow", function(self)
         if not WalkMapExtras.UseGameMapKeys() then return end
-        if (InCombatLockdown and InCombatLockdown()) or (WalkMapCombat and WalkMapCombat.Locked()) then return end
+        if (InCombatLockdown and InCombatLockdown()) or (WalkMapCombat and WalkMapCombat.Locked()) then
+            -- In combat the game's window cannot be closed for you. Quest &
+            -- Maps with WalkMap open means "close the map": WalkMap closes,
+            -- so the game's map is not left hidden behind it (B closes that).
+            if not isQuestLog and owner:IsShown() and WalkMap_Toggle then pcall(WalkMap_Toggle) end
+            return
+        end
         -- Pressing Quest & Maps (or M/L) while WalkMap is open closes it.
         local wasOpen = owner:IsShown()
         -- Invisible at once, so the game's map never appears; it is closed

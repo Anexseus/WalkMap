@@ -74,6 +74,27 @@ return {
         Mock.ok(env.WalkMapQuestLog.InterceptStatus():find("blocked while closing 1 time", 1, true),
             "the block is counted: " .. env.WalkMapQuestLog.InterceptStatus())
     end},
+    {"In combat, Quest & Maps with WalkMap open closes WalkMap (the game's map is not hidden behind)", function(Mock)
+        local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+        env.loadAddon()
+        env.WorldMapFrame = env.CreateFrame("Frame", "WorldMapFrame", env.UIParent)
+        env.WorldMapFrame:Hide()
+        env.fire("PLAYER_LOGIN")
+        env.fire("PLAYER_ENTERING_WORLD")
+        env.tick(1, 10)
+        env.WalkMapExtras.UseGameMapKeys = function() return true end
+        env.WalkMap_Toggle()
+        env.tick(0.2, 5)
+        Mock.ok(env.WalkMapCore.frame:IsShown(), "WalkMap open")
+        env.__combat = true
+        local hidden = false
+        env.HideUIPanel = function() hidden = true end
+        env.WorldMapFrame:Show()
+        env.tick(1, 10)
+        Mock.ok(not env.WalkMapCore.frame:IsShown(), "WalkMap closed")
+        Mock.eq(hidden, false, "the game's map is left alone in combat")
+        env.__combat = false
+    end},
     {"Left/Right paging: moves a page and keeps the row", function(Mock)
         local env, log, focused = openLong(Mock)
         local page, pages = log.PageNumber()

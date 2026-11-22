@@ -2,6 +2,11 @@
 
 ## 1.14.14
 
+Fixed
+- In combat, the wheel's Quest & Maps with WalkMap open closes WalkMap.
+  Before, the game's own map opened behind it. The game does not let
+  addons close its map in combat, so it shows; B closes it.
+
 New
 - Dungeon maps: inside the classic dungeons (Ragefire Chasm to
   Stratholme, 19 in all) the map shows the dungeon instead of the zone
