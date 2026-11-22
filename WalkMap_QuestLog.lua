@@ -1251,7 +1251,9 @@ end
 local function applyKeys()
     if InCombatLockdown and InCombatLockdown() then return end
     local wanted = WalkMapExtras.UseGameMapKeys()
-    local mapKeys = wanted and keysFor("TOGGLEWORLDMAP") or {}
+    -- Inside a dungeon with a dungeon map addon: the map key opens the game's map.
+    local handOff = WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap()
+    local mapKeys = (wanted and not handOff) and keysFor("TOGGLEWORLDMAP") or {}
     local questKeys = wanted and keysFor("TOGGLEQUESTLOG") or {}
     local signature = table.concat(mapKeys, ",") .. "|" .. table.concat(questKeys, ",")
     if signature == appliedKeys then return end
@@ -1287,6 +1289,8 @@ local function intercept(frame, isQuestLog)
     frame.walkmapIntercept = true
     frame:HookScript("OnShow", function(self)
         if not WalkMapExtras.UseGameMapKeys() then return end
+        -- Inside a dungeon, another addon's dungeon map lives in the game's map.
+        if not isQuestLog and WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap() then return end
         if (InCombatLockdown and InCombatLockdown()) or (WalkMapCombat and WalkMapCombat.Locked()) then
             -- In combat the game's window cannot be closed for you. Quest &
             -- Maps with WalkMap open means "close the map": WalkMap closes,

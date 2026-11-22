@@ -37,6 +37,9 @@ THE MAP
 - Inside a classic dungeon (Deadmines, Scholomance ...) the map shows the
   dungeon itself; pick the floor in the zone menu (click the map title).
   The game gives no position inside, so there is no arrow there.
+- With DungeonJournal or Forever Dungeon Scout installed, the map key and
+  the wheel open the game's map inside dungeons, so you see their dungeon
+  map (Settings, "Dungeon map from other addons").
   Your current zone is green. Follow (or Current zone in that menu) brings
   you back.
 - On the world map, click a continent to open it; on a continent, click a

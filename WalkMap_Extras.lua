@@ -155,6 +155,9 @@ settings.useGameMapKeys = settings.useGameMapKeys == true
 -- Wheel's Quest & Maps (the game's world map): open WalkMap with its quest
 -- log (default) or the map alone.
 if settings.wheelOpensQuestLog == nil then settings.wheelOpensQuestLog = true end
+-- Inside a dungeon, leave the map key and the wheel to the game's map when a
+-- dungeon map addon is installed (see extras.HandOffDungeonMap).
+if settings.dungeonMapHandoff == nil then settings.dungeonMapHandoff = true end
 if type(settings.waypoint) ~= "table" or type(settings.waypoint.mapID) ~= "number"
     or type(settings.waypoint.x) ~= "number" or type(settings.waypoint.y) ~= "number" then
     settings.waypoint = nil
@@ -495,6 +498,30 @@ end
 
 function extras.UseGameMapKeys()
     return settings.useGameMapKeys == true
+end
+
+-- Addons that draw their own dungeon map in the game's map window.
+local DUNGEON_MAP_ADDONS = {
+    {"ForeverDungeonJournal", "DungeonJournal"},
+    {"ForeverDungeonScout", "Forever Dungeon Scout"},
+}
+function extras.DungeonMapAddon()
+    local loaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+    if not loaded then return nil end
+    for _, addon in ipairs(DUNGEON_MAP_ADDONS) do
+        local ok, on = pcall(loaded, addon[1])
+        if ok and on then return addon[2] end
+    end
+end
+
+-- True inside a dungeon or raid with such an addon and the setting on:
+-- then the map key and the wheel open the game's map (with that addon's
+-- dungeon map), not WalkMap. The WalkMap key still opens WalkMap.
+function extras.HandOffDungeonMap()
+    if settings.dungeonMapHandoff == false then return false end
+    local ok, inside = pcall(IsInInstance)
+    if not (ok and inside == true) then return false end
+    return extras.DungeonMapAddon() ~= nil
 end
 
 function extras.ZoneTracker()
@@ -940,6 +967,8 @@ function extras.DebugReport()
     add("Fade while moving", on(settings.fadeWhileMoving) .. string.format(" (%d%%, arrow %s)",
         math.floor(extras.FadeAlpha() * 100 + 0.5), settings.fadeKeepArrow ~= false and "kept" or "fades"))
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
+    add("Dungeon map addon", tostring(extras.DungeonMapAddon() or "none") .. ", hand-off "
+        .. on(settings.dungeonMapHandoff ~= false) .. (extras.HandOffDungeonMap() and " (active)" or ""))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
     add("Friends and guild", WalkMapFriends and WalkMapFriends.Status() or "unavailable")
     add("Group progress", WalkMapGroupProgress and WalkMapGroupProgress.Status() or "unavailable")
@@ -2840,6 +2869,8 @@ local settingsPages = {
             when = function() return settings.controllerMode == true end},
         {"nativeController", nil, "Native controller navigation", "Experimental: use the game's focus cursor and window switching. Disable for custom navigation."},
         {"__mapKeys", nil, "Map key and wheel open", "What the map and quest log keys and the gamepad wheel's Quest & Maps open: the game's map, WalkMap, or WalkMap with its quest log."},
+        {"dungeonMapHandoff", nil, "Dungeon map from other addons", "Inside a dungeon, the map key and the wheel open the game's map, so you see the dungeon map of DungeonJournal or Forever Dungeon Scout (bosses and all). Your WalkMap key still opens WalkMap. Shown when one of them is installed.",
+            when = function() return extras.DungeonMapAddon() ~= nil end},
         {"controllerHints", nil, "Button hints", "A line at the top of the map says what A, B, X and Y do right now. Only while the controller has focus."},
         {"__intro", nil, "Welcome setup", "Show the first-time page with the most important settings again."},
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},

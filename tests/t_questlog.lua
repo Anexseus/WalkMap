@@ -95,6 +95,37 @@ return {
         Mock.eq(hidden, false, "the game's map is left alone in combat")
         env.__combat = false
     end},
+    {"Inside a dungeon with DungeonJournal: M and the wheel open the game's map (optional)", function(Mock)
+        local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+        local overrides = {}
+        env.GetBindingKey = function(action) if action == "TOGGLEWORLDMAP" then return "M" end end
+        env.SetOverrideBindingClick = function(_, _, key, target) overrides[key] = target end
+        env.ClearOverrideBindings = function() for k in pairs(overrides) do overrides[k] = nil end end
+        env.C_AddOns = {IsAddOnLoaded = function(name) return name == "ForeverDungeonJournal" end}
+        local inside = false
+        env.IsInInstance = function() return inside, inside and "party" or "none" end
+        env.loadAddon()
+        env.WorldMapFrame = env.CreateFrame("Frame", "WorldMapFrame", env.UIParent)
+        env.WorldMapFrame:Hide()
+        env.fire("PLAYER_LOGIN")
+        env.fire("PLAYER_ENTERING_WORLD")
+        env.WalkMapExtras.UseGameMapKeys = function() return true end
+        env.tick(1, 3)
+        Mock.eq(overrides.M, "WalkMapKeyboardToggle", "outside: M opens WalkMap")
+        inside = true
+        env.tick(1, 3)
+        Mock.eq(overrides.M, nil, "inside: M is the game's again")
+        local hidden = false
+        env.HideUIPanel = function() hidden = true end
+        env.WorldMapFrame:Show()
+        env.tick(1, 5)
+        Mock.eq(hidden, false, "the wheel's game map stays open (DungeonJournal draws there)")
+        Mock.eq(env.WalkMapExtras.DungeonMapAddon(), "DungeonJournal", "named in Settings/debug")
+        -- Turned off: WalkMap again, also inside.
+        env.WalkMapCharacterSettings.dungeonMapHandoff = false
+        env.tick(1, 3)
+        Mock.eq(overrides.M, "WalkMapKeyboardToggle", "setting off: M opens WalkMap inside too")
+    end},
     {"Left/Right paging: moves a page and keeps the row", function(Mock)
         local env, log, focused = openLong(Mock)
         local page, pages = log.PageNumber()

@@ -1,5 +1,14 @@
 # WalkMap changelog
 
+## Unreleased
+
+New
+- Dungeon map from other addons (Settings, shown when DungeonJournal or
+  Forever Dungeon Scout is installed; on): inside a dungeon the map key
+  and the wheel's Quest & Maps open the game's map, so you see their
+  dungeon map with its bosses. Your WalkMap key still opens WalkMap, and
+  outside dungeons nothing changes.
+
 ## 1.14.15
 
 Hotfix for 1.14.14.
