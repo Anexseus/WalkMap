@@ -1,5 +1,12 @@
 # WalkMap changelog
 
+## Unreleased
+
+Fixed
+- Dungeons WalkMap has no map of (Forever's newer ones, such as
+  Excavation Site: Wetlands) no longer show a black map: the map stays on
+  the zone you came from, and the status line names the dungeon.
+
 ## 1.14.14
 
 Changed

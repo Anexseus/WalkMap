@@ -79,4 +79,28 @@ return {
         Mock.eq(table.concat(missing, ", "), "", "no tile missing")
         Mock.eq(env.WalkMapDungeons.Current(), nil, "not in a dungeon: no dungeon map")
     end},
+    {"A dungeon with no map (Excavation Site: Wetlands): the zone outside, not a black map", function(Mock)
+        local env = Mock.new({playerMap = 1436})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.fire("PLAYER_LOGIN")
+        env.fire("PLAYER_ENTERING_WORLD")
+        env.WalkMap_Toggle()
+        env.tick(0.2, 10)
+        Mock.eq(env.WalkMapCore.CurrentMap(), 1436, "outside in Westfall")
+        -- Into the dungeon: the game's map for it has no position.
+        env.IsInInstance = function() return true, "party" end
+        env.GetInstanceInfo = function() return "Excavation Site: Wetlands", "party", 1, "Normal", 5, 0, false, 9999 end
+        env.C_Map.GetBestMapForUnit = function() return 9998 end
+        -- The game lists art for it, but nothing to draw (the black map).
+        local layers = env.C_Map.GetMapArtLayers
+        env.C_Map.GetMapArtLayers = function(id)
+            if id == 9998 then return {{layerWidth = 1002, layerHeight = 668, tileWidth = 256, tileHeight = 256}} end
+            return layers(id)
+        end
+        env.C_Map.GetPlayerMapPosition = function() return nil end
+        env.tick(0.2, 10)
+        Mock.eq(env.WalkMapDungeons.Fallback(), 1436, "the zone you came from")
+        Mock.eq(env.WalkMapCore.CurrentMap(), 1436, "the map stays on the zone outside")
+        Mock.ok(env.WalkMapCore.status:GetText():find("Excavation Site", 1, true), "status names the dungeon")
+    end},
 }

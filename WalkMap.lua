@@ -4144,7 +4144,8 @@ local function update()
         mapID = currentMap
     end
     -- Inside a classic dungeon (no map in the game): its own floors.
-    local dungeonMap = not WalkMapMaps.Selected() and WalkMapDungeons and WalkMapDungeons.Current()
+    local dungeonMap = not WalkMapMaps.Selected() and WalkMapDungeons
+        and (WalkMapDungeons.Current() or WalkMapDungeons.Fallback())
     if dungeonMap then mapID = dungeonMap end
     mapID = WalkMapMaps.Selected() or mapID
 

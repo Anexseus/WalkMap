@@ -62,6 +62,28 @@ end
 
 function dungeons.IsDungeonMap(mapID) return split(mapID) ~= nil end
 
+-- The last zone you stood in outside (map art and a position), for
+-- dungeons WalkMap has no map of.
+local lastOutside
+local function noteOutside()
+    if call(IsInInstance) == true or not (C_Map and C_Map.GetBestMapForUnit) then return end
+    if gameMapWorks() then lastOutside = call(C_Map.GetBestMapForUnit, "player") end
+end
+
+-- Inside a dungeon with no map at all - not one of ours, and the game's
+-- has no position (Forever's newer dungeons such as Excavation Site:
+-- Wetlands): the zone you came from, so the map is not left black.
+function dungeons.Fallback()
+    noteOutside()
+    if call(IsInInstance) ~= true or instanceHere() or gameMapWorks() then return nil end
+    if lastOutside then return lastOutside end
+    -- Logged in inside: the zone the game files the dungeon under.
+    local best = C_Map and call(C_Map.GetBestMapForUnit, "player")
+    local info = best and call(C_Map.GetMapInfo, best)
+    local parent = info and info.parentMapID
+    if type(parent) == "number" and parent > 0 and call(C_Map.GetMapArtLayers, parent) then return parent end
+end
+
 -- Our map ID for the dungeon you are in (its chosen floor), or nil.
 function dungeons.Current()
     local instanceID = instanceHere()
