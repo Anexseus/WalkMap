@@ -34,6 +34,9 @@ Quest & Maps.
 THE MAP
 -------
 - Click the map title to browse zones, continents, the world and dungeons.
+- Inside a classic dungeon (Deadmines, Scholomance ...) the map shows the
+  dungeon itself; pick the floor in the zone menu (click the map title).
+  The game gives no position inside, so there is no arrow there.
   Your current zone is green. Follow (or Current zone in that menu) brings
   you back.
 - On the world map, click a continent to open it; on a continent, click a

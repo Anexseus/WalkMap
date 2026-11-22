@@ -860,6 +860,7 @@ function extras.DebugReport()
     if WalkMapMaps then
         lines[#lines + 1] = "Browsed map: " .. tostring(WalkMapMaps.Selected() or "automatic current zone")
         lines[#lines + 1] = "Player zone: " .. tostring(WalkMapMaps.CurrentZone() or "unknown")
+        lines[#lines + 1] = "Dungeon map: " .. (WalkMapDungeons and WalkMapDungeons.Status() or "unavailable")
         do
             local inside = IsInInstance and select(2, pcall(IsInInstance))
             local name, kind, _, _, _, _, _, instanceID
@@ -2219,7 +2220,25 @@ openMenu = function(button, options, field)
         local value = option[1]
         local questGroup = field == "quests" and
             questGroups[value:match("^__group:(.+)$")]
-        if field == "maps" then
+        local floorIndex = field == "maps" and tonumber(tostring(value):match("^__floor:(%d+)$"))
+        if floorIndex then
+            -- A floor of the dungeon you are in.
+            local chosen = false
+            for _, floor in ipairs(WalkMapDungeons.Floors()) do
+                if floor[1] == floorIndex then chosen = floor[3] end
+            end
+            row.label:SetText(option[2])
+            showCheckbox(row, true, chosen)
+            setRowEnter(row, function(self)
+                self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
+                setControllerPanelVisible(submenu, false)
+            end)
+            row:SetScript("OnClick", function()
+                extras.CloseMenus()
+                WalkMapMaps.Choose(nil)
+                WalkMapDungeons.SetFloor(floorIndex)
+            end)
+        elseif field == "maps" then
             local group = mapGroups[value]
             row.walkmapOpensSubmenu = group ~= nil
             local info = group and mapGroupInfo[value]
@@ -2439,6 +2458,10 @@ end
 function extras.OpenMapMenu(button)
     if not menu or not WalkMapMaps then return end
     local options = {{"__current", "|cff80ff80Current zone: " .. WalkMapMaps.Name(WalkMapMaps.CurrentZone()) .. "|r"}}
+    -- In a classic dungeon: its floors first (WalkMap_Dungeons.lua).
+    for _, floor in ipairs(WalkMapDungeons and WalkMapDungeons.Floors() or {}) do
+        options[#options + 1] = {"__floor:" .. floor[1], floor[2]}
+    end
     mapGroups, mapGroupInfo = {}, {}
     local here = WalkMapMaps.CurrentZone()
     for i, group in ipairs(WalkMapMaps.MenuGroups()) do

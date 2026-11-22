@@ -3224,8 +3224,10 @@ local function drawMap(
         nil
 
 
-    local layers =
-        C_Map.GetMapArtLayers(
+    -- Classic dungeons: WalkMap's own floors (WalkMap_Dungeons.lua).
+    local shipped = WalkMapDungeons and WalkMapDungeons.Art(mapID)
+    local layers = shipped and {shipped.layer}
+        or C_Map.GetMapArtLayers(
             mapID
         )
 
@@ -3246,8 +3248,8 @@ local function drawMap(
     end
 
 
-    local files =
-        C_Map.GetMapArtLayerTextures(
+    local files = shipped and shipped.files
+        or C_Map.GetMapArtLayerTextures(
             mapID,
             1
         )
@@ -3358,7 +3360,8 @@ local function drawMap(
         )
 
 
-    local zoneName = info and info.name or tostring(mapID)
+    local zoneName = (WalkMapDungeons and WalkMapDungeons.Title(mapID))
+        or info and info.name or tostring(mapID)
     title:SetText(
         "WalkMap - " .. zoneName
         .. (WalkMapExtras.ZoneLevelText and WalkMapExtras.ZoneLevelText(zoneName) or "")
@@ -4140,6 +4143,9 @@ local function update()
             .. " while game zone " .. tostring(mapID or "none") .. " lacks local art")
         mapID = currentMap
     end
+    -- Inside a classic dungeon (no map in the game): its own floors.
+    local dungeonMap = not WalkMapMaps.Selected() and WalkMapDungeons and WalkMapDungeons.Current()
+    if dungeonMap then mapID = dungeonMap end
     mapID = WalkMapMaps.Selected() or mapID
 
 

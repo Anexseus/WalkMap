@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+New
+- Dungeon maps: inside the classic dungeons (Ragefire Chasm to
+  Stratholme, 19 in all) the map shows the dungeon instead of the zone
+  outside. Floors are picked in the zone menu. The game has no maps of
+  these dungeons, so WalkMap ships Blizzard's own (see
+  THIRD_PARTY_NOTICES). There is no arrow inside: the game gives no
+  position there.
+
 Changed
 - Inside a dungeon or raid the map's status line says where you are
   ("In The Deadmines - no position inside") instead of "Position

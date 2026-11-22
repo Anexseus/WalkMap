@@ -60,4 +60,14 @@ own live blacklist instead of the bundled copy.
 World of Warcraft client artwork
 --------------------------------
 The addon references textures and frame templates supplied by the game.
-No copies of those client assets are distributed.
+
+Classic dungeon maps (Maps/Dungeons/*.blp)
+------------------------------------------
+The dungeon map tiles in Maps/Dungeons are Blizzard Entertainment's World
+of Warcraft artwork, (c) Blizzard Entertainment. They are not covered by
+WalkMap's GPL license. They are shipped because the WoW Forever client has
+no maps of the classic dungeons. The tiles and the list of which tile goes
+where on each floor (WalkMap_DungeonMapData.lua) were taken from the
+package of Forever Dungeon Scout by Kushen, which ships the same Blizzard
+artwork. Its separately licensed painted maps (by Santiago Reyes) are NOT
+included.
