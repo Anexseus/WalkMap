@@ -4080,9 +4080,15 @@ local function updatePlayerPosition(mapID)
 
         playerDot:Hide()
 
-
+        -- Inside a dungeon or raid the game gives addons no position: say
+        -- where you are instead of a bare "Position unavailable".
+        local inside, instanceName = false, nil
+        if IsInInstance then inside = IsInInstance() == true end
+        if inside and GetInstanceInfo then instanceName = GetInstanceInfo() end
         status:SetText(
-            "Position unavailable."
+            (inside and type(instanceName) == "string" and instanceName ~= "")
+                and ("In " .. instanceName .. " - no position inside")
+                or "Position unavailable."
         )
 
         nearestBadge:Hide()

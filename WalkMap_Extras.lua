@@ -860,6 +860,16 @@ function extras.DebugReport()
     if WalkMapMaps then
         lines[#lines + 1] = "Browsed map: " .. tostring(WalkMapMaps.Selected() or "automatic current zone")
         lines[#lines + 1] = "Player zone: " .. tostring(WalkMapMaps.CurrentZone() or "unknown")
+        do
+            local inside = IsInInstance and select(2, pcall(IsInInstance))
+            local name, kind, _, _, _, _, _, instanceID
+            if GetInstanceInfo then name, kind, _, _, _, _, _, instanceID = GetInstanceInfo() end
+            local best = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
+            local bestInfo = best and C_Map.GetMapInfo and C_Map.GetMapInfo(best)
+            lines[#lines + 1] = ("Instance: %s (%s, %s, id %s); game's best map %s (%s, type %s)"):format(
+                inside == true and "yes" or "no", tostring(name), tostring(kind), tostring(instanceID),
+                tostring(best), tostring(bestInfo and bestInfo.name), tostring(bestInfo and bestInfo.mapType))
+        end
     end
     local function add(name, value)
         lines[#lines + 1] = name .. ": " .. tostring(value)

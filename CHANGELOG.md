@@ -1,5 +1,13 @@
 # WalkMap changelog
 
+## Unreleased
+
+Changed
+- Inside a dungeon or raid the map's status line says where you are
+  ("In The Deadmines - no position inside") instead of "Position
+  unavailable.", and the Debug report shows the instance and the game's
+  map for it.
+
 ## 1.14.13
 
 Hotfix for 1.14.12.
