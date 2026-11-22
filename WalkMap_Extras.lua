@@ -2885,6 +2885,7 @@ local settingsPages = {
         {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
         {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},
         {"__info", nil, "Xbox Series controller", "On Windows: in Steam's controller settings, install Xbox Extended Feature Support and restart the PC. Then the Share button can be mapped in Steam Input, for example to M. If it still does not show, update the controller in Microsoft's Xbox Accessories app."},
+        {"__info", nil, "Other controllers", "Other controllers are most likely fine too; we have only tested with the ones above."},
     }},
     {"Bags & vendors", "Bag tools by Underbuks, integrated from SortPants.", {
         {"bagSortEnabled", nil, "Bag sorting", "Allow manual sorting through the button, command or shortcut."},

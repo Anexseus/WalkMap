@@ -5,7 +5,8 @@
 New
 - Settings > Controllers: recommended controllers and how to set them up
   in Steam Input (Steam Controller back buttons and touchpad radial menu,
-  8BitDo Pro 3 in D-input mode, the Xbox Series Share button).
+  8BitDo Pro 3 in D-input mode, the Xbox Series Share button). Other
+  controllers are most likely fine too; these are the ones we tested.
 
 Fixed
 - The wheel's Quest & Maps in combat (when it opens WalkMap): the game
