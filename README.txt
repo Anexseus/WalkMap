@@ -60,9 +60,9 @@ THE MAP
   map). With Share where you are (off by default) your guild and friends
   who use WalkMap or OpenMap see a dot where you stand, and you see theirs;
   never shared from dungeons, raids or battlegrounds.
-  Their dot says whether they are on the same layer as you, when both
-  layers are known (WalkMap reads yours from creatures you target or mouse
-  over).
+  Before game build 71037 their dot also said whether they were on the
+  same layer as you; the game no longer gives addons that (20 Nov 2026),
+  so WalkMap shows no layer rather than a wrong one.
 - Places > Other > Rare mobs shows rare mobs and rare elites with their
   level (from QuestieDB).
 - Click a quest's marker (its ? or one of its objective icons) to focus

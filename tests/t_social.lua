@@ -267,6 +267,28 @@ return {
         env.WalkMapWaypoint.PadAt(0.3, 0.3)
         Mock.ok(env.WalkMapExtras.Waypoint(), "off a marker: waypoint as before")
     end},
+    {"Game build 71037 and later: no layer read, sent or shown (GUIDs no longer tell)", function(Mock)
+        local env = start(Mock, {shareLocation = true}, function(env)
+            guild(env, {})
+            env.GetBuildInfo = function() return "1.60.1", "71037", "Nov 20 2026", 16001 end
+        end)
+        openMap(env)
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "L1\t1436\t0.3000\t0.4000\tPRIEST\t18", "GUILD", "Anna-TestRealm")
+        env.fire("CHAT_MSG_ADDON", "OpenMapLoc", "W1\t1436\t5250", "GUILD", "Anna-TestRealm")
+        env.UnitGUID = function() return "Creature-0-5250-0-1234-299-0000ABCDEF" end
+        env.fire("PLAYER_TARGET_CHANGED")
+        Mock.eq(env.WalkMapFriends.MyLayer(), nil, "my layer not read")
+        env.WalkMapFriends.Tick()
+        env.tick(3, 15)
+        for _, m in ipairs(env.__sent) do Mock.ok(not tostring(m.text):find("^W1"), "no layer sent") end
+        env.WalkMapFriends.Refresh(1436)
+        for _, p in ipairs(env.WalkMapFriends.Pins()) do
+            for _, line in ipairs(p.lines or {}) do
+                Mock.ok(not tostring(line.text):find("layer"), "no layer line: " .. tostring(line.text))
+            end
+        end
+        Mock.ok(env.WalkMapFriends.Status():find("not readable", 1, true), "debug report says why")
+    end},
     {"Layers: same or other layer only when both sides know it", function(Mock)
         local env = start(Mock, {shareLocation = true}, function(env) guild(env, {}) end)
         local function dotLines()

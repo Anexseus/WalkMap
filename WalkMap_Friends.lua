@@ -239,7 +239,23 @@ local function zoneNow()
     local m = call(C_Map.GetBestMapForUnit, "player")
     return type(m) == "number" and m or nil
 end
+-- From game build 71037 (Forever, 20 Nov 2026) every creature carries its
+-- own number in that GUID field, so it no longer tells layers apart
+-- (LayerSwap 1.14.41 and TitanLayer saw the same). Then WalkMap reads no
+-- layer and shows none, rather than a wrong one.
+local LAYERLESS_BUILD = 71037
+local layersReadable
+local function layersWork()
+    if layersReadable == nil then
+        local _, build = call(GetBuildInfo)
+        layersReadable = not (tonumber(build) and tonumber(build) >= LAYERLESS_BUILD)
+    end
+    return layersReadable
+end
+friendsMod.LayersWork = layersWork
+
 local function readLayer(unit)
+    if not layersWork() then return end
     if value(IsInInstance and IsInInstance()) then return end
     local guid = call(UnitGUID, unit)
     if type(guid) ~= "string" then return end
@@ -821,7 +837,8 @@ function friendsMod.Status()
     local uid = mine.map and myLayer(mine.map)
     return ("friends/guild online %d, sharing %d, my sharing %s, my layer %s"):format(online, sharingNow,
         wantShare() and (sharing and "on (sent)" or "on") or "off",
-        uid and (uid .. " in map " .. mine.map) or "unknown")
+        not layersWork() and "not readable in this game build"
+            or uid and (uid .. " in map " .. mine.map) or "unknown")
 end
 
 -- Test hooks.

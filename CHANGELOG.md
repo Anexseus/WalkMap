@@ -1,5 +1,14 @@
 # WalkMap changelog
 
+## Unreleased
+
+Changed
+- Same layer / Other layer is no longer shown. From game build 71037
+  (20 Nov 2026) every creature carries its own number where the layer
+  used to be, so addons can no longer tell layers apart (LayerSwap and
+  TitanLayer dropped it too). WalkMap now shows no layer rather than a
+  wrong one. Dots, zones, invites and group progress are not affected.
+
 ## 1.14.12
 
 Hotfix for 1.14.11.
