@@ -8,8 +8,9 @@ New
   copy of the wheel's main page - the same entries in the same places, in
   the game's own art - and its Quest & Maps opens and closes WalkMap,
   which the game's wheel cannot do in combat. Point with the right stick
-  and let go, or point and press A; B closes it. Chat is greyed out there
-  (only the game's own wheel can focus the chat). Out of combat the game's
+  and let go, or point and press A; B closes it. Chat and Game Menu are
+  greyed out there (only the game's own wheel can open those; Escape still
+  opens the game menu). Out of combat the game's
   wheel opens as always.
 - Game map in dungeons (Settings > Controller & help) is always shown
   now: Auto (with DungeonJournal or Forever Dungeon Scout), Always (for

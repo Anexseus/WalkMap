@@ -45,7 +45,11 @@ local ENTRIES = {
     -- The game's Chat entry gives the chat window controller focus; no
     -- macro can do that, so it is greyed out here.
     {key = "chat", label = "RADIAL_LABEL_CHAT", fallback = "Chat"},
-    {key = "gamemenu", label = "RADIAL_LABEL_GAME_MENU", fallback = "Game Menu", button = "MainMenuMicroButton"},
+    -- The game's menu button only opens the menu when the mouse is over it
+    -- (MainMenuMicroButtonMixin:OnClick checks IsMouseOver), so a macro's
+    -- /click does nothing; opening it from addon code in combat would taint
+    -- the game's controller handling. Greyed out here too (Escape works).
+    {key = "gamemenu", label = "RADIAL_LABEL_GAME_MENU", fallback = "Game Menu"},
     {key = "spellbook", label = "RADIAL_LABEL_SPELLBOOK", fallback = "Spellbook", button = "SpellbookMicroButton"},
 }
 
@@ -299,8 +303,14 @@ local PICK_SNIPPET = [[
     local x, y = 0, 0
     if stick and stick.x and stick.y then x, y = stick.x, stick.y end
     local lengthSq = x * x + y * y
+    -- The held key's direction only stands in while nothing has been aimed
+    -- at yet, and only as a key goes down: as the stick is let go it reads
+    -- near the middle and the last key left over is a straight direction,
+    -- which turned a diagonal pick (Talents) into its neighbour.
     if lengthSq < 0.15 then
         x, y = 0, 0
+    end
+    if lengthSq < 0.15 and down and (owner:GetAttribute("sel") or 0) < 1 then
         if owner:GetAttribute("held-UP") == 1 then y = 1 end
         if owner:GetAttribute("held-DOWN") == 1 then y = -1 end
         if owner:GetAttribute("held-RIGHT") == 1 then x = 1 end
