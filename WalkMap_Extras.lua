@@ -1996,10 +1996,9 @@ local zoneLevels = {
     ["Winterspring"] = {55, 60}, ["Silithus"] = {55, 60},
     -- New in Forever (their map IDs are not in WalkMap's ID table, so the
     -- map labels look them up here by name too). Ranges as Forever's own
-    -- zone overview gives them. Shen'dralas is left out until its range is
-    -- confirmed (sources say 40-45 or 45-53).
+    -- zone overview gives them; Shen'dralas 35-45 (most quests 38-45).
     ["Zephras Isle"] = {1, 12}, ["Riverglades"] = {35, 45}, ["The Riverglades"] = {35, 45},
-    ["Mount Hyjal"] = {55, 60},
+    ["Shen'dralas"] = {35, 45}, ["Shen'Dralas"] = {35, 45}, ["Mount Hyjal"] = {55, 60},
 }
 
 -- Level range by English zone name, or nil.
