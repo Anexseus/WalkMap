@@ -288,6 +288,9 @@ local ZONE_LEVELS = {
     [1441] = {25, 35}, [1442] = {15, 27}, [1443] = {30, 40}, [1444] = {40, 50},
     [1445] = {35, 45}, [1446] = {40, 50}, [1447] = {45, 55}, [1448] = {48, 55},
     [1449] = {48, 55}, [1451] = {55, 60}, [1452] = {53, 60},
+    -- New in Forever (map IDs as QuestieDB's Forever zone table lists them):
+    -- Mount Hyjal, Zephras Isle, Riverglades, Shen'dralas.
+    [2482] = {55, 60}, [2521] = {1, 12}, [2548] = {35, 45}, [2652] = {35, 45},
 }
 
 -- Lowest and highest level a zone is meant for, or nil when unknown. The

@@ -135,7 +135,7 @@ end
 function rules.PolicyStatus()
     if loadedPolicy() then return "QuestieDB + loaded Questie blacklist" end
     if type(WalkMapQuestBlacklist) == "table" then
-        return "QuestieDB + WalkMap's static copy of Questie's blacklist (Questie 12.9.0)"
+        return "QuestieDB + WalkMap's static copy of Questie's blacklist (Questie 12.12.0)"
     end
     return "QuestieDB only; Questie's separate blacklist is unavailable"
 end
