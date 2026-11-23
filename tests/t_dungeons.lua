@@ -125,4 +125,41 @@ return {
         local file = io.open("Maps/Dungeons/Painted/ExcavationSiteWetlands.blp", "rb")
         Mock.ok(file, "shipped") if file then file:close() end
     end},
+    {"Dungeon maps can be chosen from the zone menu, floors and all", function(Mock)
+        local env = Mock.new({playerMap = 1436})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.fire("PLAYER_LOGIN")
+        env.WalkMap_Toggle()
+        env.tick(0.2, 10)
+        local d = env.WalkMapDungeons
+        env.WalkMapExtras.OpenMapMenu(env.WalkMapCore.mapPickerButton)
+        local section
+        local function search(frame, depth)
+            if depth > 6 or section then return end
+            for _, row in ipairs(frame.rows or {}) do
+                local text = row:IsShown() and row.label and row.label:GetText()
+                if text and text:find("Dungeon maps", 1, true) then section = row end
+            end
+            for _, child in ipairs(frame.__children or {}) do search(child, depth + 1) end
+        end
+        search(env.UIParent, 0)
+        Mock.ok(section, "a Dungeon maps section in the zone menu")
+        env.WalkMapExtras.CloseMenus()
+        local list = d.List()
+        Mock.ok(#list >= 20, "classic and painted dungeons listed: " .. #list)
+        local deadmines
+        for _, entry in ipairs(list) do if entry[2] == "The Deadmines" then deadmines = entry end end
+        Mock.ok(deadmines and deadmines[1] == 2003601 and deadmines[3] == 2, "Deadmines, floor 1 of 2")
+        Mock.eq(env.WalkMapMaps.Choose(deadmines[1]), true, "chosen outside the dungeon")
+        env.tick(0.5, 2)
+        Mock.eq(env.WalkMapCore.CurrentMap(), 2003601, "the map shows it")
+        Mock.eq(#d.Floors(), 2, "its floors are offered")
+        d.ChooseFloor(2)
+        env.tick(0.5, 2)
+        Mock.eq(env.WalkMapCore.CurrentMap(), 2003602, "floor 2")
+        Mock.ok(tostring(env.WalkMapMaps.Name(2003602)):find("Deadmines", 1, true), "named by the dungeon")
+        env.WalkMapMaps.Choose(nil)
+        env.tick(0.5, 2)
+        Mock.eq(env.WalkMapCore.CurrentMap(), 1436, "back to Westfall")
+    end},
 }

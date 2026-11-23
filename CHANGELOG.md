@@ -1,5 +1,19 @@
 # WalkMap changelog
 
+## 1.14.19
+
+New
+- Dungeon maps in the zone menu, a section of its own: every dungeon map
+  WalkMap has (the classic dungeons and the painted maps of Forever's new
+  dungeons) can be opened from anywhere. A dungeon with more floors lists
+  them at the top of the menu.
+- Level ranges for Forever's new zones: Zephras Isle 1-12, Riverglades
+  35-45, Shen'dralas 35-45, Mount Hyjal 55-60.
+
+Changed
+- WalkMap's copy of Questie's quest blacklist (used without Questie) is
+  updated to Questie 12.12.0.
+
 ## 1.14.18
 
 New

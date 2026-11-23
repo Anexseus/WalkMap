@@ -44,7 +44,9 @@ end
 function maps.Selected() return type(settings.browsedMapID) == "number" and settings.browsedMapID or nil end
 
 function maps.Choose(id)
-    if id and not hasArt(id) then return false end
+    -- WalkMap's own dungeon maps (WalkMap_Dungeons.lua) have no game art.
+    local dungeon = id and WalkMapDungeons and WalkMapDungeons.IsDungeonMap and WalkMapDungeons.IsDungeonMap(id)
+    if id and not dungeon and not hasArt(id) then return false end
     settings.browsedMapID = id
     if changed then changed() end
     return true
@@ -341,6 +343,9 @@ function maps.NameWithLevels(id, name)
 end
 
 function maps.Name(id)
+    local dungeon = WalkMapDungeons and WalkMapDungeons.IsDungeonMap and WalkMapDungeons.IsDungeonMap(id)
+        and WalkMapDungeons.Title(id)
+    if dungeon then return dungeon end
     local entry = info(id)
     return entry and entry.name or tostring(id or "Current zone")
 end

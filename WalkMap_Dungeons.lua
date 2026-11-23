@@ -129,15 +129,50 @@ function dungeons.Title(mapID)
     return name .. " - " .. entry.floors[floor][1]
 end
 
--- For the zone menu: {{floor, label, chosen}, ...} while in a dungeon with
--- more than one floor.
+-- Every dungeon map WalkMap has, for the zone menu's own "Dungeon maps"
+-- section: {{mapID of floor 1, name, floors, painted}, ...} by name.
+function dungeons.List()
+    local list = {}
+    for instanceID, entry in pairs(WalkMapDungeonMapData or {}) do
+        if entry.floors and entry.floors[1] then
+            list[#list + 1] = {BASE + instanceID * 100 + 1, entry.names[1], #entry.floors, entry.painted == true}
+        end
+    end
+    local function key(entry) return (entry[2]:gsub("^The ", "")) end
+    table.sort(list, function(a, b) return key(a) < key(b) end)
+    return list
+end
+
+-- True when two of our map IDs are floors of the same dungeon.
+function dungeons.SameDungeon(a, b)
+    local first, second = split(a), split(b)
+    return first ~= nil and first == second
+end
+
+-- For the zone menu: {{floor, label, chosen}, ...} for the dungeon map you
+-- chose in the menu, or the dungeon you are in, when it has more than one
+-- floor.
 function dungeons.Floors()
-    local current = dungeons.Current()
+    local selected = WalkMapMaps and WalkMapMaps.Selected and WalkMapMaps.Selected()
+    local current = (selected and split(selected)) and selected or dungeons.Current()
     local instanceID, floor, entry = split(current)
     local list = {}
     if not entry or #entry.floors < 2 then return list end
     for i, f in ipairs(entry.floors) do list[#list + 1] = {i, f[1], i == floor} end
     return list, instanceID
+end
+
+-- A floor from the zone menu: of the dungeon map you chose there, else of
+-- the dungeon you are in.
+function dungeons.ChooseFloor(floor)
+    local selected = WalkMapMaps and WalkMapMaps.Selected and WalkMapMaps.Selected()
+    local instanceID, _, entry = split(selected)
+    if entry then
+        if not entry.floors[floor] then return false end
+        return WalkMapMaps.Choose(BASE + instanceID * 100 + floor)
+    end
+    if WalkMapMaps and WalkMapMaps.Choose then WalkMapMaps.Choose(nil) end
+    return dungeons.SetFloor(floor)
 end
 
 function dungeons.SetFloor(floor)

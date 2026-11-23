@@ -2215,7 +2215,11 @@ local function showSubmenu(group, parentRow)
         local decor = {}
         row.option = option
         row.label:SetText(option[2])
-        if group[1] == "maps" then
+        if group[1] == "maps" and option.dungeon then
+            local selected = WalkMapMaps.Selected()
+            showCheckbox(row, true, selected and WalkMapDungeons.SameDungeon(selected, key) or false)
+            row:SetScript("OnClick", function() extras.CloseMenus();WalkMapMaps.Choose(key) end)
+        elseif group[1] == "maps" then
             local here = key == WalkMapMaps.CurrentZone()
             row.label:SetText(here and ("|cff80ff80" .. option[2] .. "|r") or option[2])
             local levels, levelColor = zoneLevelDetail(option[2])
@@ -2308,8 +2312,7 @@ openMenu = function(button, options, field)
             end)
             row:SetScript("OnClick", function()
                 extras.CloseMenus()
-                WalkMapMaps.Choose(nil)
-                WalkMapDungeons.SetFloor(floorIndex)
+                WalkMapDungeons.ChooseFloor(floorIndex)
             end)
         elseif field == "maps" then
             local group = mapGroups[value]
@@ -2319,7 +2322,7 @@ openMenu = function(button, options, field)
                 or info and info.label or option[2])
             decor.arrow = group ~= nil
             decor.detail = info and info.detail
-            decor.separator = i == 2
+            decor.separator = i == 2 or (info and info.firstDungeons)
             showCheckbox(row, not group, not group and not WalkMapMaps.Selected())
             setRowEnter(row, function(self)
                 self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
@@ -2548,6 +2551,33 @@ function extras.OpenMapMenu(button)
         mapGroupInfo[key] = {label = group.region or group.name,
             detail = group.range or (#group.zones .. " maps"), here = contains}
         options[#options + 1] = {key, group.name}
+    end
+    -- A section of its own: every dungeon map WalkMap has (Blizzard's
+    -- classic floors and the painted maps of Forever's new dungeons), 16 to
+    -- a page. Choosing one shows its first floor; its floors are then listed
+    -- at the top of this menu.
+    local list = WalkMapDungeons and WalkMapDungeons.List and WalkMapDungeons.List() or {}
+    local pages = math.ceil(#list / 16)
+    local chosen = WalkMapMaps.Selected()
+    for page = 1, pages do
+        local zones, contains = {}, false
+        for i = (page - 1) * 16 + 1, math.min(page * 16, #list) do
+            local dungeon = list[i]
+            local label = dungeon[2] .. (dungeon[3] > 1 and (" |cff9a9a9a(" .. dungeon[3] .. " floors)|r") or "")
+            zones[#zones + 1] = {dungeon[1], label, dungeon = true}
+            if chosen and WalkMapDungeons.SameDungeon(chosen, dungeon[1]) then contains = true end
+        end
+        local key = "__dungeons:" .. page
+        mapGroups[key] = {"maps", "Dungeon maps", zones}
+        local range
+        if pages > 1 then
+            local first = tostring(zones[1][2]):gsub("^The ", ""):sub(1, 1):upper()
+            local last = tostring(zones[#zones][2]):gsub("^The ", ""):sub(1, 1):upper()
+            range = first == last and first or (first .. " - " .. last)
+        end
+        mapGroupInfo[key] = {label = "Dungeon maps", detail = range or (#zones .. " maps"),
+            here = contains, firstDungeons = page == 1}
+        options[#options + 1] = {key, "Dungeon maps"}
     end
     openMenu(button, options, "maps")
 end
