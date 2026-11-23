@@ -10,6 +10,9 @@ New
 - Level ranges for Forever's new zones: Zephras Isle 1-12, Riverglades
   35-45, Shen'dralas 35-45, Mount Hyjal 55-60.
 
+- What's new page (shown once): dungeon maps, Game map in dungeons for
+  dungeon map addons, and WalkMap's wheel in combat (from 1.14.18).
+
 Changed
 - WalkMap's copy of Questie's quest blacklist (used without Questie) is
   updated to Questie 12.12.0.

@@ -2682,10 +2682,10 @@ end
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE
-local NEWS_VERSION = "1.14.11"
--- Earlier What's new pages that already showed friends, guild and sharing:
--- players who saw one of them do not get this one.
-local NEWS_ALREADY_SEEN = {["1.14.8"] = true, ["1.14.10"] = true}
+local NEWS_VERSION = "1.14.19"
+-- Earlier What's new pages that already showed what this one shows: players
+-- who saw one of them do not get this one. (None for 1.14.19.)
+local NEWS_ALREADY_SEEN = {}
 
 -- Welcome page: opens the map (if needed) with settings on that page.
 -- Out of combat only.
@@ -2973,12 +2973,12 @@ local settingsPages = {
     -- NEWS_VERSION). Only for releases with significant changes: then
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
-    {"What's new in WalkMap 1.14.11", "Changes in this update. Done closes this page; /walkmap news shows it again.", {
-        {"friendsOnMap", nil, "See friends on the map", "Online friends by zone. The button left of the quest log button shows who is in the zone you are looking at - click it to invite them to your group; on the continent and world maps each zone gets a badge."},
-        {"guildOnMap", nil, "See guild on the map", "Online guild members by zone, the same way."},
-        {"shareLocation", nil, "Share where you are", "Off: nobody sees where you stand. On: your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs - on the map and on the minimap. Never from dungeons, raids or battlegrounds."},
-        {"groupProgress", nil, "Group progress", "In a party, the quest tracker shows under each quest you share how far the others are with it (they need WalkMap too)."},
-        {"__news", nil, "Easier to read", "Settings pages scroll with a bar in the window's look; zones stand apart from quests in the quest log; text stays inside its rows and buttons when the font is drawn larger."},
+    {"What's new in WalkMap 1.14.19", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
+        {"__news", nil, "Maps inside dungeons", "The classic dungeons have their own maps, floor by floor (Blizzard's maps), and Forever's new dungeons painted maps by Santiago Reyes. Inside a dungeon WalkMap shows its map; the zone menu picks the floor."},
+        {"__news", nil, "Any dungeon map, from anywhere", "Zones > Dungeon maps: a section of its own with every dungeon map WalkMap has, to look at before you go in."},
+        {"__dungeonMap", nil, "Game map in dungeons", "Still use your dungeon addon: inside a dungeon, the map key and the wheel can open the game's map for it. Auto: with DungeonJournal or Forever Dungeon Scout. Always: any other dungeon map addon. Off: always WalkMap."},
+        {"combatWheel", nil, "Open and close the map from the wheel in combat", "The game does not let addons use its wheel's map in a fight, so in combat the wheel button opens WalkMap's copy of the wheel instead: same entries, same places, and Quest & Maps opens and closes WalkMap. Out of combat the game's own wheel opens as always."},
+        {"__news", nil, "Level ranges for the new zones", "Zephras Isle 1-12, Riverglades 35-45, Shen'dralas 35-45 and Mount Hyjal 55-60, in the map title and on the map."},
         {"__reportBugs", nil, "Found a bug? Tell us", "Please write in the comments on WalkMap's CurseForge page. A screenshot or the Debug report (Settings > Controller & help) helps a lot."},
     }, hidden = true},
 }

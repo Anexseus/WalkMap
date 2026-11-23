@@ -139,7 +139,7 @@ return {
         env.UIErrorsFrame = env.CreateFrame("Frame", "UIErrorsFrame", env.UIParent)
         env.UIErrorsFrame.Clear = function() cleared = cleared + 1 end
         env.print = function(text) printed[#printed + 1] = text end
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
         env.WalkMapCombat.Free = function() return false end
         env.fire("PLAYER_LOGIN")
         env.tick(0.5, 3)

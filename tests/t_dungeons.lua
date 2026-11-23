@@ -4,7 +4,7 @@ local function inDeadmines(Mock)
     local env = Mock.new({playerMap = 1436})
     env.IsInInstance = function() return true, "party" end
     env.GetInstanceInfo = function() return "The Deadmines", "party", 1, "Normal", 5, 0, false, 36 end
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     -- In the instance the game gives no position (and Westfall has none either).
@@ -63,7 +63,7 @@ return {
     end},
     {"Every tile the data names is shipped, and outside dungeons nothing changes", function(Mock)
         local env = Mock.new({playerMap = 1436})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
         local missing = {}
         for id, entry in pairs(env.WalkMapDungeonMapData) do
             for _, floor in ipairs(entry.floors) do
@@ -81,7 +81,7 @@ return {
     end},
     {"A dungeon with no map (Alcaz Prison): the zone outside, not a black map", function(Mock)
         local env = Mock.new({playerMap = 1436})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
         env.fire("PLAYER_LOGIN")
         env.fire("PLAYER_ENTERING_WORLD")
         env.WalkMap_Toggle()
@@ -107,7 +107,7 @@ return {
         local env = Mock.new({playerMap = 1436})
         env.IsInInstance = function() return true, "party" end
         env.GetInstanceInfo = function() return "Excavation Site: Wetlands", "party", 1, "Normal", 5, 0, false, 2984 end
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
         env.fire("PLAYER_LOGIN")
         env.fire("PLAYER_ENTERING_WORLD")
         env.C_Map.GetPlayerMapPosition = function() return nil end
@@ -127,7 +127,7 @@ return {
     end},
     {"Dungeon maps can be chosen from the zone menu, floors and all", function(Mock)
         local env = Mock.new({playerMap = 1436})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
         env.fire("PLAYER_LOGIN")
         env.WalkMap_Toggle()
         env.tick(0.2, 10)

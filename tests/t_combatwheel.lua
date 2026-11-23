@@ -3,7 +3,7 @@
 -- the settings and the hand-off.
 local function boot(Mock)
     local env = Mock.new({playerMap = 1436})
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {welcomeSeen = true})
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
     env.fire("PLAYER_LOGIN")
     env.tick(0.5, 2)
     return env
