@@ -158,6 +158,10 @@ if settings.wheelOpensQuestLog == nil then settings.wheelOpensQuestLog = true en
 -- Inside a dungeon, leave the map key and the wheel to the game's map when a
 -- dungeon map addon is installed (see extras.HandOffDungeonMap).
 if settings.dungeonMapHandoff == nil then settings.dungeonMapHandoff = true end
+-- "Game map in dungeons: Always": also without a known dungeon map addon.
+settings.dungeonMapAlways = settings.dungeonMapAlways == true
+-- WalkMap's wheel in combat (WalkMap_CombatWheel.lua): on unless turned off.
+if settings.combatWheel == nil then settings.combatWheel = true end
 -- 1.14.17 betas only: "Wheel closes WalkMap in combat" (removed; the game
 -- runs no addon snippet on its quest log button in combat).
 settings.wheelClosesInCombat = nil
@@ -524,8 +528,17 @@ function extras.HandOffDungeonMap()
     if settings.dungeonMapHandoff == false then return false end
     local ok, inside = pcall(IsInInstance)
     if not (ok and inside == true) then return false end
-    return extras.DungeonMapAddon() ~= nil
+    return settings.dungeonMapAlways == true or extras.DungeonMapAddon() ~= nil
 end
+
+-- "Game map in dungeons": "auto" (with DungeonJournal or Forever Dungeon
+-- Scout), "always" (any other dungeon map addon) or "off".
+function extras.DungeonMapMode()
+    if settings.dungeonMapHandoff == false then return "off" end
+    return settings.dungeonMapAlways == true and "always" or "auto"
+end
+
+function extras.CombatWheel() return settings.combatWheel ~= false end
 
 function extras.ZoneTracker()
     return settings.zoneTracker ~= false
@@ -971,8 +984,9 @@ function extras.DebugReport()
         math.floor(extras.FadeAlpha() * 100 + 0.5), settings.fadeKeepArrow ~= false and "kept" or "fades"))
     add("Wheel opens quest log", on(settings.wheelOpensQuestLog ~= false))
     add("Wheel in combat", WalkMapWheelCombat and WalkMapWheelCombat.Status() or "unavailable")
+    add("WalkMap's combat wheel", WalkMapCombatWheel and WalkMapCombatWheel.Status() or "unavailable")
     add("Dungeon map addon", tostring(extras.DungeonMapAddon() or "none") .. ", hand-off "
-        .. on(settings.dungeonMapHandoff ~= false) .. (extras.HandOffDungeonMap() and " (active)" or ""))
+        .. extras.DungeonMapMode() .. (extras.HandOffDungeonMap() and " (active)" or ""))
     add("Game quest log guard", WalkMapGameMapGuard and WalkMapGameMapGuard.Status() or "unavailable")
     add("Friends and guild", WalkMapFriends and WalkMapFriends.Status() or "unavailable")
     add("Group progress", WalkMapGroupProgress and WalkMapGroupProgress.Status() or "unavailable")
@@ -1637,6 +1651,9 @@ local function setOption(field, value)
     if field == "showQuestXP" then
         if WalkMapTracker and WalkMapTracker.Refresh then WalkMapTracker.Refresh() end
         if WalkMapQuestLog and WalkMapQuestLog.Refresh then WalkMapQuestLog.Refresh() end
+    end
+    if field == "combatWheel" and WalkMapCombatWheel and WalkMapCombatWheel.Refresh then
+        WalkMapCombatWheel.Refresh()
     end
     if field == "closeInCombat" and WalkMapCombat and WalkMapCombat.SettingChanged then
         WalkMapCombat.SettingChanged()
@@ -2873,8 +2890,8 @@ local settingsPages = {
             when = function() return settings.controllerMode == true end},
         {"nativeController", nil, "Native controller navigation", "Experimental: use the game's focus cursor and window switching. Disable for custom navigation."},
         {"__mapKeys", nil, "Map key and wheel open", "What the map and quest log keys and the gamepad wheel's Quest & Maps open: the game's map, WalkMap, or WalkMap with its quest log."},
-        {"dungeonMapHandoff", nil, "Dungeon map from other addons", "Inside a dungeon, the map key and the wheel open the game's map, so you see the dungeon map of DungeonJournal or Forever Dungeon Scout (bosses and all). Your WalkMap key still opens WalkMap. Shown when one of them is installed.",
-            when = function() return extras.DungeonMapAddon() ~= nil end},
+        {"__dungeonMap", nil, "Game map in dungeons", "Inside a dungeon, the map key and the wheel open the game's map, for a dungeon map addon. Auto: with DungeonJournal or Forever Dungeon Scout. Always: for any other dungeon map addon. Off: always WalkMap. Your WalkMap key still opens WalkMap."},
+        {"combatWheel", nil, "WalkMap's wheel in combat", "In a fight, the button for the game's wheel opens WalkMap's copy of its main page: the same entries in the same places, and Quest & Maps opens and closes WalkMap. Point with the right stick and let go, or press A; B closes it. Out of combat the game's own wheel opens as always."},
         {"controllerHints", nil, "Button hints", "A line at the top of the map says what A, B, X and Y do right now. Only while the controller has focus."},
         {"__intro", nil, "Welcome setup", "Show the first-time page with the most important settings again."},
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},
@@ -2929,7 +2946,7 @@ WELCOME_PAGE = NEWS_PAGE - 1
 local COMBAT_WAIT = {
     __miniType = true, miniMap = true, nativeIcons = true, __playStyle = true,
     controllerMode = true, nativeController = true, selectKeepsReleased = true, __trySelect = true,
-    __mapKeys = true, useGameMapKeys = true, hideGameTracker = true, __trackerScope = true,
+    __mapKeys = true, useGameMapKeys = true, combatWheel = true, __dungeonMap = true, hideGameTracker = true, __trackerScope = true,
     __applyLook = true, __accountLoad = true, __sortBags = true, __bagBinding = true,
     __recommended = true, __intro = true,
 }
@@ -3020,6 +3037,10 @@ refreshSettingsRows = function()
         elseif field == "__mapKeys" then
             display = display .. ": " .. (not settings.useGameMapKeys and "Game map"
                 or settings.wheelOpensQuestLog ~= false and "WalkMap + quest log" or "WalkMap")
+        elseif field == "__dungeonMap" then
+            local mode = extras.DungeonMapMode()
+            display = display .. ": " .. (mode == "off" and "Off" or mode == "always" and "Always"
+                or "Auto" .. (extras.DungeonMapAddon() and " (" .. extras.DungeonMapAddon() .. ")" or ""))
         elseif field == "__autoSell" then
             display = display .. ": " .. (not settings.autoSellJunk and "Off"
                 or settings.vendorMessages ~= false and "On" or "On, quietly")
@@ -3196,6 +3217,21 @@ refreshSettingsRows = function()
                 else
                     setOption("useGameMapKeys", false)
                 end
+                refreshSettingsRows()
+            elseif field == "__dungeonMap" then
+                -- Auto -> Always -> Off -> Auto
+                local mode = extras.DungeonMapMode()
+                if mode == "auto" then
+                    settings.dungeonMapAlways = true
+                    setOption("dungeonMapHandoff", true)
+                elseif mode == "always" then
+                    settings.dungeonMapAlways = false
+                    setOption("dungeonMapHandoff", false)
+                else
+                    settings.dungeonMapAlways = false
+                    setOption("dungeonMapHandoff", true)
+                end
+                if WalkMapCombatWheel and WalkMapCombatWheel.Refresh then WalkMapCombatWheel.Refresh() end
                 refreshSettingsRows()
             elseif field == "__autoSell" then
                 -- Off -> On -> On, quietly -> Off

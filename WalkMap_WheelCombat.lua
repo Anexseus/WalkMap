@@ -26,6 +26,8 @@ local hints, lastHint = 0, -10
 local function button() return _G.QuestLogMicroButton end
 local function inCombat() return InCombatLockdown and InCombatLockdown() == true end
 local function wanted()
+    -- WalkMap's own wheel takes over in combat: nothing to grey out.
+    if WalkMapCombatWheel and WalkMapCombatWheel.Active and WalkMapCombatWheel.Active() then return false end
     return WalkMapExtras and WalkMapExtras.UseGameMapKeys and WalkMapExtras.UseGameMapKeys()
         and not (WalkMapCombat and WalkMapCombat.Free and WalkMapCombat.Free())
         and not (WalkMapExtras.HandOffDungeonMap and WalkMapExtras.HandOffDungeonMap())

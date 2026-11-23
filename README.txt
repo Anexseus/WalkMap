@@ -1,4 +1,4 @@
-WalkMap 1.14.17 - a controller-friendly map for WoW Forever
+WalkMap 1.14.18 - a controller-friendly map for WoW Forever
 =======================================================
 By Anexseus and Underbuks. Free software under the GNU GPL v3 or later.
 
@@ -28,7 +28,9 @@ INSTALLING
 Open and close the map with /walkmap, a key you bind under
 Key Bindings > WalkMap > Toggle WalkMap, or - with "Use WalkMap instead of
 game map" on - the game's map key, quest log key and the gamepad wheel's
-Quest & Maps.
+Quest & Maps. In combat that wheel button opens WalkMap's own copy of the
+wheel's main page, whose Quest & Maps opens and closes WalkMap (Settings,
+"WalkMap's wheel in combat").
 
 
 THE MAP
@@ -43,7 +45,8 @@ THE MAP
   https://www.patreon.com/c/SantiagoReyesMaps - https://ko-fi.com/sr433_20
 - With DungeonJournal or Forever Dungeon Scout installed, the map key and
   the wheel open the game's map inside dungeons, so you see their dungeon
-  map (Settings, "Dungeon map from other addons").
+  map (Settings, "Game map in dungeons": Auto, Always for any other
+  dungeon map addon, or Off).
   Your current zone is green. Follow (or Current zone in that menu) brings
   you back.
 - On the world map, click a continent to open it; on a continent, click a

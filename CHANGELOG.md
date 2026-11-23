@@ -1,5 +1,20 @@
 # WalkMap changelog
 
+## 1.14.18
+
+New
+- WalkMap's wheel in combat (Settings > Controller & help, on by
+  default): in a fight, the button for the game's wheel opens WalkMap's
+  copy of the wheel's main page - the same entries in the same places, in
+  the game's own art - and its Quest & Maps opens and closes WalkMap,
+  which the game's wheel cannot do in combat. Point with the right stick
+  and let go, or point and press A; B closes it. Chat is greyed out there
+  (only the game's own wheel can focus the chat). Out of combat the game's
+  wheel opens as always.
+- Game map in dungeons (Settings > Controller & help) is always shown
+  now: Auto (with DungeonJournal or Forever Dungeon Scout), Always (for
+  any other dungeon map addon) or Off. Also used by the combat wheel.
+
 ## 1.14.17
 
 New
