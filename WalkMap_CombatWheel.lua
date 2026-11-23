@@ -52,6 +52,7 @@ local ENTRIES = {
 local header, wheel, art, toggle, pick, close
 local ready, lastError, keys, guessed, stickIndex = false, nil, {}, false, 2
 local opened = 0
+local AXIS_CVAR, savedAxis = "GamePadStickAxisButtons", nil
 
 local function locked() return InCombatLockdown and InCombatLockdown() == true end
 local function enabled()
@@ -210,8 +211,10 @@ local function buildArt()
         if ok and C_Texture and C_Texture.GetAtlasInfo then
             local okInfo, info = pcall(C_Texture.GetAtlasInfo, atlas)
             if okInfo and info and info.width and info.width > 0 and info.height > 0 then
-                icon:SetScale(math.min(45 / info.width, 45 / info.height))
-                icon:SetSize(info.width, info.height)
+                -- (Sized, not scaled: a scaled texture also scales its
+                -- offset, and beta2 drew every icon in the middle.)
+                local scale = math.min(45 / info.width, 45 / info.height)
+                icon:SetSize(info.width * scale, info.height * scale)
             else
                 icon:SetSize(45, 45)
             end
@@ -219,7 +222,29 @@ local function buildArt()
             icon:SetSize(45, 45)
         end
     end
+    -- While the wheel is up it takes both sticks, so the camera and your
+    -- character stand still (the game hands stick input to a shown frame
+    -- that asks for it). And the game only sends the stick's directions as
+    -- keys - what the secure side listens to - with GamePadStickAxisButtons
+    -- on: switched on while the wheel is up, put back when it closes.
+    -- (Both found by Controller Forever's wheels; beta2 had neither: the
+    -- camera turned and letting go chose nothing.)
+    if art.EnableGamePadStick then
+        pcall(art.EnableGamePadStick, art, true)
+        art:SetScript("OnGamePadStick", function() end)
+    end
+    art:SetScript("OnHide", function()
+        if savedAxis ~= nil and C_CVar and C_CVar.SetCVar then pcall(C_CVar.SetCVar, AXIS_CVAR, savedAxis) end
+        savedAxis = nil
+    end)
     art:SetScript("OnShow", function(self)
+        if C_CVar and C_CVar.GetCVar and C_CVar.SetCVar then
+            local ok, current = pcall(C_CVar.GetCVar, AXIS_CVAR)
+            if ok and current ~= nil and tostring(current) ~= "1" then
+                if savedAxis == nil then savedAxis = tostring(current) end
+                pcall(C_CVar.SetCVar, AXIS_CVAR, "1")
+            end
+        end
         self.selected = nil
         self.highlight:Hide()
         for _, segment in ipairs(self.segments) do
