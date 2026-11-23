@@ -301,6 +301,14 @@ function maps.LevelRange(id)
             return low, high
         end
     end
+    -- Zones new in Forever: by name (WalkMapExtras' list).
+    if id and WalkMapExtras and WalkMapExtras.ZoneLevelRange and maps.Name then
+        local ok, name = pcall(maps.Name, id)
+        if ok then
+            local low, high = WalkMapExtras.ZoneLevelRange(name)
+            if low then return low, high end
+        end
+    end
     return nil
 end
 

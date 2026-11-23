@@ -1994,7 +1994,20 @@ local zoneLevels = {
     ["Burning Steppes"] = {50, 58}, ["Western Plaguelands"] = {51, 58},
     ["Eastern Plaguelands"] = {53, 60}, ["Deadwind Pass"] = {55, 60},
     ["Winterspring"] = {55, 60}, ["Silithus"] = {55, 60},
+    -- New in Forever (their map IDs are not in WalkMap's ID table, so the
+    -- map labels look them up here by name too). Ranges as Forever's own
+    -- zone overview gives them. Shen'dralas is left out until its range is
+    -- confirmed (sources say 40-45 or 45-53).
+    ["Zephras Isle"] = {1, 12}, ["Riverglades"] = {35, 45}, ["The Riverglades"] = {35, 45},
+    ["Mount Hyjal"] = {55, 60},
 }
+
+-- Level range by English zone name, or nil.
+function extras.ZoneLevelRange(name)
+    local range = type(name) == "string" and zoneLevels[name]
+    if range then return range[1], range[2] end
+    return nil
+end
 local function zoneLevelDetail(name)
     local range = zoneLevels[name]
     if not range then return nil end
