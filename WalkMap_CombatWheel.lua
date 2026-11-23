@@ -121,7 +121,7 @@ end
 -- Index (1-8) the stick points at, or nil when it is near the middle. The
 -- same sums as the secure snippet below and the game's wheel.
 local function aimed(x, y)
-    if type(x) ~= "number" or type(y) ~= "number" or x * x + y * y < 0.25 then return nil end
+    if type(x) ~= "number" or type(y) ~= "number" or x * x + y * y < 0.15 then return nil end
     local degrees = math.deg(math.atan2(y, x))
     if degrees < -SEGMENT_ANGLE / 2 then degrees = degrees + 360 end
     local index = math.floor((degrees + SEGMENT_ANGLE) / SEGMENT_ANGLE + 0.5)
@@ -248,38 +248,56 @@ local function buildArt()
     end)
 end
 
--- Secure side. Attributes on the wheel: sel (entry aimed at), held (stick
--- directions pressed), stick (index of the right stick), macro-1..8.
+-- Secure side. Attributes on the wheel: sel (entry aimed at), held-UP ..
+-- held-RIGHT (stick direction keys down), stick (index of the right
+-- stick), macro-1..8.
+-- Lessons from the stick (also found by Controller Forever's class wheels):
+-- the game reports one direction key per stick at a time and often never
+-- the earlier key coming up as the stick turns on, so each key's state is
+-- kept and a new push clears the others; in a fight the stick can read as
+-- centred just as its key goes down, so the held key's direction is used
+-- then; the release is the last key coming up (the stick is still well
+-- out at that moment), or the stick itself back in the middle.
 local PICK_SNIPPET = [[
     if not owner:IsShown() then return false end
-    local sel = owner:GetAttribute("sel") or 0
-    local held = owner:GetAttribute("held") or 0
+    if button ~= "A" then
+        owner:SetAttribute("held-" .. button, down and 1 or 0)
+        if down then
+            for _, other in ipairs(newtable("UP", "DOWN", "LEFT", "RIGHT")) do
+                if other ~= button then owner:SetAttribute("held-" .. other, 0) end
+            end
+        end
+    end
     local state = GetGamePadState()
     local sticks = state and state.sticks
     local stick = sticks and sticks[owner:GetAttribute("stick") or 2]
-    if stick then
-        local x, y = stick.x or 0, stick.y or 0
-        if x * x + y * y >= 0.25 then
-            local degrees = math.deg(math.atan2(y, x))
-            if degrees < -22.5 then degrees = degrees + 360 end
-            local index = math.floor((degrees + 45) / 45 + 0.5)
-            if index > 8 then index = index - 8 end
-            if index < 1 then index = 1 end
-            sel = index
+    local x, y = 0, 0
+    if stick and stick.x and stick.y then x, y = stick.x, stick.y end
+    local lengthSq = x * x + y * y
+    if lengthSq < 0.15 then
+        x, y = 0, 0
+        if owner:GetAttribute("held-UP") == 1 then y = 1 end
+        if owner:GetAttribute("held-DOWN") == 1 then y = -1 end
+        if owner:GetAttribute("held-RIGHT") == 1 then x = 1 end
+        if owner:GetAttribute("held-LEFT") == 1 then x = -1 end
+    end
+    if x ~= 0 or y ~= 0 then
+        local degrees = math.deg(math.atan2(y, x))
+        if degrees < -22.5 then degrees = degrees + 360 end
+        local index = math.floor((degrees + 45) / 45 + 0.5)
+        if index > 8 then index = index - 8 end
+        if index < 1 then index = 1 end
+        owner:SetAttribute("sel", index)
+    end
+    local sel = owner:GetAttribute("sel") or 0
+    if down or sel < 1 then return false end
+    if button ~= "A" then
+        if lengthSq > 0.08 then
+            for _, key in ipairs(newtable("UP", "DOWN", "LEFT", "RIGHT")) do
+                if owner:GetAttribute("held-" .. key) == 1 then return false end
+            end
         end
     end
-    local choose = false
-    if button == "A" then
-        if not down and sel > 0 then choose = true end
-    elseif down then
-        held = held + 1
-    elseif held > 0 then
-        held = held - 1
-        if held == 0 and sel > 0 then choose = true end
-    end
-    owner:SetAttribute("sel", sel)
-    owner:SetAttribute("held", held)
-    if not choose then return false end
     local macro = owner:GetAttribute("macro-" .. sel)
     owner:ClearBindings()
     owner:Hide()
@@ -287,6 +305,9 @@ local PICK_SNIPPET = [[
     self:SetAttribute("*macrotext*", macro)
 ]]
 
+-- Bound with every modifier too: the triggers and shoulders can act as
+-- Shift / Ctrl / Alt on a controller, and a stick key then arrives as
+-- "SHIFT-PADRSTICKUP".
 local TOGGLE_SNIPPET = [[
     local wheel = self:GetFrameRef("wheel")
     if wheel:IsShown() then
@@ -295,15 +316,18 @@ local TOGGLE_SNIPPET = [[
         return
     end
     wheel:SetAttribute("sel", 0)
-    wheel:SetAttribute("held", 0)
+    for _, key in ipairs(newtable("UP", "DOWN", "LEFT", "RIGHT")) do wheel:SetAttribute("held-" .. key, 0) end
     wheel:Show()
     local pick = self:GetFrameRef("pick"):GetName()
-    wheel:SetBindingClick(true, "PAD1", pick, "A")
-    wheel:SetBindingClick(true, "PADRSTICKUP", pick, "UP")
-    wheel:SetBindingClick(true, "PADRSTICKDOWN", pick, "DOWN")
-    wheel:SetBindingClick(true, "PADRSTICKLEFT", pick, "LEFT")
-    wheel:SetBindingClick(true, "PADRSTICKRIGHT", pick, "RIGHT")
-    wheel:SetBindingClick(true, "PAD2", self:GetFrameRef("close"):GetName(), "LeftButton")
+    local close = self:GetFrameRef("close"):GetName()
+    for _, modifier in ipairs(newtable("", "SHIFT-", "CTRL-", "ALT-", "CTRL-SHIFT-", "ALT-SHIFT-", "ALT-CTRL-", "ALT-CTRL-SHIFT-")) do
+        wheel:SetBindingClick(true, modifier .. "PAD1", pick, "A")
+        wheel:SetBindingClick(true, modifier .. "PADRSTICKUP", pick, "UP")
+        wheel:SetBindingClick(true, modifier .. "PADRSTICKDOWN", pick, "DOWN")
+        wheel:SetBindingClick(true, modifier .. "PADRSTICKLEFT", pick, "LEFT")
+        wheel:SetBindingClick(true, modifier .. "PADRSTICKRIGHT", pick, "RIGHT")
+        wheel:SetBindingClick(true, modifier .. "PAD2", close, "LeftButton")
+    end
 ]]
 
 local function build()

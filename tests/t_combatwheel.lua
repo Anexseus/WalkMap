@@ -14,7 +14,7 @@ return {
         local env = boot(Mock)
         local aimed = env.WalkMapCombatWheel.Aimed
         Mock.eq(aimed(0, 0), nil, "middle: nothing")
-        Mock.eq(aimed(0.3, 0.3), nil, "inside the dead zone: nothing")
+        Mock.eq(aimed(0.25, 0.25), nil, "inside the dead zone: nothing")
         Mock.eq(aimed(1, 0), 1, "east: Bags")
         Mock.eq(aimed(0.7, 0.7), 2, "north-east: Professions")
         Mock.eq(aimed(0, 1), 3, "north: Character")
