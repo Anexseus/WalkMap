@@ -32,6 +32,11 @@ return {
         local env = boot(Mock, "frFR")
         Mock.eq(env.WalkMapL("Follow: On"), "Suivre : Activé", "Label : value")
         Mock.eq(env.WalkMapL("Settings"), "Réglages", "a word")
+        Mock.eq(env.WalkMapL("Marker size: Normal"), "Taille des marqueurs : Normale", "feminine label")
+        Mock.eq(env.WalkMapL("Auto-sell junk: On"), "Vente auto de la camelote : Activée", "feminine label")
+        Mock.eq(env.WalkMapL("Quest icons: Off"), "Icônes de quête : Désactivées", "feminine plural")
+        Mock.eq(env.WalkMapL("Marker distance: All"), "Portée des marqueurs : Toute la minicarte", "whole minimap")
+        Mock.eq(env.WalkMapL("Quest tracker: Off"), "Suivi des quêtes : Désactivé", "masculine stays")
     end},
     {"German in use: map, every settings page and the zone menu, without errors", function(Mock)
         local env = boot(Mock, "deDE")

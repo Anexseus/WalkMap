@@ -42,6 +42,9 @@ function locale.Add(code, strings, patterns, options)
     local entry = languages[code] or {strings = {}, patterns = {}}
     languages[code] = entry
     entry.colon = options and options.colon or entry.colon or ": "
+    -- options.agree: {["translated label"] = {["value"] = "agreeing value"}}
+    -- for languages whose values follow the label (French "Taille : Normale").
+    entry.agree = options and options.agree or entry.agree
     for key, value in pairs(strings or {}) do entry.strings[key] = value end
     for key, value in pairs(patterns or {}) do
         local pattern, count = compile(key)
@@ -102,7 +105,11 @@ lookup = function(text)
     local label, value = text:match("^([^:|]-): (.+)$")
     if label and label ~= "" then
         local left = active.strings[label]
-        if left then return left .. active.colon .. lookup(value) end
+        if left then
+            local translated = lookup(value)
+            local forms = active.agree and active.agree[left]
+            return left .. active.colon .. (forms and forms[translated] or translated)
+        end
     end
     -- "Text (detail)"
     local main, detail = text:match("^(.-) (%b())$")
