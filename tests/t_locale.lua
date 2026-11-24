@@ -2,7 +2,7 @@
 -- French come from the language files, built texts are translated in parts.
 local function boot(Mock, language)
     local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19", language = language}, {welcomeSeen = true})
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.20", language = language}, {welcomeSeen = true})
     env.fire("ADDON_LOADED", "WalkMap")
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")

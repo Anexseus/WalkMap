@@ -7,7 +7,7 @@ local function givers(Mock, tags)
         local tag = tags[id]
         if tag then return {tagID = tag, tagName = tag == 41 and "PvP" or "Dungeon"} end
     end
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true})
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.20"}, {welcomeSeen = true})
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     env.WalkMapData.quests = {

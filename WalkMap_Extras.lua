@@ -2787,9 +2787,14 @@ local function betaSeenKey(build)
     end
     return version
 end
-local NEWS_VERSION = "1.14.19"
+-- WalkMap's Discord: bug reports, suggestions, news. Shown in a box that
+-- selects itself on click, so Ctrl+C copies it (addons cannot copy).
+local DISCORD_LINK = "https://discord.gg/cndVAA3GST"
+extras.DISCORD_LINK = DISCORD_LINK
+
+local NEWS_VERSION = "1.14.20"
 -- Earlier What's new pages that already showed what this one shows: players
--- who saw one of them do not get this one. (None for 1.14.19.)
+-- who saw one of them do not get this one. (None for 1.14.20.)
 local NEWS_ALREADY_SEEN = {}
 
 -- Welcome page: opens the map (if needed) with settings on that page.
@@ -3089,6 +3094,13 @@ local settingsPages = {
         {"__bagBinding", nil, "Sort shortcut", "Set it under Key Bindings > WalkMap > Sort bags. Click for help."},
         {"__bagStatus", nil, "Bag tools status", "WalkMap auto-sell is off."},
     }},
+    {"Community", "Join WalkMap's Discord: report bugs, suggest features and hear about new versions and betas first.", {
+        {"__discord", nil, "Join our Discord", "Click the link, press Ctrl+C and paste it in your browser or Discord: discord.gg/cndVAA3GST"},
+        {"__info", nil, "Bug reports", "One thread per bug in the bug-reports channel, with your WalkMap version, mouse or controller, and your other addons. The Debug report (Settings > Controller & help) helps a lot."},
+        {"__info", nil, "Suggestions", "Ideas for WalkMap go in the suggestions channel. We read them all."},
+        {"__info", nil, "Beta testing", "Want to try new things first? Ask for the Beta Tester role on the Discord."},
+        {"__info", nil, "Also on CurseForge", "You can still write in the comments on WalkMap's CurseForge page."},
+    }},
     -- First-time page; not listed under Categories (see WELCOME_PAGE).
     {"Welcome to WalkMap", "Pick the basics now; everything can be changed later under Settings. Done closes this page. Tips: /walkmap guide", {
         {"__recommended", nil, "Use recommended settings", "The authors' setup for the map, quest log, tracker, controller, minimap and map buttons. The choices below are up to you."},
@@ -3109,13 +3121,11 @@ local settingsPages = {
     -- NEWS_VERSION). Only for releases with significant changes: then
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
-    {"What's new in WalkMap 1.14.19", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
-        {"__news", nil, "Maps inside dungeons", "The classic dungeons have their own maps, floor by floor (Blizzard's maps), and Forever's new dungeons painted maps by Santiago Reyes. Inside a dungeon WalkMap shows its map; the zone menu picks the floor."},
-        {"__news", nil, "Any dungeon map, from anywhere", "Zones > Dungeon maps: a section of its own with every dungeon map WalkMap has, to look at before you go in."},
-        {"__dungeonMap", nil, "Game map in dungeons", "Still use your dungeon addon: inside a dungeon, the map key and the wheel can open the game's map for it. Auto: with DungeonJournal or Forever Dungeon Scout. Always: any other dungeon map addon. Off: always WalkMap."},
-        {"combatWheel", nil, "Open and close the map from the wheel in combat", "The game does not let addons use its wheel's map in a fight, so in combat the wheel button opens WalkMap's copy of the wheel instead: same entries, same places, and Quest & Maps opens and closes WalkMap. Out of combat the game's own wheel opens as always."},
-        {"__news", nil, "Level ranges for the new zones", "Zephras Isle 1-12, Riverglades 35-45, Shen'dralas 35-45 and Mount Hyjal 55-60, in the map title and on the map."},
-        {"__reportBugs", nil, "Found a bug? Tell us", "Please write in the comments on WalkMap's CurseForge page. A screenshot or the Debug report (Settings > Controller & help) helps a lot."},
+    {"What's new in WalkMap 1.14.20", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
+        {"__news", nil, "Deutsch and Français", "WalkMap now speaks German and French. Auto follows the game's language; choose under Settings > Look > Language."},
+        {"__lowQuests", nil, "Low-level quests", "Quest chains often start low and end at your level. Choose Quest chains to show gray quests at quest givers when their chain goes on to your level (the tooltip says how far), or All for every gray quest. Also under Settings > Quests on the map."},
+        {"__news", nil, "Button hints stay off", "Turning off the button hints at the top of the map now lasts after a restart."},
+        {"__discord", nil, "Join our Discord", "Bug reports, suggestions and news about new versions and betas. Click the link, press Ctrl+C and paste it in your browser or Discord. Also under Settings > Community."},
     }, hidden = true},
 }
 NEWS_PAGE = #settingsPages
@@ -3129,7 +3139,7 @@ do
         rows[#rows + 1] = {"__news", nil, item[1], item[2]}
     end
     rows[#rows + 1] = {"__reportBugs", nil, "Found a bug? Please tell us",
-        "This is a beta: write in the comments on WalkMap's CurseForge page what you tried and what went wrong, also when everything worked. A screenshot, a short video or the Debug report (Settings > Controller & help) helps a lot. Thank you for testing!"}
+        "This is a beta: tell us on the Discord (Settings > Community) or in the comments on WalkMap's CurseForge page what you tried and what went wrong, also when everything worked. A screenshot, a short video or the Debug report (Settings > Controller & help) helps a lot. Thank you for testing!"}
     settingsPages[#settingsPages + 1] = {"What are we testing", "This beta is for testing. Please try the things below and tell us what you find. Done closes this page; /walkmap testing shows it again.", rows, hidden = true}
     BETA_PAGE = #settingsPages
 end
@@ -3344,8 +3354,49 @@ refreshSettingsRows = function()
             if field == "__recommended" or field == "__trySelect" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
             row.description:SetPoint("RIGHT", row, "RIGHT", -108, 0)
         end
+        -- Discord: the invite in a box on the right. A click on the row or
+        -- the box selects it all, ready for Ctrl+C; typing cannot change it.
+        local isLink = field == "__discord"
+        if isLink and not row.walkmapLinkBox then
+            local box = CreateFrame("EditBox", nil, row)
+            box:SetSize(200, 22)
+            box:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+            box:SetAutoFocus(false)
+            box:SetFontObject("ChatFontNormal")
+            box:SetTextInsets(6, 6, 0, 0)
+            box:EnableMouse(true)
+            local background = box:CreateTexture(nil, "BACKGROUND")
+            background:SetAllPoints(box)
+            background:SetColorTexture(0, 0, 0, 0.6)
+            local border = box:CreateTexture(nil, "BORDER")
+            border:SetPoint("TOPLEFT", box, "TOPLEFT", -1, 1)
+            border:SetPoint("BOTTOMRIGHT", box, "BOTTOMRIGHT", 1, -1)
+            border:SetColorTexture(0.55, 0.47, 0.25, 0.9)
+            box:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+            box:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
+            box:SetScript("OnMouseUp", function(self) self:SetFocus(); self:HighlightText() end)
+            box:SetScript("OnTextChanged", function(self, typed)
+                if typed and self:GetText() ~= DISCORD_LINK then
+                    self:SetText(DISCORD_LINK)
+                    self:HighlightText()
+                end
+            end)
+            box:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+            box:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+            row.walkmapLinkBox = box
+        end
+        if row.walkmapLinkBox then
+            row.walkmapLinkBox:SetShown(isLink)
+            if isLink then
+                row.walkmapLinkBox:SetText(DISCORD_LINK)
+                row.walkmapLinkBox:SetCursorPosition(0)
+                row.description:SetPoint("RIGHT", row, "RIGHT", -216, 0)
+            elseif row.walkmapLinkBox:HasFocus() then
+                row.walkmapLinkBox:ClearFocus()
+            end
+        end
         -- What's new highlights: gold heading.
-        if field == "__newsStar" or field == "__reportBugs" or field == "__info" then
+        if field == "__newsStar" or field == "__reportBugs" or field == "__info" or field == "__discord" then
             row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r"))
         end
         if row.description.SetMaxLines then row.description:SetMaxLines(isButton and 2 or 0) end
@@ -3463,6 +3514,10 @@ refreshSettingsRows = function()
                 extras.ShowDebug()
             elseif field == "__intro" then
                 extras.ShowWelcome()
+            elseif field == "__discord" then
+                local box = row.walkmapLinkBox
+                if box then box:SetFocus(); box:HighlightText() end
+                print("|cff80ff80WalkMap:|r " .. WalkMapL("Join our Discord") .. " - " .. DISCORD_LINK)
             elseif field == "__news" or field == "__newsStar" or field == "__reportBugs" or field == "__info" then
                 -- Information only.
                 return
@@ -3724,7 +3779,7 @@ local function createSettingsPanel()
     for i, page in ipairs(settingsPages) do
         if page.hidden then break end
         local row = CreateFrame("Button", nil, settingsPanel)
-        -- 35 px steps leave room for ten categories above the footer.
+        -- 35 px steps leave room for eleven categories above the footer.
         row:SetSize(145, 31)
         row:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 17, -78 - (i - 1) * 35)
         row:EnableMouse(true)

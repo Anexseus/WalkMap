@@ -30,38 +30,48 @@ end
 local function click(row) row:GetScript("OnClick")(row) end
 
 return {
-    {"What's new 1.14.19: dungeon maps, the dungeon addon choice and the combat wheel, set right there", function(Mock)
+    {"What's new 1.14.20: languages, low-level quests set right there, and the Discord link", function(Mock)
         local env, panel = start(Mock)
         local s = env.WalkMapCharacterSettings
-        local labels = page(env, "What's new in WalkMap 1.14.19")
-        Mock.ok(#labels >= 3, "rows shown")
-        Mock.ok(labels[1]:find("Maps inside dungeons", 1, true), "dungeon maps first")
-        local dungeonRow = rowStarting(panel, "Game map in dungeons")
-        Mock.ok(dungeonRow, "the dungeon addon choice is on the page")
-        Mock.ok(tostring(dungeonRow.label:GetText()):find("Auto", 1, true), "Auto by default")
-        click(dungeonRow)
-        Mock.eq(env.WalkMapExtras.DungeonMapMode(), "always", "changed from What's new")
-        local wheelRow = rowStarting(panel, "Open and close the map from the wheel")
-        Mock.ok(wheelRow, "the combat wheel is on the page")
-        Mock.eq(s.combatWheel, true, "on by default")
+        local labels = page(env, "What's new in WalkMap 1.14.20")
+        Mock.ok(#labels >= 4, "rows shown")
+        Mock.ok(labels[1]:find("Deutsch and Fran", 1, true), "languages first")
+        local low = rowStarting(panel, "Low-level quests")
+        Mock.ok(low, "low-level quests on the page")
+        Mock.ok(tostring(low.label:GetText()):find("Off", 1, true), "off by default")
+        click(low)
+        Mock.eq(s.lowQuests, "chains", "Quest chains turned on from What's new")
+        Mock.ok(tostring(low.label:GetText()):find("Quest chains", 1, true), "the row shows it")
+        local discord = rowStarting(panel, "|cffffd24aJoin our Discord") or rowStarting(panel, "Join our Discord")
+        Mock.ok(discord, "Discord on the page")
+        local box = discord.walkmapLinkBox
+        Mock.ok(box and box:IsShown(), "a link box")
+        Mock.eq(box:GetText(), "https://discord.gg/cndVAA3GST", "the invite in it")
+        click(discord)
+        Mock.ok(box:HasFocus(), "a click selects the link for Ctrl+C")
+        box:SetText("oops")
+        box:GetScript("OnTextChanged")(box, true)
+        Mock.eq(box:GetText(), "https://discord.gg/cndVAA3GST", "typing cannot change it")
+        local other = page(env, "Quests on the map")
+        Mock.ok(not discord.walkmapLinkBox:IsShown() or rowStarting(panel, "Join our Discord") == discord, "the box goes with its row")
     end},
-    {"Everyone who saw an older What's new gets 1.14.19's once", function(Mock)
-        for _, seen in ipairs({"1.14", "1.14.8", "1.14.11"}) do
+    {"Everyone who saw an older What's new gets 1.14.20's once", function(Mock)
+        for _, seen in ipairs({"1.14", "1.14.11", "1.14.19"}) do
             local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
             env.loadAddon({welcomeSeen = true, newsSeen = seen}, {})
-            env.WalkMapExtras.Build = function() return "1.14.19" end -- a full release
+            env.WalkMapExtras.Build = function() return "1.14.20" end -- a full release
             env.fire("PLAYER_LOGIN")
             env.fire("PLAYER_ENTERING_WORLD")
             env.tick(1, 5)
             env.WalkMap_Toggle()
             env.tick(1, 5)
-            Mock.eq(env.WalkMapSettings.newsSeen, "1.14.19", "What's new shown after " .. seen)
+            Mock.eq(env.WalkMapSettings.newsSeen, "1.14.20", "What's new shown after " .. seen)
             Mock.ok(env.WalkMapExtras.SettingsPanel():IsShown(), "settings window open on What's new")
         end
     end},
     {"Tracker place and size per interface, both starting from the old one", function(Mock)
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"},
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.20"},
             {zoneTrackerPos = {point = "TOPRIGHT", x = -10, y = -200, h = 300}})
         local x = env.WalkMapExtras
         Mock.eq(x.TrackerInterface(), "mouse", "mouse and keyboard interface")
@@ -76,11 +86,13 @@ return {
         env.InputUtil = nil
         Mock.eq(x.TrackerSettings().h, 180, "mouse layout unchanged")
     end},
-    {"Categories: ten pages, merged ones gone", function(Mock)
+    {"Categories: eleven pages, merged ones gone", function(Mock)
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors, Community", "category list")
+        local community = page(env, "Community")
+        Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
         local giver = page(env, "Giver level")
         Mock.eq(giver[1], "Automatic", "giver level rows still built")
         Mock.eq(#giver, 7, "Automatic plus six ranges")

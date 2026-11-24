@@ -56,6 +56,11 @@ function W:HookScript(name, fn)
 end
 function W:Click(button) fire(self, "OnClick", button or "LeftButton") end
 function W:SetText(text) self.__text = text end
+-- Edit boxes: focus and selection.
+function W:SetFocus() self.__focus = true fire(self, "OnEditFocusGained") end
+function W:ClearFocus() if self.__focus then self.__focus = false fire(self, "OnEditFocusLost") end end
+function W:HasFocus() return self.__focus == true end
+function W:HighlightText(from, to) self.__highlight = not (from == 0 and to == 0) end
 function W:SetFormattedText(fmt, ...) self.__text = string.format(fmt, ...) end
 function W:GetText() return self.__text end
 -- 12 px a line; with a width set, the text wraps at 6 px a character.

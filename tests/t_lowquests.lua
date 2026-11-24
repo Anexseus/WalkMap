@@ -3,7 +3,7 @@
 local function givers(Mock, lowQuests)
     local env = Mock.new({playerMap = 1436, level = 30})
     env.UnitLevel = function() return 30 end
-    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.19"}, {welcomeSeen = true, lowQuests = lowQuests})
+    env.loadAddon({welcomeSeen = true, newsSeen = "1.14.20"}, {welcomeSeen = true, lowQuests = lowQuests})
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     env.WalkMapData.quests = {

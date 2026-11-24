@@ -5,18 +5,26 @@
 New
 - German and French: WalkMap's windows, settings, menus, tooltips and chat
   messages follow the game's language. Settings > Look > Language picks
-  another one (Auto, English, Deutsch, Français). The translations are new:
-  corrections are welcome in the comments on CurseForge. Changing it
-  redraws the open map and its buttons at once.
-- Betas show "What are we testing" (once per beta, instead of What's new):
-  what to try in that beta and a call for bug reports. /walkmap testing
-  shows it again. Full releases never show it.
+  another one (Auto, English, Deutsch, Français). Changing it redraws the
+  open map and its buttons at once. German texts revised after a review.
+- Low-level quests (Settings > Quests on the map, and on What's new): Off,
+  Quest chains or All. Quest chains shows gray quests at quest givers when
+  their chain goes on to your level; the tooltip says how far
+  ("chain to level 32"). Chains come from QuestieDB and quest prerequisites.
+- Community page in Settings and on What's new: WalkMap's Discord for bug
+  reports and suggestions, with the invite in a box that selects itself
+  for Ctrl+C.
+- Betas show "What are we testing" instead of What's new: once per
+  version, and again when a beta brings something new to test. A call for
+  bug reports, now pointing to the Discord too. /walkmap testing shows it
+  again. Full releases never show it.
 
 Fixed
 - Button hints (and Pad focus) turned off by hand came back on after a
   restart: when the game switched its interface at login, "How you play"
   followed it and set them again. Now your own choice stays; choosing
   "How you play" yourself still sets them.
+- French: "Largeur" values agree (Normale, Étroite).
 
 ## 1.14.19
 
