@@ -26,7 +26,7 @@ do
     WalkMapExtras.StyleButton(layoutButton)
     local label = layoutButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     label:SetPoint("CENTER")
-    label:SetText("Buttons")
+    label:SetText(WalkMapL("Buttons"))
     -- Quests moves one place right to make room.
     -- Quests takes the old Player slot on the right (Player is gone; its
     -- hidden button still follows the footer layout, M+/M- included).
@@ -145,7 +145,7 @@ do
             for _, item in ipairs(ITEMS) do
                 if item[1] == key then
                     if item[4] and InCombatLockdown and InCombatLockdown() then
-                        print("|cff80ff80WalkMap:|r The close button can change after combat.")
+                        print(WalkMapL("|cff80ff80WalkMap:|r The close button can change after combat."))
                         return
                     end
                     hiddenSet()[key] = not isHidden(key) or nil
@@ -167,8 +167,8 @@ do
     layoutButton:HookScript("OnEnter", function(self)
         if not GameTooltip then return end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:SetText("Map buttons")
-        GameTooltip:AddLine("Choose which buttons the map shows. Settings and this button always stay.",
+        GameTooltip:SetText(WalkMapL("Map buttons"))
+        GameTooltip:AddLine(WalkMapL("Choose which buttons the map shows. Settings and this button always stay."),
             0.8, 0.8, 0.8, true)
         GameTooltip:Show()
     end)

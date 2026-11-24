@@ -52,7 +52,7 @@ if WalkMapUI then WalkMapUI.ApplyMaterial(coordinatesBG, 1, 0.55) end
 local coordinatesText = coordinates:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 coordinatesText:SetPoint("CENTER", coordinates, "CENTER", 0, 0)
 coordinatesText:SetTextColor(1, 0.87, 0.58)
-coordinatesText:SetText("--.-, --.-")
+coordinatesText:SetText(WalkMapL("--.-, --.-"))
 local canvas = CreateFrame("Frame", nil, clip)
 canvas:EnableMouse(false)
 local markerLayer = CreateFrame("Frame", nil, canvas)
@@ -99,7 +99,7 @@ local function moveMiniPlayer(x, y, visible)
         canvas.offsetX, canvas.offsetY = offsetX, offsetY
     end
     if visible then
-        coordinatesText:SetText(string.format("%.1f, %.1f", x * 100, y * 100))
+        coordinatesText:SetText(WalkMapL(string.format("%.1f, %.1f", x * 100, y * 100)))
         local px, py = snap(x * cw), snap(y * ch)
         if player.px ~= px or player.py ~= py then
             player:ClearAllPoints()
@@ -109,7 +109,7 @@ local function moveMiniPlayer(x, y, visible)
         player:SetRotation(GetPlayerFacing and GetPlayerFacing() or 0)
         player:Show()
     else
-        coordinatesText:SetText("--.-, --.-")
+        coordinatesText:SetText(WalkMapL("--.-, --.-"))
         player:Hide()
     end
     return offsetX, offsetY
@@ -518,7 +518,7 @@ driver:SetScript("OnUpdate", function(_, delta)
         mini:Hide()
         if message ~= lastError then
             lastError = message
-            print("|cff80ff80WalkMap:|r Minimap preview unavailable: " .. tostring(message))
+            print(WalkMapL("|cff80ff80WalkMap:|r Minimap preview unavailable: " .. tostring(message)))
         end
     end
 end)

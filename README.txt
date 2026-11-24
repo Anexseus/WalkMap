@@ -310,6 +310,15 @@ Chat and data:
 - The game does not tell addons which parts of a map are still unexplored.
 - WoW has no Danish client, so quest and NPC names follow the game's language.
 
+Languages:
+- WalkMap's own text is in English, German and French and follows the
+  game's language; Settings > Look > Language picks another one.
+- The translations are in WalkMap_Locale_deDE.lua and WalkMap_Locale_frFR.lua:
+  the English text on the left, the translation on the right. Corrections
+  are welcome. The debug report stays in English.
+- On a German or French client the new Forever dungeons may not get their
+  painted map yet: WalkMap finds them by their English name.
+
 
 NOTES
 -----

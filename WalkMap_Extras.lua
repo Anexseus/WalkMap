@@ -1131,10 +1131,10 @@ local function createDebugPanel()
         WalkMapUI.Window(panel)
         local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
         title:SetPoint("TOP", panel, "TOP", 0, -8)
-        title:SetText("WalkMap debug report")
+        title:SetText(WalkMapL("WalkMap debug report"))
         local hint = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 15, -43)
-        hint:SetText("Click the report, then press Ctrl+C. Alternative: /walkmap debug chat")
+        hint:SetText(WalkMapL("Click the report, then press Ctrl+C. Alternative: /walkmap debug chat"))
         local scroll = CreateFrame("ScrollFrame", nil, panel)
         scroll:SetPoint("TOPLEFT", panel, "TOPLEFT", 15, -69)
         scroll:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -15, 43)
@@ -1163,7 +1163,7 @@ local function createDebugPanel()
         extras.StyleButton(close)
         local label = close:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         label:SetPoint("CENTER")
-        label:SetText("Done")
+        label:SetText(WalkMapL("Done"))
         close:SetScript("OnClick", function() panel:Hide() end)
         debugPanel = panel
         debugAction = nil
@@ -1218,14 +1218,14 @@ local function makePin(pool, index, icon, x, y, name, detail, size, markerKey, i
         pin:SetScript("OnEnter", function(self)
             if GameTooltip then
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                GameTooltip:SetText(self.pinName)
+                GameTooltip:SetText(WalkMapL(self.pinName))
                 if self.detail and self.detail ~= "" then
-                    GameTooltip:AddLine(self.detail, 0.9, 0.85, 0.5)
+                    GameTooltip:AddLine(WalkMapL(self.detail), 0.9, 0.85, 0.5)
                 end
                 if self.giverKey then
-                    GameTooltip:AddLine("Right-click or Shift-click to hide this giver", 0.7, 0.8, 1)
+                    GameTooltip:AddLine(WalkMapL("Right-click or Shift-click to hide this giver"), 0.7, 0.8, 1)
                 elseif self.hiddenKey then
-                    GameTooltip:AddLine("Right-click or Shift-click to hide this marker", 0.7, 0.8, 1)
+                    GameTooltip:AddLine(WalkMapL("Right-click or Shift-click to hide this marker"), 0.7, 0.8, 1)
                 end
                 GameTooltip:Show()
             end
@@ -1610,20 +1610,20 @@ local function refreshLabels()
     end
     local selection = count == 0 and "None" or
         (count == 1 and placeNames[only] or tostring(count) .. " selected")
-    buttons[1].label:SetText(owner:GetWidth() < 480
-        and "Places" or "Places: " .. selection)
-    buttons[2].label:SetText(owner:GetWidth() < 480
+    buttons[1].label:SetText(WalkMapL(owner:GetWidth() < 480
+        and "Places" or "Places: " .. selection))
+    buttons[2].label:SetText(WalkMapL(owner:GetWidth() < 480
         and (settings.clearView and "Clear: On" or "Clear: Off")
-        or (settings.clearView and "Clear view: On" or "Clear view: Off"))
+        or (settings.clearView and "Clear view: On" or "Clear view: Off")))
     local miniState = not settings.miniMap and "Off"
         or settings.miniTerrain == "game" and "Game" or "Zone"
-    buttons[3].label:SetText(owner:GetWidth() < 480
-        and "Mini: " .. miniState or "WalkMap mini: " .. miniState)
+    buttons[3].label:SetText(WalkMapL(owner:GetWidth() < 480
+        and "Mini: " .. miniState or "WalkMap mini: " .. miniState))
     local paused = settings.follow and (followPausedAt ~= nil
         or (WalkMapMaps and WalkMapMaps.Selected and WalkMapMaps.Selected() ~= nil))
-    buttons[4].label:SetText(owner:GetWidth() < 480
+    buttons[4].label:SetText(WalkMapL(owner:GetWidth() < 480
         and (paused and "Paused" or settings.follow and "Follow ON" or "Follow")
-        or (paused and "Follow: Paused" or settings.follow and "Follow: On" or "Follow: Off"))
+        or (paused and "Follow: Paused" or settings.follow and "Follow: On" or "Follow: Off")))
     for _, index in ipairs({2, 3, 4}) do
         local active = index == 2 and settings.clearView
             or index == 3 and settings.miniMap
@@ -1631,14 +1631,25 @@ local function refreshLabels()
         buttons[index].label:SetTextColor(active and 0.4 or 1,
             active and 1 or 1, active and 0.8 or 1)
     end
-    if viewButton then viewButton.label:SetText("Settings") end
+    if viewButton then viewButton.label:SetText(WalkMapL("Settings")) end
     if questButton then
         local focus = extras.QuestFocus()
         local title = focus and C_QuestLog and C_QuestLog.GetTitleForQuestID
             and C_QuestLog.GetTitleForQuestID(focus)
-        questButton.label:SetText(focus and (title or "1 quest") or "Quests: All")
+        questButton.label:SetText(WalkMapL(focus and (title or "1 quest") or "Quests: All"))
         if focus then questButton.label:SetTextColor(0.4, 1, 0.8)
         else questButton.label:SetTextColor(1, 1, 1) end
+    end
+    -- Translated labels can be longer than the English ones: shrink them to
+    -- stay inside their buttons.
+    if WalkMapUI and WalkMapUI.FitText then
+        local all = {buttons[1], buttons[2], buttons[3], buttons[4], viewButton, questButton}
+        for _, button in pairs(all) do
+            if button and button.label and button.GetWidth then
+                local width = tonumber(button:GetWidth()) or 0
+                if width > 20 then WalkMapUI.FitText(button.label, width - 8) end
+            end
+        end
     end
 end
 
@@ -1717,7 +1728,7 @@ local function rowDecor(row)
         decor.arrow = nil
         decor.arrowText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         decor.arrowText:SetPoint("RIGHT", row, "RIGHT", -5, 0)
-        decor.arrowText:SetText(">")
+        decor.arrowText:SetText(WalkMapL(">"))
         decor.arrowText:Hide()
     else
         decor.arrow:Hide()
@@ -1766,7 +1777,7 @@ local function applyRowDecor(row)
     decor.detail:ClearAllPoints()
     decor.detail:SetPoint("RIGHT", row, "RIGHT", opts.arrow and -20 or -6, 0)
     local detail = opts.detail or ""
-    decor.detail:SetText(detail)
+    decor.detail:SetText(WalkMapL(detail))
     local color = opts.detailColor or {0.62, 0.6, 0.55}
     decor.detail:SetTextColor(color[1], color[2], color[3])
     decor.detail:SetShown(detail ~= "")
@@ -1962,7 +1973,7 @@ function extras.Guide()
         "Bind Toggle WalkMap Pad focus, or use /walkmap pad in a macro.",
         "Hover DB for database details, or type /walkmap db. QuestieDB must be enabled.",
         "/walkmap news shows what's new in this version.",
-    }) do print(line) end
+    }) do print(WalkMapL(line)) end
 end
 
 function extras.RefreshLabels()
@@ -2168,7 +2179,7 @@ local function togglePlace(value)
         for _, row in ipairs(submenu.rows) do
             if row:IsShown() and row.option then
                 local key = row.option[1]
-                row.label:SetText(row.option[2])
+                row.label:SetText(WalkMapL(row.option[2]))
                 showCheckbox(row, true, not not settings.placeFilters[key])
             end
         end
@@ -2214,14 +2225,14 @@ local function showSubmenu(group, parentRow)
         local key = option[1]
         local decor = {}
         row.option = option
-        row.label:SetText(option[2])
+        row.label:SetText(WalkMapL(option[2]))
         if group[1] == "maps" and option.dungeon then
             local selected = WalkMapMaps.Selected()
             showCheckbox(row, true, selected and WalkMapDungeons.SameDungeon(selected, key) or false)
             row:SetScript("OnClick", function() extras.CloseMenus();WalkMapMaps.Choose(key) end)
         elseif group[1] == "maps" then
             local here = key == WalkMapMaps.CurrentZone()
-            row.label:SetText(here and ("|cff80ff80" .. option[2] .. "|r") or option[2])
+            row.label:SetText(WalkMapL(here and ("|cff80ff80" .. option[2] .. "|r") or option[2]))
             local levels, levelColor = zoneLevelDetail(option[2])
             decor.detail, decor.detailColor = levels, levelColor
             if here then
@@ -2304,7 +2315,7 @@ openMenu = function(button, options, field)
             for _, floor in ipairs(WalkMapDungeons.Floors()) do
                 if floor[1] == floorIndex then chosen = floor[3] end
             end
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             showCheckbox(row, true, chosen)
             setRowEnter(row, function(self)
                 self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
@@ -2318,8 +2329,8 @@ openMenu = function(button, options, field)
             local group = mapGroups[value]
             row.walkmapOpensSubmenu = group ~= nil
             local info = group and mapGroupInfo[value]
-            row.label:SetText(info and info.here and ("|cffb8f0b8" .. info.label .. "|r")
-                or info and info.label or option[2])
+            row.label:SetText(WalkMapL(info and info.here and ("|cffb8f0b8" .. info.label .. "|r")
+                or info and info.label or option[2]))
             decor.arrow = group ~= nil
             decor.detail = info and info.detail
             decor.separator = i == 2 or (info and info.firstDungeons)
@@ -2338,7 +2349,7 @@ openMenu = function(button, options, field)
             end)
         elseif questGroup then
             row.walkmapOpensSubmenu = true
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             decor.arrow = true
             decor.detail = questGroupDetail(questGroup)
             showCheckbox(row, false, false)
@@ -2352,7 +2363,7 @@ openMenu = function(button, options, field)
                 showSubmenu(questGroup, self)
             end)
         elseif field == "view" and (value == "__guide" or value == "__db") then
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             showCheckbox(row, false, false)
             setRowEnter(row, function(self)
                 self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
@@ -2363,12 +2374,12 @@ openMenu = function(button, options, field)
                 if value == "__guide" then
                     extras.Guide()
                 else
-                    print("|cff80ff80WalkMap:|r " .. (WalkMapLiveDB
-                        and WalkMapLiveDB.Status() or "QuestieDB unavailable"))
+                    print(WalkMapL("|cff80ff80WalkMap:|r " .. (WalkMapLiveDB
+                        and WalkMapLiveDB.Status() or "QuestieDB unavailable")))
                 end
             end)
         elseif field == "view" or field == "quests" then
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             showCheckbox(row, true, settings[value])
             setRowEnter(row, function(self)
                 self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3])
@@ -2383,7 +2394,7 @@ openMenu = function(button, options, field)
             if group then
                 row.walkmapOpensSubmenu = true
                 row.walkmapPlaceGroup = group
-                row.label:SetText(group[2])
+                row.label:SetText(WalkMapL(group[2]))
                 local icon, coords = placeGroupIcon(group)
                 decor.icon, decor.iconCoords = icon, coords
                 decor.arrow = true
@@ -2397,7 +2408,7 @@ openMenu = function(button, options, field)
                 end)
                 row:SetScript("OnClick", function(self) showSubmenu(group, self) end)
             else
-                row.label:SetText(value == "__clear" and ("|cffd8b8a8" .. option[2] .. "|r") or option[2])
+                row.label:SetText(WalkMapL(value == "__clear" and ("|cffd8b8a8" .. option[2] .. "|r") or option[2]))
                 decor.separator = value == "__clear"
                 showCheckbox(row, false, false)
                 setRowEnter(row, function(self)
@@ -2410,7 +2421,7 @@ openMenu = function(button, options, field)
             -- Checked = the button is shown. "Show all" / "Hide all" at the end.
             local provider = buttonsMenu
             local bulk = value == "__showall" or value == "__hideall"
-            row.label:SetText(bulk and ("|cffd8b8a8" .. option[2] .. "|r") or option[2])
+            row.label:SetText(WalkMapL(bulk and ("|cffd8b8a8" .. option[2] .. "|r") or option[2]))
             decor.separator = value == "__showall"
             showCheckbox(row, not bulk, not bulk and not provider.IsHidden(value))
             setRowEnter(row, function(self)
@@ -2430,7 +2441,7 @@ openMenu = function(button, options, field)
         elseif field == "actions" then
             -- A list of things to do (extras.OpenActions): label, detail on
             -- the right, run() on click. Rows without run() are plain text.
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             decor.detail, decor.detailColor = option[3], option[4]
             decor.separator = option.separator
             showCheckbox(row, false, false)
@@ -2446,7 +2457,7 @@ openMenu = function(button, options, field)
         elseif field == "questfocus" then
             local group = value == "__other" and questFocusGroup
             row.walkmapOpensSubmenu = group ~= nil and group ~= false
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             if group then
                 decor.arrow = true
                 decor.detail = tostring(#group[3])
@@ -2472,7 +2483,7 @@ openMenu = function(button, options, field)
                 extras.SetQuestFocus(value ~= "__all" and value or nil)
             end)
         else
-            row.label:SetText(option[2])
+            row.label:SetText(WalkMapL(option[2]))
             showCheckbox(row, true, settings[field] == value)
             setRowEnter(row, function(self) self.label:SetTextColor(HOVER_TEXT[1], HOVER_TEXT[2], HOVER_TEXT[3]) end)
             row:SetScript("OnClick", function() setOption(field, value) end)
@@ -2683,7 +2694,7 @@ local function applyRecommended()
     -- map redraw); every other value above is read live.
     setOption("miniMap", true)
     if WalkMapCombat and WalkMapCombat.SettingChanged then WalkMapCombat.SettingChanged() end
-    print("|cff80ff80WalkMap:|r recommended settings applied. Change anything later under Settings.")
+    print(WalkMapL("|cff80ff80WalkMap:|r recommended settings applied. Change anything later under Settings."))
 end
 
 -- Index of the hidden welcome page; set where settingsPages is defined
@@ -2910,6 +2921,7 @@ local settingsPages = {
         {"__welcomeLook", nil, "Window look", "Classic (the game's own art), Stone and gold, Wood and parchment, or Leather and bronze. Apply now uses it."},
         {"trackerFrame", nil, "Frame around the quest tracker", "With Stone, Wood or Leather: a metal frame and a title band around the quest tracker. Off: only its background."},
         {"__applyLook", nil, "Use the chosen look", "Reload the interface to use the chosen look."},
+        {"__language", nil, "Language", "Language of WalkMap's text. Auto follows the game. Reload to change every text."},
     }},
     {"Quest tracker", "WalkMap's on-screen list of quests, and messages to your group.", {
         {"__trackerScope", nil, "Quest tracker", "Off, this zone only, this zone plus nearby quests from neighbouring zones, or all zones. Alt-drag its header to move it, or use the game's Edit Mode to move it and set its size."},
@@ -3018,8 +3030,8 @@ refreshSettingsRows = function()
         settingsPanel.categoryIndex = 1
         page = settingsPages[1]
     end
-    settingsPanel.pageTitle:SetText(page[1])
-    settingsPanel.summary:SetText(page[2])
+    settingsPanel.pageTitle:SetText(WalkMapL(page[1]))
+    settingsPanel.summary:SetText(WalkMapL(page[2]))
     settingsPanel.rows = {}
     -- Rows listed right now ("when"), and the part of them that fits.
     local items = {}
@@ -3086,6 +3098,10 @@ refreshSettingsRows = function()
         elseif field == "__mapKeys" then
             display = display .. ": " .. (not settings.useGameMapKeys and "Game map"
                 or settings.wheelOpensQuestLog ~= false and "WalkMap + quest log" or "WalkMap")
+        elseif field == "__language" then
+            local chosen = type(WalkMapSettings) == "table" and WalkMapSettings.language or "auto"
+            display = display .. ": " .. (chosen == "auto"
+                and ("Auto (" .. WalkMapLocale.Name() .. ")") or WalkMapLocale.Name(chosen))
         elseif field == "__dungeonMap" then
             local mode = extras.DungeonMapMode()
             display = display .. ": " .. (mode == "off" and "Off" or mode == "always" and "Always"
@@ -3135,8 +3151,8 @@ refreshSettingsRows = function()
         elseif TRACKER_CHOICES[field:sub(3)] then
             display = display .. ": " .. trackerChoiceLabel(field:sub(3))
         end
-        row.label:SetText(display)
-        row.description:SetText(description)
+        row.label:SetText(WalkMapL(display))
+        row.description:SetText(WalkMapL(description))
         local selectable = field:sub(1, 2) ~= "__" and value ~= "save"
         local selected = value == nil and settings[field] == true
             or settings[field] == value
@@ -3186,17 +3202,17 @@ refreshSettingsRows = function()
             local text = field == "__recommended" and (done and "Applied" or "Apply")
                 or field == "__trySelect" and (done and "Turn off" or "Try it")
                 or (done and "In use" or "Apply now")
-            actionButton.text:SetText(text)
+            actionButton.text:SetText(WalkMapL(text))
             -- Gold when there is something to apply, grey when it is done.
             if done then actionButton.text:SetTextColor(0.62, 0.62, 0.62)
             else actionButton.text:SetTextColor(1, 0.82, 0) end
             actionButton:SetAlpha(done and 0.7 or 1)
-            if field == "__recommended" or field == "__trySelect" then row.label:SetText("|cffffd24a" .. display .. "|r") end
+            if field == "__recommended" or field == "__trySelect" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
             row.description:SetPoint("RIGHT", row, "RIGHT", -108, 0)
         end
         -- What's new highlights: gold heading.
         if field == "__newsStar" or field == "__reportBugs" or field == "__info" then
-            row.label:SetText("|cffffd24a" .. display .. "|r")
+            row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r"))
         end
         if row.description.SetMaxLines then row.description:SetMaxLines(isButton and 2 or 0) end
         row:SetScript("OnClick", function()
@@ -3204,7 +3220,7 @@ refreshSettingsRows = function()
             -- quest tracker or protected buttons wait until after combat.
             -- (Only reachable in combat with a free map window.)
             if WalkMapCombat and WalkMapCombat.Locked() and COMBAT_WAIT[field] then
-                print("|cff80ff80WalkMap:|r " .. (option and option[3] or "This setting") .. " can be changed after combat.")
+                print(WalkMapL("|cff80ff80WalkMap:|r " .. (option and option[3] or "This setting") .. " can be changed after combat."))
                 return
             end
             if field == "profile" then
@@ -3267,6 +3283,16 @@ refreshSettingsRows = function()
                     setOption("useGameMapKeys", false)
                 end
                 refreshSettingsRows()
+            elseif field == "__language" then
+                -- Auto -> English -> Deutsch -> Français -> Auto (account-wide)
+                if type(WalkMapSettings) == "table" then
+                    local order, chosen = WalkMapLocale.ORDER, WalkMapSettings.language or "auto"
+                    for index, code in ipairs(order) do
+                        if code == chosen then WalkMapSettings.language = order[index % #order + 1] break end
+                    end
+                    WalkMapLocale.Apply()
+                end
+                refreshSettingsRows()
             elseif field == "__dungeonMap" then
                 -- Auto -> Always -> Off -> Auto
                 local mode = extras.DungeonMapMode()
@@ -3297,8 +3323,8 @@ refreshSettingsRows = function()
             elseif field == "__db" or field == "__guide" then
                 extras.CloseMenus()
                 if field == "__guide" then extras.Guide()
-                else print("|cff80ff80WalkMap:|r " .. (WalkMapLiveDB
-                    and WalkMapLiveDB.Status() or "QuestieDB unavailable")) end
+                else print(WalkMapL("|cff80ff80WalkMap:|r " .. (WalkMapLiveDB
+                    and WalkMapLiveDB.Status() or "QuestieDB unavailable"))) end
             elseif field == "__debug" then
                 extras.ShowDebug()
             elseif field == "__intro" then
@@ -3309,7 +3335,7 @@ refreshSettingsRows = function()
             elseif field == "__trySelect" then
                 setOption("selectKeepsReleased", settings.selectKeepsReleased ~= true)
                 if settings.selectKeepsReleased then
-                    print("|cff80ff80WalkMap:|r Select keeps the map released is on. Press Select to leave the map - it stays released even if you close and open the map - and Select takes it back. Turn it off under Settings > Controller & help.")
+                    print(WalkMapL("|cff80ff80WalkMap:|r Select keeps the map released is on. Press Select to leave the map - it stays released even if you close and open the map - and Select takes it back. Turn it off under Settings > Controller & help."))
                 end
                 refreshSettingsRows()
             elseif field == "__sortBags" and WalkMapBags then
@@ -3317,7 +3343,7 @@ refreshSettingsRows = function()
             elseif field == "__bagBinding" and WalkMapBags then
                 WalkMapBags.BindingHelp()
             elseif field == "__bagStatus" and WalkMapBags then
-                print("|cff80ff80WalkMap:|r " .. WalkMapBags.Status())
+                print(WalkMapL("|cff80ff80WalkMap:|r " .. WalkMapBags.Status()))
             elseif field == "__miniIconScale" or field == "__nativeIconScale"
                 or field == "__miniIconGap" or field == "__nativeIconGap"
                 or field == "__miniIconRange" or field == "__nativeIconRange" then
@@ -3357,21 +3383,21 @@ refreshSettingsRows = function()
                 refreshSettingsRows()
             elseif field == "__accountSave" then
                 extras.SaveAccountSettings()
-                print("|cff80ff80WalkMap:|r This character's settings are saved for your account."
-                    .. " On another character: Settings > Profiles > Load account settings.")
+                print(WalkMapL("|cff80ff80WalkMap:|r This character's settings are saved for your account."
+                    .. " On another character: Settings > Profiles > Load account settings."))
                 refreshSettingsRows()
             elseif field == "__accountNew" then
                 extras.SetAccountForNew(not extras.AccountForNew())
                 if extras.AccountForNew() and not extras.HasAccountSettings() then
-                    print("|cff80ff80WalkMap:|r Save account settings first; until then new characters start with the defaults.")
+                    print(WalkMapL("|cff80ff80WalkMap:|r Save account settings first; until then new characters start with the defaults."))
                 end
                 refreshSettingsRows()
             elseif field == "__accountLoad" then
                 local now = GetTime and GetTime() or 0
                 if not extras.HasAccountSettings() then
-                    print("|cff80ff80WalkMap:|r No account settings saved yet.")
+                    print(WalkMapL("|cff80ff80WalkMap:|r No account settings saved yet."))
                 elseif InCombatLockdown and InCombatLockdown() then
-                    print("|cff80ff80WalkMap:|r Load account settings after combat.")
+                    print(WalkMapL("|cff80ff80WalkMap:|r Load account settings after combat."))
                 elseif accountLoadArmedAt and now - accountLoadArmedAt < 4 then
                     accountLoadArmedAt = nil
                     extras.LoadAccountSettings()
@@ -3388,7 +3414,7 @@ refreshSettingsRows = function()
                 refreshSettingsRows()
             elseif field == "__applyLook" then
                 if InCombatLockdown and InCombatLockdown() then
-                    print("|cff80ff80WalkMap:|r The new look applies after combat (Apply now again).")
+                    print(WalkMapL("|cff80ff80WalkMap:|r The new look applies after combat (Apply now again)."))
                 elseif (settings.look or "classic") ~= WalkMapUI.Look() then
                     if C_UI and C_UI.Reload then C_UI.Reload() elseif ReloadUI then ReloadUI() end
                 end
@@ -3522,10 +3548,10 @@ local function createSettingsPanel()
     WalkMapUI.Inset(settingsPanel, 175, 39, 10, 58)
     local title = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOP", settingsPanel, "TOP", 0, -8)
-    title:SetText("WalkMap settings")
+    title:SetText(WalkMapL("WalkMap settings"))
     local categoriesTitle = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     categoriesTitle:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 22, -51)
-    categoriesTitle:SetText("Categories")
+    categoriesTitle:SetText(WalkMapL("Categories"))
     settingsPanel.pageTitle = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     settingsPanel.pageTitle:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 188, -50)
     settingsPanel.summary = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -3538,7 +3564,7 @@ local function createSettingsPanel()
     extras.StyleButton(close)
     local closeText = close:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     closeText:SetPoint("CENTER")
-    closeText:SetText("Done")
+    closeText:SetText(WalkMapL("Done"))
     close:SetScript("OnClick", function() setControllerPanelVisible(settingsPanel, false) end)
     settingsPanel.doneButton = close
     local cornerClose = CreateFrame("Button", nil, settingsPanel)
@@ -3550,11 +3576,11 @@ local function createSettingsPanel()
     settingsPanel.closeButton = cornerClose
     local footer = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     footer:SetPoint("BOTTOMLEFT", settingsPanel, "BOTTOMLEFT", 16, 15)
-    footer:SetText("D-pad: navigate    Left/Right: categories/options    B: close")
+    footer:SetText(WalkMapL("D-pad: navigate    Left/Right: categories/options    B: close"))
     footer:SetTextColor(0.7, 0.7, 0.7)
     local authors = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     authors:SetPoint("BOTTOM", settingsPanel, "BOTTOM", 0, 37)
-    authors:SetText("Created by Anexseus and Underbuks")
+    authors:SetText(WalkMapL("Created by Anexseus and Underbuks"))
     authors:SetTextColor(0.75, 0.75, 0.75)
     for i, page in ipairs(settingsPages) do
         if page.hidden then break end
@@ -3568,7 +3594,7 @@ local function createSettingsPanel()
         row.label:SetPoint("LEFT", row, "LEFT", 7, 0)
         row.label:SetPoint("RIGHT", row, "RIGHT", -4, 0)
         row.label:SetJustifyH("LEFT")
-        row.label:SetText(page[1])
+        row.label:SetText(WalkMapL(page[1]))
         row:SetScript("OnClick", function()
             settingsPanel.categoryIndex = i
             refreshSettingsRows()
@@ -3762,8 +3788,8 @@ function extras.Init(window, mapCanvas, onChanged)
     questButton:HookScript("OnEnter", function(self)
         if not GameTooltip then return end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:SetText("Quest focus")
-        GameTooltip:AddLine("Show only one quest's icons and areas, or all quests.", 0.8, 0.8, 0.8, true)
+        GameTooltip:SetText(WalkMapL("Quest focus"))
+        GameTooltip:AddLine(WalkMapL("Show only one quest's icons and areas, or all quests."), 0.8, 0.8, 0.8, true)
         GameTooltip:Show()
     end)
     questButton:HookScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -3802,7 +3828,7 @@ function extras.Init(window, mapCanvas, onChanged)
     end)
     buttons[3]:SetScript("OnClick", function()
         if WalkMapCombat and WalkMapCombat.Locked() then
-            print("|cff80ff80WalkMap:|r The minimap can be changed after combat.")
+            print(WalkMapL("|cff80ff80WalkMap:|r The minimap can be changed after combat."))
             return
         end
         if not settings.miniMap then

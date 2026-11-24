@@ -246,7 +246,7 @@ function combat.Init(frame, closeButton, toggleButton, viewport)
         end
         shieldLabel = shield:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         shieldLabel:SetPoint("BOTTOM", shield, "BOTTOM", 0, 7)
-        shieldLabel:SetText(SHIELD_TEXT)
+        shieldLabel:SetText(WalkMapL(SHIELD_TEXT))
         shield:Hide()
         closeButton:SetFrameLevel(shield:GetFrameLevel() + 2)
         -- Opened during combat: fit the shield to the map area again.

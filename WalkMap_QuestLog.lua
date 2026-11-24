@@ -299,7 +299,7 @@ local function makeButton(parent, width, height, text)
     local function fit() WalkMapUI.FitText(button.label, width - 6, height) end
     if hooksecurefunc then pcall(hooksecurefunc, button.label, "SetText", fit) end
     button.walkmapFit = fit
-    button.label:SetText(text)
+    button.label:SetText(WalkMapL(text))
     fit()
     return button
 end
@@ -321,9 +321,9 @@ local function tooltip(button, title, line)
         -- No tooltip when the controller lands here just because the map opened.
         if WalkMapJustOpened and WalkMapJustOpened(self) then return end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(type(title) == "function" and title(self) or title)
+        GameTooltip:SetText(WalkMapL(type(title) == "function" and title(self) or title))
         local text = type(line) == "function" and line(self) or line
-        if text then GameTooltip:AddLine(text, 0.85, 0.85, 0.85, true) end
+        if text then GameTooltip:AddLine(WalkMapL(text), 0.85, 0.85, 0.85, true) end
         GameTooltip:Show()
     end)
     button:HookScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -349,10 +349,10 @@ end
 local function updateFullButton()
     local button = actions.full
     if not button then return end
-    if not fullText then button.label:SetText("Full text") return end
+    if not fullText then button.label:SetText(WalkMapL("Full text")) return end
     local offset, maxScroll = detail.scroll:GetVerticalScroll() or 0, math.max(0,
         (detail.contentHeight or 0) - detail.scroll:GetHeight())
-    button.label:SetText(offset < maxScroll - 1 and "More text" or "Back")
+    button.label:SetText(WalkMapL(offset < maxScroll - 1 and "More text" or "Back"))
 end
 
 local function buildPanel()
@@ -366,7 +366,7 @@ local function buildPanel()
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -9)
-    title:SetText("Quest log")
+    title:SetText(WalkMapL("Quest log"))
     panel.count = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     panel.count:SetPoint("LEFT", title, "RIGHT", 8, 0)
     panel.count:SetTextColor(0.85, 0.78, 0.6)
@@ -409,8 +409,8 @@ local function buildPanel()
     grip:HookScript("OnEnter", function(self)
         if not GameTooltip then return end
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText("Drag to set the quest log's length")
-        GameTooltip:AddLine("Right-click to match the map's height again.", 0.85, 0.85, 0.85)
+        GameTooltip:SetText(WalkMapL("Drag to set the quest log's length"))
+        GameTooltip:AddLine(WalkMapL("Right-click to match the map's height again."), 0.85, 0.85, 0.85)
         GameTooltip:Show()
     end)
     grip:HookScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -489,7 +489,7 @@ local function buildPanel()
         detail.lines[i] = line
     end
     detail.rewardTitle = content:CreateFontString(nil, "OVERLAY", TITLE_FONT)
-    detail.rewardTitle:SetText("Rewards")
+    detail.rewardTitle:SetText(WalkMapL("Rewards"))
     ink(detail.rewardTitle, INK)
     detail.rewardLine = content:CreateFontString(nil, "OVERLAY", BODY_FONT)
     detail.rewardLine:SetWidth(width)
@@ -508,9 +508,9 @@ local function buildPanel()
             if not GameTooltip then return end
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             if not (GameTooltip.SetQuestLogItem and pcall(GameTooltip.SetQuestLogItem, GameTooltip, self.kind, self.index)) then
-                GameTooltip:SetText(self.name or "")
+                GameTooltip:SetText(WalkMapL(self.name or ""))
             end
-            if self.kind == "choice" then GameTooltip:AddLine("Choose one", 0.7, 0.8, 1) end
+            if self.kind == "choice" then GameTooltip:AddLine(WalkMapL("Choose one"), 0.7, 0.8, 1) end
             GameTooltip:Show()
         end)
         item:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -599,13 +599,13 @@ local function buildPanel()
         local now = GetTime and GetTime() or 0
         if button.armedID ~= entry.id or now > (button.armedUntil or 0) then
             button.armedID, button.armedUntil = entry.id, now + ABANDON_WINDOW
-            button.label:SetText("Confirm?")
+            button.label:SetText(WalkMapL("Confirm?"))
             button.label:SetTextColor(1, 0.45, 0.35)
             if C_Timer and C_Timer.After then
                 C_Timer.After(ABANDON_WINDOW, function()
                     if button.armedID == entry.id and (GetTime and GetTime() or 0) >= (button.armedUntil or 0) then
                         button.armedID = nil
-                        button.label:SetText("Abandon")
+                        button.label:SetText(WalkMapL("Abandon"))
                         button.label:SetTextColor(1, 1, 1)
                     end
                 end)
@@ -613,7 +613,7 @@ local function buildPanel()
             return
         end
         button.armedID = nil
-        button.label:SetText("Abandon")
+        button.label:SetText(WalkMapL("Abandon"))
         button.label:SetTextColor(1, 1, 1)
         selectQuest(entry)
         if C_QuestLog.SetAbandonQuest then call(C_QuestLog.SetAbandonQuest)
@@ -915,29 +915,29 @@ showDetail = function(questID)
     for _, item in ipairs(detail.items) do item:Hide() end
     detail.hasRewards = false
     if not entry then
-        detail.title:SetText(#entries == 0 and "Your quest log is empty." or "Choose a quest.")
+        detail.title:SetText(WalkMapL(#entries == 0 and "Your quest log is empty." or "Choose a quest."))
         detail.tag:SetText("")
         for _, line in ipairs(detail.lines) do line:SetText("") end
         detail.text:SetText("")
         layoutContent(nil, fullText)
         return
     end
-    detail.title:SetText(entry.title)
+    detail.title:SetText(WalkMapL(entry.title))
     local tagParts = {}
     if type(entry.level) == "number" and entry.level > 0 then tagParts[#tagParts + 1] = "Level " .. entry.level end
     if entry.tag then tagParts[#tagParts + 1] = entry.tag end
-    detail.tag:SetText(table.concat(tagParts, "  -  "))
+    detail.tag:SetText(WalkMapL(table.concat(tagParts, "  -  ")))
     local used = 0
     for _, objective in ipairs(entry.objectives or {}) do
         if used >= #detail.lines then break end
         used = used + 1
-        detail.lines[used]:SetText("- " .. tostring(objective.text or ""))
+        detail.lines[used]:SetText(WalkMapL("- " .. tostring(objective.text or "")))
         local color = objective.finished and INK_DONE or INK
         detail.lines[used]:SetTextColor(color[1], color[2], color[3])
     end
     if used == 0 then
         used = 1
-        detail.lines[1]:SetText(entry.complete and "Ready to turn in." or "No objectives listed.")
+        detail.lines[1]:SetText(WalkMapL(entry.complete and "Ready to turn in." or "No objectives listed."))
         local color = entry.complete and INK_DONE or INK
         detail.lines[1]:SetTextColor(color[1], color[2], color[3])
     end
@@ -947,12 +947,12 @@ showDetail = function(questID)
     local parts = {}
     if reward.xp then parts[#parts + 1] = reward.xp .. " XP" end
     if reward.money then parts[#parts + 1] = moneyText(reward.money) end
-    detail.rewardLine:SetText(table.concat(parts, "   "))
+    detail.rewardLine:SetText(WalkMapL(table.concat(parts, "   ")))
     for i, item in ipairs(reward.items) do
         local button = detail.items[i]
         button.kind, button.index, button.name = item.kind, item.index, item.name
         button.icon:SetTexture(item.texture)
-        button.count:SetText(type(item.count) == "number" and item.count > 1 and item.count or "")
+        button.count:SetText(WalkMapL(type(item.count) == "number" and item.count > 1 and item.count or ""))
         button:Show()
     end
     detail.hasRewards = #parts > 0 or #reward.items > 0
@@ -964,9 +964,9 @@ showDetail = function(questID)
         if description and description ~= "" then
             text = text .. (text ~= "" and "\n\n" or "") .. tostring(description)
         end
-        detail.text:SetText(text)
+        detail.text:SetText(WalkMapL(text))
     else
-        detail.text:SetText(tostring(summary or description or ""))
+        detail.text:SetText(WalkMapL(tostring(summary or description or "")))
     end
     layoutContent(entry, fullText)
     if not fullText then setScroll(0) end
@@ -975,11 +975,11 @@ showDetail = function(questID)
     if entry.id ~= selectedID then return end
     if actions.abandon.armedID and actions.abandon.armedID ~= entry.id then
         actions.abandon.armedID = nil
-        actions.abandon.label:SetText("Abandon")
+        actions.abandon.label:SetText(WalkMapL("Abandon"))
         actions.abandon.label:SetTextColor(1, 1, 1)
     end
-    actions.track.label:SetText(isTracked(entry) and "Untrack" or "Track")
-    actions.focus.label:SetText(WalkMapExtras.QuestFocus() == entry.id and "Unfocus" or "Focus")
+    actions.track.label:SetText(WalkMapL(isTracked(entry) and "Untrack" or "Track"))
+    actions.focus.label:SetText(WalkMapL(WalkMapExtras.QuestFocus() == entry.id and "Unfocus" or "Focus"))
     local mapID = questMap(entry)
     actions.map:SetEnabled(mapID ~= nil)
     actions.map.label:SetTextColor(mapID and 1 or 0.5, mapID and 1 or 0.5, mapID and 1 or 0.5)
@@ -997,8 +997,8 @@ refresh = function()
     for _, entry in ipairs(entries) do if entry.id then quests = quests + 1 end end
     local maxQuests = (C_QuestLog.GetMaxNumQuestsCanAccept and C_QuestLog.GetMaxNumQuestsCanAccept())
         or MAX_QUESTLOG_QUESTS or 20
-    panel.count:SetText(quests .. "/" .. maxQuests)
-    filterButton.label:SetText(settings.questLogZoneOnly and "This zone" or "All zones")
+    panel.count:SetText(WalkMapL(quests .. "/" .. maxQuests))
+    filterButton.label:SetText(WalkMapL(settings.questLogZoneOnly and "This zone" or "All zones"))
     filterButton.walkmapFit()
     for _, button in ipairs(actions) do
         if button.walkmapFit then button.walkmapFit() end
@@ -1071,8 +1071,8 @@ refresh = function()
             local collapsed = settings.questLogCollapsed[entry.title] == true
             -- (Whether the zone is folded in the game's own quest log does
             -- not matter here: WalkMap lists its quests either way.)
-            header.text:SetText(entry.title)
-            header.count:SetText(collapsed and tostring(counts[entry.title] or 0) or "")
+            header.text:SetText(WalkMapL(entry.title))
+            header.count:SetText(WalkMapL(collapsed and tostring(counts[entry.title] or 0) or ""))
             -- Long zone names shrink to stay inside the list.
             -- Long zone names shrink to stay inside the list; if even the
             -- smallest size is too wide, the end is cut ("...").
@@ -1096,18 +1096,18 @@ refresh = function()
             row:SetPoint("RIGHT", panel, "RIGHT", -12, 0)
             row.questID = entry.id
             row.hovered = false
-            row.label:SetText(entry.title .. (entry.tag and ("  |cffff9966" .. entry.tag .. "|r") or ""))
+            row.label:SetText(WalkMapL(entry.title .. (entry.tag and ("  |cffff9966" .. entry.tag .. "|r") or "")))
             local r, g, b = levelColor(entry.level, entry.id)
             row.label:SetTextColor(r, g, b)
             local xpText = WalkMapQuestInfo and WalkMapQuestInfo.XPText(entry.id) or ""
             if xpText ~= "" then xpText = xpText .. "   " end
             if entry.complete then
-                row.detail:SetText(xpText .. "|cff80f280Done|r")
+                row.detail:SetText(WalkMapL(xpText .. "|cff80f280Done|r"))
                 row.detail:SetTextColor(0.5, 0.95, 0.5)
             else
                 local progress = entry.total > 0 and (entry.done .. "/" .. entry.total .. "   ") or ""
                 local level = type(entry.level) == "number" and entry.level > 0 and tostring(entry.level) or ""
-                row.detail:SetText(xpText .. "|cffbfb38a" .. progress .. "|r" .. level)
+                row.detail:SetText(WalkMapL(xpText .. "|cffbfb38a" .. progress .. "|r" .. level))
                 row.detail:SetTextColor(0.85, 0.78, 0.6)
             end
             row.mark:SetShown(entry.id == focus)
@@ -1119,12 +1119,12 @@ refresh = function()
     for i = rowCount + 1, #rows do rows[i]:Hide() end
     for i = headerCount + 1, #headers do headers[i]:Hide() end
     panel.emptyText:SetShown(not fullText and #visible == 0)
-    panel.emptyText:SetText(settings.questLogZoneOnly and "No quests filed under this zone." or "Your quest log is empty.")
+    panel.emptyText:SetText(WalkMapL(settings.questLogZoneOnly and "No quests filed under this zone." or "Your quest log is empty."))
 
     pager:ClearAllPoints()
     pager:SetPoint("BOTTOM", panel.listBg, "BOTTOM", 0, 4)
     pager:SetShown(not fullText and pages > 1)
-    pager.label:SetText(string.format("Page %d/%d", page, pages))
+    pager.label:SetText(WalkMapL(string.format("Page %d/%d", page, pages)))
     pager.prev:SetEnabled(page > 1)
     pager.prev:SetAlpha(page > 1 and 1 or 0.3)
     pager.next:SetEnabled(page < pages)

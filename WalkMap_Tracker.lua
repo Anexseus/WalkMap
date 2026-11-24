@@ -157,11 +157,11 @@ end)
 grip:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("WalkMap zone quests")
-    GameTooltip:AddLine("Alt-drag to move. Alt-right-click to reset. Set its size in the game's Edit Mode.", 0.85, 0.85, 0.85, true)
-    GameTooltip:AddLine("Click a quest to open it in WalkMap's quest log.", 0.85, 0.85, 0.85, true)
-    GameTooltip:AddLine("Right-click a quest to remove it from this tracker and the maps. Track in the quest log brings it back.", 0.85, 0.85, 0.85, true)
-    GameTooltip:AddLine("Shift-click a quest to link it in chat (open the chat line first, or right after).", 0.85, 0.85, 0.85, true)
+    GameTooltip:SetText(WalkMapL("WalkMap zone quests"))
+    GameTooltip:AddLine(WalkMapL("Alt-drag to move. Alt-right-click to reset. Set its size in the game's Edit Mode."), 0.85, 0.85, 0.85, true)
+    GameTooltip:AddLine(WalkMapL("Click a quest to open it in WalkMap's quest log."), 0.85, 0.85, 0.85, true)
+    GameTooltip:AddLine(WalkMapL("Right-click a quest to remove it from this tracker and the maps. Track in the quest log brings it back."), 0.85, 0.85, 0.85, true)
+    GameTooltip:AddLine(WalkMapL("Shift-click a quest to link it in chat (open the chat line first, or right after)."), 0.85, 0.85, 0.85, true)
     GameTooltip:Show()
 end)
 grip:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -229,7 +229,7 @@ do
     edge("TOPRIGHT", "BOTTOMRIGHT", false)
     local tag = editBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     tag:SetPoint("BOTTOMLEFT", editBox, "TOPLEFT", 2, 2)
-    tag:SetText("WalkMap quest tracker")
+    tag:SetText(WalkMapL("WalkMap quest tracker"))
 end
 local corner = CreateFrame("Button", nil, editBox)
 corner:SetSize(18, 18)
@@ -272,9 +272,9 @@ end)
 editBox:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText("WalkMap quest tracker")
-    GameTooltip:AddLine("Drag to move. Drag the corner to set width and height: the tracker lists the quests that fit.", 0.85, 0.85, 0.85, true)
-    GameTooltip:AddLine("Right-click: automatic height (down to the bottom of the screen).", 0.85, 0.85, 0.85, true)
+    GameTooltip:SetText(WalkMapL("WalkMap quest tracker"))
+    GameTooltip:AddLine(WalkMapL("Drag to move. Drag the corner to set width and height: the tracker lists the quests that fit."), 0.85, 0.85, 0.85, true)
+    GameTooltip:AddLine(WalkMapL("Right-click: automatic height (down to the bottom of the screen)."), 0.85, 0.85, 0.85, true)
     GameTooltip:Show()
 end)
 editBox:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -365,8 +365,8 @@ local function blockFor(i)
             if self.questID and WalkMapExtras.SetTrackerHidden then
                 WalkMapExtras.SetTrackerHidden(self.questID, true)
                 if print then
-                    print("|cff80ff80WalkMap:|r " .. tostring(self.questTitle or "Quest")
-                        .. " removed from the tracker. Track in WalkMap's quest log brings it back.")
+                    print(WalkMapL("|cff80ff80WalkMap:|r " .. tostring(self.questTitle or "Quest")
+                        .. " removed from the tracker. Track in WalkMap's quest log brings it back."))
                 end
             end
             return
@@ -529,7 +529,7 @@ local function render()
     if not WalkMapExtras.ZoneTracker() then frame:Hide() return end
     local quests, zoneName, focus = zoneQuests()
     if #quests == 0 and not editing then frame:Hide() return end
-    header:SetText(zoneName or "Zone")
+    header:SetText(WalkMapL(zoneName or "Zone"))
     if not more then
         more = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         more:SetJustifyH("LEFT")
@@ -549,7 +549,7 @@ local function render()
         if group ~= lastGroup and group ~= "" then
             labelsUsed = labelsUsed + 1
             local label = groupLabel(labelsUsed)
-            label:SetText(group)
+            label:SetText(WalkMapL(group))
             label:SetTextColor(0.62, 0.6, 0.52)
             label:ClearAllPoints()
             label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, y - 2)
@@ -564,28 +564,28 @@ local function render()
         block:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, y)
         local r, g, b = levelColor(quest.level, quest.id)
         local prefix = quest.id == focus and "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:12|t " or ""
-        block.title:SetText(prefix .. (type(quest.level) == "number" and quest.level > 0
+        block.title:SetText(WalkMapL(prefix .. (type(quest.level) == "number" and quest.level > 0
             and ("[" .. quest.level .. "] ") or "") .. quest.title
-            .. (quest.tag and (" |cffc8a0ff(" .. quest.tag .. ")|r") or ""))
-        block.distance:SetText((quest.here or quest.near) and distanceText(quest.id) or "")
+            .. (quest.tag and (" |cffc8a0ff(" .. quest.tag .. ")|r") or "")))
+        block.distance:SetText(WalkMapL((quest.here or quest.near) and distanceText(quest.id) or ""))
         block.title:SetTextColor(r, g, b)
         local height = (block.title.GetStringHeight and block.title:GetStringHeight() or 13) + 1
         local used = 0
         if opts.objectives == false then
             if quest.complete then
-                block.title:SetText(block.title:GetText() .. " |cff80f080(ready)|r")
+                block.title:SetText(WalkMapL(block.title:GetText() .. " |cff80f080(ready)|r"))
             end
         elseif quest.complete then
             used = 1
             local line = lineFor(block, 1)
-            line:SetText("Ready to turn in")
+            line:SetText(WalkMapL("Ready to turn in"))
             line:SetTextColor(0.5, 0.95, 0.5)
         else
             local ok, objectives = call(C_QuestLog.GetQuestObjectives, quest.id)
             for _, objective in ipairs(ok and type(objectives) == "table" and objectives or {}) do
                 used = used + 1
                 local line = lineFor(block, used)
-                line:SetText("- " .. tostring(objective.text or ""))
+                line:SetText(WalkMapL("- " .. tostring(objective.text or "")))
                 if objective.finished then line:SetTextColor(0.5, 0.95, 0.5)
                 else line:SetTextColor(0.9, 0.9, 0.9) end
                 if used >= 6 then break end
@@ -596,7 +596,7 @@ local function render()
             for _, row in ipairs(WalkMapGroupProgress.Lines(quest.id)) do
                 used = used + 1
                 local line = lineFor(block, used)
-                line:SetText(row[1])
+                line:SetText(WalkMapL(row[1]))
                 line:SetTextColor(row[2], row[3], row[4])
             end
         end
@@ -604,11 +604,11 @@ local function render()
         block.xp:ClearAllPoints()
         if xpText ~= "" and used > 0 then
             block.xp:SetPoint("TOPRIGHT", block, "TOPRIGHT", 0, -height - 1)
-            block.xp:SetText(xpText)
+            block.xp:SetText(WalkMapL(xpText))
             block.xp:Show()
         else
             block.xp:Hide()
-            if xpText ~= "" then block.title:SetText(block.title:GetText() .. " " .. xpText) end
+            if xpText ~= "" then block.title:SetText(WalkMapL(block.title:GetText() .. " " .. xpText)) end
         end
         for n = 1, used do
             local line = block.lines[n]
@@ -641,7 +641,7 @@ local function render()
     local left = #quests - placed
     if left > 0 then
         more:SetWidth(WIDTH)
-        more:SetText("+" .. left .. (left == 1 and " more quest" or " more quests"))
+        more:SetText(WalkMapL("+" .. left .. (left == 1 and " more quest" or " more quests")))
         more:ClearAllPoints()
         more:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, y - 1)
         more:Show()
@@ -800,7 +800,7 @@ events:SetScript("OnUpdate", function(_, elapsed)
         tracker.distanceAt = 0
         for _, block in ipairs(blocks) do
             if block:IsShown() and block.questID and block.distance:GetText() ~= nil then
-                if block.distance:GetText() ~= "" then block.distance:SetText(distanceText(block.questID)) end
+                if block.distance:GetText() ~= "" then block.distance:SetText(WalkMapL(distanceText(block.questID))) end
             end
         end
     end

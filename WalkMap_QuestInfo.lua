@@ -297,8 +297,8 @@ function info.LinkToChat(questID)
     pendingLink, pendingUntil = link, now() + PENDING_FOR
     info.lastLink = info.lastLink .. " (waiting for chat)"
     if print then
-        print("|cff80ff80WalkMap:|r open the chat line within " .. PENDING_FOR
-            .. " seconds to put in " .. questTitle(questID) .. ".")
+        print(WalkMapL("|cff80ff80WalkMap:|r open the chat line within " .. PENDING_FOR
+            .. " seconds to put in " .. questTitle(questID) .. "."))
     end
     return false
 end

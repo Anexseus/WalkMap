@@ -484,11 +484,11 @@ local function pin(pool, index, size)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             for i, line in ipairs(self.lines) do
                 if line.right then
-                    GameTooltip:AddDoubleLine(line.text, line.right, line.r, line.g, line.b, 0.6, 0.8, 1)
+                    GameTooltip:AddDoubleLine(WalkMapL(line.text), WalkMapL(line.right), line.r, line.g, line.b, 0.6, 0.8, 1)
                 elseif i == 1 then
-                    GameTooltip:SetText(line.text, line.r or 1, line.g or 0.82, line.b or 0)
+                    GameTooltip:SetText(WalkMapL(line.text), line.r or 1, line.g or 0.82, line.b or 0)
                 else
-                    GameTooltip:AddLine(line.text, line.r or 1, line.g or 1, line.b or 1)
+                    GameTooltip:AddLine(WalkMapL(line.text), line.r or 1, line.g or 1, line.b or 1)
                 end
             end
             GameTooltip:Show()
@@ -745,11 +745,11 @@ function friendsMod.Tab()
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
         for i, line in ipairs(tabLines()) do
             if line.right then
-                GameTooltip:AddDoubleLine(line.text, line.right, line.r, line.g, line.b, 0.6, 0.8, 1)
+                GameTooltip:AddDoubleLine(WalkMapL(line.text), WalkMapL(line.right), line.r, line.g, line.b, 0.6, 0.8, 1)
             elseif i == 1 then
-                GameTooltip:SetText(line.text, 1, 0.82, 0)
+                GameTooltip:SetText(WalkMapL(line.text), 1, 0.82, 0)
             else
-                GameTooltip:AddLine(line.text, line.r or 1, line.g or 1, line.b or 1, true)
+                GameTooltip:AddLine(WalkMapL(line.text), line.r or 1, line.g or 1, line.b or 1, true)
             end
         end
         GameTooltip:Show()
@@ -771,7 +771,7 @@ end
 
 function friendsMod.UpdateTab()
     if not tab then return end
-    tab.count:SetText(#hereList > 0 and #hereList or "")
+    tab.count:SetText(WalkMapL(#hereList > 0 and #hereList or ""))
     if tab.icon.SetDesaturated then tab.icon:SetDesaturated(#hereList == 0) end
 end
 

@@ -113,10 +113,10 @@ upButton:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     local _, name = parent()
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-    GameTooltip:SetText("Open " .. tostring(name or "the map above"))
-    GameTooltip:AddLine("Right-click on a continent or the world map does the same. "
-        .. "Controller: LB in map control when zoomed all the way out.", 0.8, 0.8, 0.8, true)
-    GameTooltip:AddLine("Hide this button under Buttons.", 0.6, 0.6, 0.6, true)
+    GameTooltip:SetText(WalkMapL("Open " .. tostring(name or "the map above")))
+    GameTooltip:AddLine(WalkMapL("Right-click on a continent or the world map does the same. "
+        .. "Controller: LB in map control when zoomed all the way out."), 0.8, 0.8, 0.8, true)
+    GameTooltip:AddLine(WalkMapL("Hide this button under Buttons."), 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
 end)
 upButton:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -140,7 +140,7 @@ function levels.Refresh()
     local text = (inControl and "LB: " or "") .. (upArrow and "" or "< ") .. name
     if text ~= shownText then
         shownText = text
-        upLabel:SetText(text)
+        upLabel:SetText(WalkMapL(text))
         local width = upLabel.GetStringWidth and upLabel:GetStringWidth() or 100
         upButton:SetWidth(math.max(60, math.min(260, (width or 100) + (upArrow and 30 or 18))))
     end
@@ -244,7 +244,7 @@ viewport:HookScript("OnUpdate", function(_, delta)
     local scale = hover:GetEffectiveScale()
     label:ClearAllPoints()
     label:SetPoint("BOTTOM", UIParent, "BOTTOMLEFT", cx / scale, cy / scale + 14)
-    label:SetText(viewport.walkmapChildText(child))
+    label:SetText(WalkMapL(viewport.walkmapChildText(child)))
     label:Show()
 end)
 viewport:HookScript("OnHide", function() label:Hide() outline:Hide() end)

@@ -2,6 +2,12 @@
 
 ## 1.14.20
 
+New
+- German and French: WalkMap's windows, settings, menus, tooltips and chat
+  messages follow the game's language. Settings > Look > Language picks
+  another one (Auto, English, Deutsch, Français). The translations are new:
+  corrections are welcome in the comments on CurseForge.
+
 Fixed
 - Button hints (and Pad focus) turned off by hand came back on after a
   restart: when the game switched its interface at login, "How you play"

@@ -14,7 +14,7 @@ local action = "WALKMAP_SORT_BAGS"
 local lastAutoSell = settings.autoSellJunk
 
 local function say(message)
-    print("|cff80ff80WalkMap:|r " .. message)
+    print(WalkMapL("|cff80ff80WalkMap:|r " .. message))
 end
 
 local function restricted()

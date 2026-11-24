@@ -113,7 +113,7 @@ mapArrow:SetPoint("RIGHT", -1, 0)
 mapArrow:SetTexture("Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
 local mapPickerHint = mapPickerButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 mapPickerHint:SetPoint("RIGHT", mapArrow, "LEFT", -1, 0)
-mapPickerHint:SetText("Zones")
+mapPickerHint:SetText(WalkMapL("Zones"))
 mapPickerHint:SetTextColor(1, 0.82, 0.3)
 mapPickerButton:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
 mapPickerButton:GetHighlightTexture():SetAlpha(0.3)
@@ -137,8 +137,8 @@ mapPickerButton:SetScript("OnEnter", function(self)
     if WalkMapJustOpened(self) then return end
     if GameTooltip then
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-        GameTooltip:SetText("Choose zone")
-        GameTooltip:AddLine("Browse zones by region. Green marks your current zone; Follow returns to it.", 1, 1, 1, true)
+        GameTooltip:SetText(WalkMapL("Choose zone"))
+        GameTooltip:AddLine(WalkMapL("Browse zones by region. Green marks your current zone; Follow returns to it."), 1, 1, 1, true)
         GameTooltip:Show()
     end
 end)
@@ -573,8 +573,8 @@ local setWaypoint
 local function say(message)
 
     print(
-        "|cff80ff80WalkMap:|r "
-        .. message
+        WalkMapL("|cff80ff80WalkMap:|r "
+        .. message)
     )
 
 end
@@ -1323,8 +1323,8 @@ end
 local function addObjectiveTooltip(entry)
     local label = entry.objectiveName or "Objective"
     if entry.progress then label = label .. "  " .. entry.progress end
-    GameTooltip:AddLine(label, 1, 0.9, 0.65)
-    if entry.dropSource then GameTooltip:AddLine("Dropped by " .. entry.dropSource, 0.85, 0.85, 0.85) end
+    GameTooltip:AddLine(WalkMapL(label), 1, 0.9, 0.65)
+    if entry.dropSource then GameTooltip:AddLine(WalkMapL("Dropped by " .. entry.dropSource), 0.85, 0.85, 0.85) end
     local levels = type(entry.levels) == "table" and entry.levels or nil
     if levels or RANK_LABELS[entry.rank] then
         -- "Level 15-16", coloured like quest difficulty for your level.
@@ -1340,11 +1340,11 @@ local function addObjectiveTooltip(entry)
         elseif RANK_LABELS[entry.rank] then
             r, g, b = rankColor(entry.rank)
         end
-        GameTooltip:AddLine(text, r, g, b)
+        GameTooltip:AddLine(WalkMapL(text), r, g, b)
     end
     if type(entry.dropRate) == "number" then
-        GameTooltip:AddLine("Estimated drop rate: "
-            .. string.format("%g%%", entry.dropRate), 0.6, 0.9, 0.6)
+        GameTooltip:AddLine(WalkMapL("Estimated drop rate: "
+            .. string.format("%g%%", entry.dropRate)), 0.6, 0.9, 0.6)
         return true
     end
     return false
@@ -1499,9 +1499,9 @@ local function refreshObjectivePins(mapID, mapQuests, activeQuestID)
                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
                 local entries = self.entries
                 if #entries == 1 then
-                    GameTooltip:SetText(entries[1].questTitle or "Quest")
+                    GameTooltip:SetText(WalkMapL(entries[1].questTitle or "Quest"))
                     if addObjectiveTooltip(entries[1]) then
-                        GameTooltip:AddLine("QuestieDB estimate; may differ in-game.", 0.7, 0.7, 0.7)
+                        GameTooltip:AddLine(WalkMapL("QuestieDB estimate; may differ in-game."), 0.7, 0.7, 0.7)
                     end
                     -- Called directly: "a and f()" would keep only f's first result.
                     local nextID, nextName
@@ -1509,27 +1509,27 @@ local function refreshObjectivePins(mapID, mapQuests, activeQuestID)
                         nextID, nextName = WalkMapLiveDB.NextQuest(entries[1].questID)
                     end
                     if nextID then
-                        GameTooltip:AddLine("Next in chain: " .. tostring(nextName or ("Quest " .. nextID)), 0.6, 0.85, 1)
+                        GameTooltip:AddLine(WalkMapL("Next in chain: " .. tostring(nextName or ("Quest " .. nextID))), 0.6, 0.85, 1)
                     end
                 else
-                    GameTooltip:SetText(#entries .. " quest objectives")
+                    GameTooltip:SetText(WalkMapL(#entries .. " quest objectives"))
                     local hasRate = false
                     for n = 1, math.min(#entries, 10) do
                         local entry = entries[n]
-                        GameTooltip:AddLine(entry.questTitle or "Quest",
+                        GameTooltip:AddLine(WalkMapL(entry.questTitle or "Quest"),
                             entry.active and 0.4 or 1, entry.active and 0.9 or 0.82, 1)
                         if addObjectiveTooltip(entry) then hasRate = true end
                     end
                     if #entries > 10 then
-                        GameTooltip:AddLine("+ " .. (#entries - 10) .. " more objectives", 0.7, 0.7, 0.7)
+                        GameTooltip:AddLine(WalkMapL("+ " .. (#entries - 10) .. " more objectives"), 0.7, 0.7, 0.7)
                     end
                     if hasRate then
-                        GameTooltip:AddLine("QuestieDB estimates; may differ in-game.", 0.7, 0.7, 0.7)
+                        GameTooltip:AddLine(WalkMapL("QuestieDB estimates; may differ in-game."), 0.7, 0.7, 0.7)
                     end
                 end
-                GameTooltip:AddLine(#entries == 1 and "Click to focus this quest"
-                    or "Click to focus these quests in turn", 0.7, 0.8, 1)
-                GameTooltip:AddLine("Right-click or Shift-click to hide this location", 0.7, 0.8, 1)
+                GameTooltip:AddLine(WalkMapL(#entries == 1 and "Click to focus this quest"
+                    or "Click to focus these quests in turn"), 0.7, 0.8, 1)
+                GameTooltip:AddLine(WalkMapL("Right-click or Shift-click to hide this location"), 0.7, 0.8, 1)
                 GameTooltip:Show()
             end)
             pin:SetScript("OnLeave", function()
@@ -1589,7 +1589,7 @@ local function refreshObjectivePins(mapID, mapQuests, activeQuestID)
         pin.dropRate = entry.dropRate
         if #group.entries > 1 then
             local count = #group.entries
-            pin.badge:SetText(tostring(count))
+            pin.badge:SetText(WalkMapL(tostring(count)))
             pin.badgeBack:SetSize(count >= 10 and 17 or 13, 13)
             pin.badge:Show()
             pin.badgeBack:Show()
@@ -1972,14 +1972,14 @@ local function refreshQuests(
 
 
             pin.label:SetText(
-                name
+                WalkMapL(name
                 or
                 (
                     "Quest "
                     .. tostring(
                         quest.questID
                     )
-                )
+                ))
             )
 
             pin.questTitle = name or "Quest " .. tostring(quest.questID)
@@ -2089,21 +2089,21 @@ local function refreshQuests(
                     lead.groupBadge:SetShadowColor(0, 0, 0, 1)
                     lead.groupBadge:SetShadowOffset(1, -1)
                 end
-                lead.groupBadge:SetText(tostring(#entries))
+                lead.groupBadge:SetText(WalkMapL(tostring(#entries)))
                 lead.groupBadge:Show()
-                lead.label:SetText(#entries .. " quests")
+                lead.label:SetText(WalkMapL(#entries .. " quests"))
                 lead.groupEntries = entries
                 lead:EnableMouse(true)
                 lead:SetScript("OnEnter", function(self)
                     if not GameTooltip then return end
                     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                    GameTooltip:SetText(#self.groupEntries .. " quests")
+                    GameTooltip:SetText(WalkMapL(#self.groupEntries .. " quests"))
                     for _, entry in ipairs(self.groupEntries) do
-                        GameTooltip:AddLine(entry.title ..
-                            (entry.ready and " (ready to turn in)" or ""),
+                        GameTooltip:AddLine(WalkMapL(entry.title ..
+                            (entry.ready and " (ready to turn in)" or "")),
                             entry.active and 0.4 or 1, entry.active and 0.9 or 0.82, 1)
                 end
-                GameTooltip:AddLine("Click to focus these quests in turn", 0.7, 0.8, 1)
+                GameTooltip:AddLine(WalkMapL("Click to focus these quests in turn"), 0.7, 0.8, 1)
                 GameTooltip:Show()
                 end)
                 lead:SetScript("OnLeave", function()
@@ -2121,12 +2121,12 @@ local function refreshQuests(
                     lead:SetScript("OnEnter", function(self)
                         if not GameTooltip then return end
                         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:SetText(self.questTitle or "Quest")
+                        GameTooltip:SetText(WalkMapL(self.questTitle or "Quest"))
                         if self.ready then
-                            GameTooltip:AddLine("Ready to turn in" .. (self.turnInName
-                                and (": " .. self.turnInName) or ""), 1, 0.85, 0.2)
+                            GameTooltip:AddLine(WalkMapL("Ready to turn in" .. (self.turnInName
+                                and (": " .. self.turnInName) or "")), 1, 0.85, 0.2)
                         end
-                        GameTooltip:AddLine("Click to focus this quest", 0.7, 0.8, 1)
+                        GameTooltip:AddLine(WalkMapL("Click to focus this quest"), 0.7, 0.8, 1)
                         GameTooltip:Show()
                     end)
                     lead:SetScript("OnLeave", function()
@@ -2371,12 +2371,12 @@ local function updatePartyMembers(
 
 
                     pin.name:SetText(
-                        name
+                        WalkMapL(name
                         or
                         (
                             "Party "
                             .. i
-                        )
+                        ))
                     )
 
 
@@ -2757,7 +2757,7 @@ dbBadge:EnableMouse(true)
 WalkMapExtras.StyleButton(dbBadge)
 local dbLabel = dbBadge:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 dbLabel:SetPoint("CENTER")
-dbLabel:SetText("DB: ...")
+dbLabel:SetText(WalkMapL("DB: ..."))
 -- The title's zone chooser ends where the badge begins, so it gains the room
 -- the compact Ready badge frees up.
 mapPickerButton:ClearAllPoints()
@@ -2783,19 +2783,19 @@ local function updateDBBadge()
     lastDBPhase, lastDBProgress = phase, progress
     if phase == "ready" then
         -- Compact when all is well; hover still shows full QuestieDB status.
-        dbLabel:SetText("DB")
+        dbLabel:SetText(WalkMapL("DB"))
         dbLabel:SetTextColor(0.4, 1, 0.5)
         setDBBadgeWidth(36)
     elseif phase == "loading" then
-        dbLabel:SetText("DB: " .. tostring(progress or 0) .. "%")
+        dbLabel:SetText(WalkMapL("DB: " .. tostring(progress or 0) .. "%"))
         dbLabel:SetTextColor(1, 0.82, 0.35)
         setDBBadgeWidth(79)
     elseif phase == "waiting" then
-        dbLabel:SetText("DB: Wait")
+        dbLabel:SetText(WalkMapL("DB: Wait"))
         dbLabel:SetTextColor(1, 0.82, 0.35)
         setDBBadgeWidth(79)
     else
-        dbLabel:SetText("DB: Error")
+        dbLabel:SetText(WalkMapL("DB: Error"))
         dbLabel:SetTextColor(1, 0.45, 0.45)
         setDBBadgeWidth(79)
     end
@@ -2805,10 +2805,10 @@ dbBadge:SetScript("OnEnter", function(self)
     if WalkMapJustOpened(self) then return end
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
-    GameTooltip:SetText("QuestieDB")
-    GameTooltip:AddLine(WalkMapLiveDB and WalkMapLiveDB.Status()
-        or "QuestieDB integration unavailable", 1, 0.85, 0.55, true)
-    GameTooltip:AddLine("Click to repeat the status in chat.", 0.7, 0.8, 1)
+    GameTooltip:SetText(WalkMapL("QuestieDB"))
+    GameTooltip:AddLine(WalkMapL(WalkMapLiveDB and WalkMapLiveDB.Status()
+        or "QuestieDB integration unavailable"), 1, 0.85, 0.55, true)
+    GameTooltip:AddLine(WalkMapL("Click to repeat the status in chat."), 0.7, 0.8, 1)
     GameTooltip:Show()
 end)
 dbBadge:SetScript("OnLeave", function()
@@ -2891,15 +2891,15 @@ local function makeZoomButton(label, right, tooltip, detail, tint)
     WalkMapExtras.StyleButton(button)
     local textLabel = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     textLabel:SetPoint("CENTER")
-    textLabel:SetText(label)
+    textLabel:SetText(WalkMapL(label))
     if tint then textLabel:SetTextColor(tint[1], tint[2], tint[3]) end
     button.walkmapLabel = textLabel
     -- Hover and native controller focus both show what the button zooms.
     button:HookScript("OnEnter", function(self)
         if not GameTooltip then return end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:SetText(tooltip)
-        if detail then GameTooltip:AddLine(detail, 0.8, 0.8, 0.8, true) end
+        GameTooltip:SetText(WalkMapL(tooltip))
+        if detail then GameTooltip:AddLine(WalkMapL(detail), 0.8, 0.8, 0.8, true) end
         GameTooltip:Show()
     end)
     button:HookScript("OnLeave", function()
@@ -2978,7 +2978,7 @@ centerButton:EnableMouse(true)
 WalkMapExtras.StyleButton(centerButton)
 local centerLabel = centerButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 centerLabel:SetPoint("CENTER")
-centerLabel:SetText("Player")
+centerLabel:SetText(WalkMapL("Player"))
 -- The footer no longer shows Player: Follow brings the map back to you, and
 -- the zone title's menu has Current zone. The button stays as a hidden
 -- action for the controller's map control (Center) and keeps the footer's
@@ -3240,7 +3240,7 @@ local function drawMap(
     if not layer then
 
         status:SetText(
-            "No map art for this zone yet."
+            WalkMapL("No map art for this zone yet.")
         )
 
         return
@@ -3260,7 +3260,7 @@ local function drawMap(
     then
 
         status:SetText(
-            "Waiting for map art..."
+            WalkMapL("Waiting for map art...")
         )
 
         return
@@ -3363,8 +3363,8 @@ local function drawMap(
     local zoneName = (WalkMapDungeons and WalkMapDungeons.Title(mapID))
         or info and info.name or tostring(mapID)
     title:SetText(
-        "WalkMap - " .. zoneName
-        .. (WalkMapExtras.ZoneLevelText and WalkMapExtras.ZoneLevelText(zoneName) or "")
+        WalkMapL("WalkMap - " .. zoneName
+        .. (WalkMapExtras.ZoneLevelText and WalkMapExtras.ZoneLevelText(zoneName) or ""))
     )
 
 end
@@ -3538,9 +3538,9 @@ WalkMapWaypoint.PadAt = function(x, y) padWaypointAt(x, y) end
 waypointPin:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Waypoint")
-    GameTooltip:AddLine(tostring(self.pinName or ""), 1, 0.9, 0.65)
-    GameTooltip:AddLine("Right-click to clear. In map control: Y to select, A to clear.", 0.7, 0.8, 1, true)
+    GameTooltip:SetText(WalkMapL("Waypoint"))
+    GameTooltip:AddLine(WalkMapL(tostring(self.pinName or "")), 1, 0.9, 0.65)
+    GameTooltip:AddLine(WalkMapL("Right-click to clear. In map control: Y to select, A to clear."), 0.7, 0.8, 1, true)
     GameTooltip:Show()
 end)
 waypointPin:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -3678,8 +3678,8 @@ corpsePin:Hide()
 corpsePin:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    GameTooltip:SetText("Your corpse")
-    GameTooltip:AddLine("Shown until you are alive again.", 0.7, 0.8, 1, true)
+    GameTooltip:SetText(WalkMapL("Your corpse"))
+    GameTooltip:AddLine(WalkMapL("Shown until you are alive again."), 0.7, 0.8, 1, true)
     GameTooltip:Show()
 end)
 corpsePin:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
@@ -3735,7 +3735,7 @@ showWaypointDirection = function(mapID, x, y)
         local yards = worldDistance(mapID, x, y, cx, cy)
         local distance = yards and string.format("%.0f yd", yards)
             or string.format("~%.0f%% map width", math.sqrt(dx * dx + dy * dy) * 100)
-        nearestText:SetText(string.format("|cffff6666Corpse:|r  %s  %s", compassDirection(dx, dy), distance))
+        nearestText:SetText(WalkMapL(string.format("|cffff6666Corpse:|r  %s  %s", compassDirection(dx, dy), distance)))
         nearestBadge:Show()
         return true
     end
@@ -3751,8 +3751,8 @@ showWaypointDirection = function(mapID, x, y)
     end
     local distance = yards and string.format("%.0f yd", yards)
         or string.format("~%.0f%% map width", math.sqrt(dx * dx + dy * dy) * 100)
-    nearestText:SetText(string.format("|cffffd24dWaypoint:|r %s  %s  %s",
-        tostring(waypoint.label or ""):sub(1, 24), compassDirection(dx, dy), distance))
+    nearestText:SetText(WalkMapL(string.format("|cffffd24dWaypoint:|r %s  %s  %s",
+        tostring(waypoint.label or ""):sub(1, 24), compassDirection(dx, dy), distance)))
     nearestBadge:Show()
     return true
 end
@@ -3934,9 +3934,9 @@ crosshair:SetScript("OnUpdate", function(_, elapsed)
     local child = viewport.walkmapChildAt(x, y)
     if child and child.name then
         -- Just the name: the hint line at the top already says what A does.
-        crosshairText:SetText(viewport.walkmapChildText(child))
+        crosshairText:SetText(WalkMapL(viewport.walkmapChildText(child)))
     else
-        crosshairText:SetText(string.format("%.1f, %.1f", x * 100, y * 100))
+        crosshairText:SetText(WalkMapL(string.format("%.1f, %.1f", x * 100, y * 100)))
     end
 end)
 end
@@ -4003,7 +4003,7 @@ local function updateNearestObjective(mapID, x, y)
         end
     end
     if not nearest then
-        nearestText:SetText("Focused quest: no known location in this zone")
+        nearestText:SetText(WalkMapL("Focused quest: no known location in this zone"))
     else
         local dx, dy = nearest[1] - x, nearest[2] - y
         local northSouth = dy < -0.025 and "N" or dy > 0.025 and "S" or ""
@@ -4011,8 +4011,8 @@ local function updateNearestObjective(mapID, x, y)
         local direction = northSouth .. eastWest
         if direction == "" then direction = "nearby" end
         local name = tostring(nearest[3] or "objective"):sub(1, 27)
-        nearestText:SetText(string.format("Nearest known: %s  %s  ~%.0f%% map width",
-            name, direction, math.sqrt(bestDistance) * 100))
+        nearestText:SetText(WalkMapL(string.format("Nearest known: %s  %s  ~%.0f%% map width",
+            name, direction, math.sqrt(bestDistance) * 100)))
     end
     nearestBadge:Show()
 end
@@ -4065,11 +4065,11 @@ local function updatePlayerPosition(mapID)
 
 
         status:SetText(
-            string.format(
+            WalkMapL(string.format(
                 "%.1f, %.1f",
                 x * 100,
                 y * 100
-            )
+            ))
         )
 
         local nearestOK, nearestError = pcall(updateNearestObjective, mapID, x, y)
@@ -4090,10 +4090,10 @@ local function updatePlayerPosition(mapID)
         if inside and GetInstanceInfo then instanceName = GetInstanceInfo() end
         -- Santiago Reyes' painted maps carry his credit and support link.
         local credit = WalkMapDungeons and WalkMapDungeons.Credit(currentMap)
-        status:SetText(credit or
+        status:SetText(WalkMapL(credit or
             (inside and type(instanceName) == "string" and instanceName ~= "")
                 and ("In " .. instanceName .. " - no position inside")
-                or "Position unavailable."
+                or "Position unavailable.")
         )
 
         nearestBadge:Hide()
@@ -4162,12 +4162,12 @@ local function update()
 
 
         title:SetText(
-            "WalkMap"
+            WalkMapL("WalkMap")
         )
 
 
         status:SetText(
-            "No map data here."
+            WalkMapL("No map data here.")
         )
 
         return
@@ -4426,7 +4426,7 @@ end)
 -- alter the beta's protected frame focus or global gamepad bindings.
 local padHint = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 padHint:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
-padHint:SetText("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
+padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
 padHint:SetTextColor(1, 0.82, 0.35)
 padHint:Hide()
 
@@ -4437,7 +4437,7 @@ resumeButton:EnableMouse(true)
 WalkMapExtras.StyleButton(resumeButton)
 local resumeLabel = resumeButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 resumeLabel:SetPoint("CENTER")
-resumeLabel:SetText("Resume controller navigation")
+resumeLabel:SetText(WalkMapL("Resume controller navigation"))
 resumeButton:Hide()
 
 local focusTarget, focusIndex, lastPadButton
@@ -4547,7 +4547,7 @@ local function exitPinMode()
     closePinDetails()
     selectedPin, padPinIndex, padPinMode = nil, 0, false
     pinOutline:Hide()
-    padHint:SetText("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
+    padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
     if not padSuspended and not (WalkMapNativeController
         and WalkMapNativeController.OwnsInput()) then
         markFocus(padTargets()[focusIndex or 1])
@@ -4601,8 +4601,8 @@ local function selectPadPin(direction)
     pinOutline:SetPoint("TOPLEFT", selectedPin, "TOPLEFT", -2, 2)
     pinOutline:SetPoint("BOTTOMRIGHT", selectedPin, "BOTTOMRIGHT", 2, -2)
     pinOutline:Show()
-    padHint:SetText("Pin " .. padPinIndex .. "/" .. #list
-        .. "   D-pad: next   A: details   X: hide   B/Y: back")
+    padHint:SetText(WalkMapL("Pin " .. padPinIndex .. "/" .. #list
+        .. "   D-pad: next   A: details   X: hide   B/Y: back"))
     return true
 end
 
@@ -4830,7 +4830,7 @@ updatePadMode = function()
     resumeButton:ClearAllPoints()
     resumeButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, UI_LAYOUT.footerButtonBottom)
     resumeButton:SetSize(175, 19)
-    resumeLabel:SetText("Resume controller navigation")
+    resumeLabel:SetText(WalkMapL("Resume controller navigation"))
     if enabled then
         status:Hide()
         if padSuspended and WalkMapExtras.MapReleased() then
@@ -4848,7 +4848,7 @@ updatePadMode = function()
             resumeButton:Hide()
             padHint:Show()
             if not padPanning and not padPinMode then
-                padHint:SetText("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
+                padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
             end
             if not padPinMode and (not focusTarget or not focusTarget:IsShown()) then
                 focusIndex = focusIndex or 1
@@ -4888,7 +4888,7 @@ padCheck:SetAllPoints(padBox)
 padCheck:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
 local padLabel = padToggle:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 padLabel:SetPoint("LEFT", padBox, "RIGHT", 2, 0)
-padLabel:SetText("Pad focus")
+padLabel:SetText(WalkMapL("Pad focus"))
 padToggle:SetScript("OnClick", function()
     if GameTooltip and GameTooltip.GetOwner
         and GameTooltip:GetOwner() == padToggle then GameTooltip:Hide() end
@@ -4990,10 +4990,10 @@ frame:SetScript("OnGamePadButtonDown", function(_, button)
     if button == "PAD3" and not menu then
         padPanning = not padPanning
         if padPanning then
-            padHint:SetText("D-pad: pan    A: open/waypoint    B: back    Select: skills")
+            padHint:SetText(WalkMapL("D-pad: pan    A: open/waypoint    B: back    Select: skills"))
             markFocus(viewport)
         else
-            padHint:SetText("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
+            padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
             markFocus(padTargets()[focusIndex or 1])
         end
         return
@@ -5008,7 +5008,7 @@ frame:SetScript("OnGamePadButtonDown", function(_, button)
         elseif padPanning then
             padPanning = false
             WalkMapExtras.ResumeFollow()
-            padHint:SetText("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
+            padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
             markFocus(padTargets()[focusIndex or 1])
         else
             frame:Hide()

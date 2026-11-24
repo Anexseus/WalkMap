@@ -76,8 +76,8 @@ function wheel.OnError(message)
         lastHint = now
         hints = hints + 1
         local closes = WalkMapExtras and WalkMapExtras.CloseMapInCombat and WalkMapExtras.CloseMapInCombat()
-        print(closes and HINT or HINT .. " Or turn on Settings > Map > Close map when combat starts,"
-            .. " so WalkMap closes by itself as a fight begins.")
+        print(WalkMapL(closes and HINT or HINT .. " Or turn on Settings > Map > Close map when combat starts,"
+            .. " so WalkMap closes by itself as a fight begins."))
     end
 end
 

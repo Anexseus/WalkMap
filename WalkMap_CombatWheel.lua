@@ -175,13 +175,13 @@ local function buildArt()
     art.bg = bg
     local title = art:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("BOTTOM", art, "TOP", 0, 25)
-    title:SetText(type(FRAME_LABEL_MAIN_MENU) == "string" and FRAME_LABEL_MAIN_MENU or "Main Menu")
+    title:SetText(WalkMapL(type(FRAME_LABEL_MAIN_MENU) == "string" and FRAME_LABEL_MAIN_MENU or "Main Menu"))
     local sub = art:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     sub:SetPoint("TOP", title, "BOTTOM", 0, -6)
-    sub:SetText("|cff80ff80WalkMap|r - in combat")
+    sub:SetText(WalkMapL("|cff80ff80WalkMap|r - in combat"))
     local hint = art:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     hint:SetPoint("TOP", art, "BOTTOM", 0, -6)
-    hint:SetText("Right stick: point, let go or press A to choose.  B closes.")
+    hint:SetText(WalkMapL("Right stick: point, let go or press A to choose.  B closes."))
     local highlight = art:CreateTexture(nil, "ARTWORK")
     if not (highlight.SetAtlas and pcall(highlight.SetAtlas, highlight, "gamepad-radial-menu-selected", true)) then
         highlight:SetSize(90, 90)
@@ -204,7 +204,7 @@ local function buildArt()
         text:SetSize(90, 40)
         text:SetWordWrap(true)
         text:SetPoint("CENTER", icon, "CENTER", TEXT_ANCHOR[i][1], TEXT_ANCHOR[i][2])
-        text:SetText(label(entry))
+        text:SetText(WalkMapL(label(entry)))
         segment.icon, segment.text, segment.disabled, segment.entry = icon, text, disabled, entry
         art.segments[i] = segment
     end

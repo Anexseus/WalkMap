@@ -397,7 +397,7 @@ end
 -- Map control hint; nil restores the default text.
 local PAN_HINT = "D-pad: move   LB/RB: zoom   Y: markers   A: open/waypoint   X/B: back"
 function native.SetPanHint(text)
-    if panWindow and panWindow.hint then panWindow.hint:SetText(text or PAN_HINT) end
+    if panWindow and panWindow.hint then panWindow.hint:SetText(WalkMapL(text or PAN_HINT)) end
 end
 
 function native.Status()
@@ -467,8 +467,8 @@ function native.SetVisible(frame, shown)
     if (restricted() or (WalkMapCombat and WalkMapCombat.Locked()))
         and (prepared[owner] or (frame == owner and WalkMapCombat and WalkMapCombat.Ready())) then
         if frame == owner then
-            print("|cff80ff80WalkMap:|r " .. (shown and "Use your bound WalkMap key to open the map during combat."
-                or "Use your WalkMap key or the X button to close the map during combat."))
+            print(WalkMapL("|cff80ff80WalkMap:|r " .. (shown and "Use your bound WalkMap key to open the map during combat."
+                or "Use your WalkMap key or the X button to close the map during combat.")))
         end
         return false
     end
@@ -478,7 +478,7 @@ function native.SetVisible(frame, shown)
         -- unclosable window, even if we temporarily used custom navigation.
         pendingVisibility[frame] = nil
         log("open request declined while native navigation is restricted")
-        print("|cff80ff80WalkMap:|r Reopen WalkMap after combat; its native UI is currently restricted.")
+        print(WalkMapL("|cff80ff80WalkMap:|r Reopen WalkMap after combat; its native UI is currently restricted."))
         return false
     end
     -- Hiding a registered panel also runs the client's own focus cleanup.
@@ -664,7 +664,7 @@ local function createControls()
     WalkMapUI.Window(controls)
     local title = controls:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOP", controls, "TOP", 0, -10)
-    title:SetText("WalkMap controls")
+    title:SetText(WalkMapL("WalkMap controls"))
     local function button(text, x, y, width, action)
         local b = CreateFrame("Button", nil, controls)
         b:SetSize(width, 26)
@@ -673,7 +673,7 @@ local function createControls()
         WalkMapExtras.StyleButton(b)
         local label = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         label:SetPoint("CENTER")
-        label:SetText(text)
+        label:SetText(WalkMapL(text))
         b:SetScript("OnClick", action)
         return b
     end
@@ -697,7 +697,7 @@ local function createControls()
     note:SetPoint("BOTTOM", controls, "BOTTOM", 0, 19)
     note:SetWidth(278)
     note:SetJustifyH("CENTER")
-    note:SetText("X: pan map. Use the game's focus button for skills.")
+    note:SetText(WalkMapL("X: pan map. Use the game's focus button for skills."))
     controls:Hide()
     controls:HookScript("OnHide", callbacks.ClosePins)
 end
@@ -811,7 +811,7 @@ local function updateHint()
     local context = WalkMapExtras.ControllerHints and WalkMapExtras.ControllerHints()
         and native.HintContext()
     local text = context and HINTS[context] or nil
-    if text then hintBar.text:SetText(text) end
+    if text then hintBar.text:SetText(WalkMapL(text)) end
     hintBar.back:SetShown(text ~= nil)
     hintBar.text:SetShown(text ~= nil)
 end

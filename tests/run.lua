@@ -8,7 +8,7 @@
 local source = debug.getinfo(1, "S").source
 local dir = source:match("^@(.*[/\\])[^/\\]+$") or "./"
 local Mock = dofile(dir .. "mock.lua")
-local FILES = {"t_maps", "t_levels", "t_tracker", "t_xp", "t_livedb", "t_turnins", "t_questlog", "t_minihover", "t_link", "t_clicks", "t_guard", "t_account", "t_settings", "t_miniframe", "t_release", "t_freewindow", "t_focuswaypoint", "t_social", "t_groupprogress", "t_givertint", "t_dungeons", "t_combatwheel", "t_load"}
+local FILES = {"t_maps", "t_levels", "t_tracker", "t_xp", "t_livedb", "t_turnins", "t_questlog", "t_minihover", "t_link", "t_clicks", "t_guard", "t_account", "t_settings", "t_miniframe", "t_release", "t_freewindow", "t_focuswaypoint", "t_social", "t_groupprogress", "t_givertint", "t_dungeons", "t_combatwheel", "t_locale", "t_load"}
 
 local only = arg and arg[1]
 local passed, failed = 0, 0
@@ -29,4 +29,13 @@ for _, name in ipairs(FILES) do
     end
 end
 io.write(string.format("%d passed, %d failed\n", passed, failed))
+if Mock.collected then
+    local list = {}
+    for text in pairs(Mock.collected) do list[#list + 1] = text end
+    table.sort(list)
+    local file = io.open("tests/untranslated.txt", "w")
+    for _, text in ipairs(list) do file:write((text:gsub("\n", "\\n")), "\n") end
+    file:close()
+    io.write(#list, " untranslated texts in tests/untranslated.txt\n")
+end
 os.exit(failed == 0 and 0 or 1)

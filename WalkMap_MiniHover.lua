@@ -134,8 +134,8 @@ local function show(marker, x, y)
     else
         frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", px + 14, py - 6)
     end
-    frame:SetText(title, 1, 0.82, 0)
-    for _, line in ipairs(lines) do frame:AddLine(line[1], line[2], line[3], line[4]) end
+    frame:SetText(WalkMapL(title), 1, 0.82, 0)
+    for _, line in ipairs(lines) do frame:AddLine(WalkMapL(line[1]), line[2], line[3], line[4]) end
     frame:Show()
     state.shownCount, state.last = state.shownCount + 1, title
 end

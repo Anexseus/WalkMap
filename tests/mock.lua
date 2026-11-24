@@ -330,6 +330,21 @@ function Mock.new(options)
 
     -- Run one addon file (path relative to the addon folder) inside env.
     function env.load(file)
+        -- Every module shows text through WalkMapL (WalkMap_Locale.lua).
+        if not rawget(env, "WalkMapL") and not file:find("^WalkMap_Locale") then
+            env.load("WalkMap_Locale.lua")
+            env.load("WalkMap_Locale_deDE.lua")
+            env.load("WalkMap_Locale_frFR.lua")
+        end
+        -- WALKMAP_COLLECT=deDE texlua tests/run.lua: list every shown text
+        -- without a translation (tests/untranslated.txt).
+        local collect = os.getenv("WALKMAP_COLLECT")
+        if collect and not env.__collecting and rawget(env, "WalkMapLocale") and file ~= "WalkMap_Locale.lua" then
+            env.__collecting = true
+            env.WalkMapLocale.Force(collect)
+            Mock.collected = Mock.collected or {}
+            env.WalkMapLocale.CollectMisses(Mock.collected)
+        end
         local path = Mock.root .. file
         local chunk, message
         if setfenv then

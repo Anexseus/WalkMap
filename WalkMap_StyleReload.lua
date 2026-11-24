@@ -20,8 +20,8 @@ local function followStyle()
     local changed = WalkMapExtras.FollowInterfaceStyle(WalkMapCombat.GamepadUI())
     if changed then
         styleNote = " WalkMap's How you play is now " .. STYLE_NAMES[changed] .. "."
-        print("|cff80ff80WalkMap:|r How you play: " .. STYLE_NAMES[changed]
-            .. " (follows the game's interface; change it under Settings > Controller & help).")
+        print(WalkMapL("|cff80ff80WalkMap:|r How you play: " .. STYLE_NAMES[changed]
+            .. " (follows the game's interface; change it under Settings > Controller & help)."))
     end
 end
 
@@ -64,7 +64,7 @@ local function build()
     if WalkMapUI and WalkMapUI.Menu then pcall(WalkMapUI.Menu, popup) end
     popup.title = popup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     popup.title:SetPoint("TOP", popup, "TOP", 0, -14)
-    popup.title:SetText("WalkMap: reload needed")
+    popup.title:SetText(WalkMapL("WalkMap: reload needed"))
     popup.text = popup:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     popup.text:SetPoint("TOPLEFT", popup, "TOPLEFT", 18, -36)
     popup.text:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -18, -36)
@@ -76,13 +76,13 @@ local function build()
         if WalkMapExtras and WalkMapExtras.StyleButton then WalkMapExtras.StyleButton(b) end
         b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         b.text:SetPoint("CENTER")
-        b.text:SetText(label)
+        b.text:SetText(WalkMapL(label))
         b:SetScript("OnClick", onClick)
         return b
     end
     popup.reloadButton = button("Reload now", -60, function()
         if InCombatLockdown and InCombatLockdown() then
-            print("|cff80ff80WalkMap:|r Reload after combat.")
+            print(WalkMapL("|cff80ff80WalkMap:|r Reload after combat."))
             return
         end
         doReload()
@@ -103,10 +103,10 @@ function reload.Show()
     if InCombatLockdown and InCombatLockdown() then pending = true return end
     pending = false
     if not popup then build() end
-    popup.text:SetText((WalkMapCombat.GamepadUI()
+    popup.text:SetText(WalkMapL((WalkMapCombat.GamepadUI()
         and "You switched the game to its controller interface. Reload so WalkMap's map works with the controller. Until then the map behaves as with mouse and keyboard."
         or "You switched the game to its mouse and keyboard interface. Reload so WalkMap's map can also be moved, resized and set up during combat.")
-        .. styleNote)
+        .. styleNote))
     if not popup:IsShown() then
         shownCount = shownCount + 1
         popup:Show()

@@ -124,7 +124,7 @@ captureText:SetPoint(
 
 
 captureText:SetText(
-    "WalkMap: Press a key\nEscape cancels"
+    WalkMapL("WalkMap: Press a key\nEscape cancels")
 )
 
 
