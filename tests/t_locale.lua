@@ -106,5 +106,19 @@ return {
         scan(env.UIParent, 0)
         Mock.ok(followFound, "the map's Follow button is German right away")
         Mock.ok(titleFound == true, "the settings window's title is German right away")
+        -- The footer's Buttons button grows for "Schaltflächen".
+        local buttonsLabel
+        local function find(frame, depth)
+            if depth > 8 or buttonsLabel then return end
+            for _, child in ipairs(frame.__children or {}) do
+                if child.GetText and child:GetText() == "Schaltflächen" and child.__parent
+                    and child.__parent.walkmapFitLabel then buttonsLabel = child end
+                find(child, depth + 1)
+            end
+        end
+        find(env.UIParent, 0)
+        Mock.ok(buttonsLabel, "Buttons is Schaltflächen")
+        Mock.ok(buttonsLabel:GetStringWidth() <= buttonsLabel.__parent:GetWidth() - 8, "and fits its button")
+        Mock.ok(buttonsLabel.__parent:GetWidth() > 64, "the button grew")
     end},
 }

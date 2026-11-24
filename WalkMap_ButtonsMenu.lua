@@ -27,6 +27,23 @@ do
     local label = layoutButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     label:SetPoint("CENTER")
     WalkMapLocale.Static(label, "Buttons")
+    -- Translations are longer ("Schaltflächen"): the button grows to fit its
+    -- word (up to 104 px, there is room before the coordinates), and the
+    -- text shrinks only past that.
+    local function fitLabel()
+        if label.walkmapFont and label.SetFont then
+            local font = label.walkmapFont
+            label:SetFont(font[1], font[2], font[3])
+        end
+        local textWidth = tonumber(label:GetStringWidth()) or 0
+        local width = math.max(64, math.min(104, math.ceil(textWidth) + 16))
+        layoutButton:SetWidth(width)
+        if WalkMapUI and WalkMapUI.FitText then WalkMapUI.FitText(label, width - 8) end
+    end
+    fitLabel()
+    layoutButton:HookScript("OnShow", fitLabel)
+    if WalkMapLocale.OnChange then WalkMapLocale.OnChange(fitLabel) end
+    layoutButton.walkmapFitLabel = fitLabel
     -- Quests moves one place right to make room.
     -- Quests takes the old Player slot on the right (Player is gone; its
     -- hidden button still follows the footer layout, M+/M- included).
