@@ -354,7 +354,7 @@ return {
         Mock.eq(s.playStyle, "both", "How you play followed the interface")
         Mock.eq(s.controllerHints, false, "hints still off after the switch")
     end},
-    {"A beta shows What are we testing once per beta, not What's new", function(Mock)
+    {"A beta shows What are we testing once per version, not What's new", function(Mock)
         local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {})
         local build = "1.14.20-beta5"
@@ -367,7 +367,7 @@ return {
         local panel = env.WalkMapExtras.SettingsPanel()
         Mock.ok(panel:IsShown(), "a page opened")
         Mock.eq(panel.pageTitle:GetText(), "What are we testing in WalkMap 1.14.20-beta5", "the testing page")
-        Mock.eq(env.WalkMapSettings.betaSeen, build, "seen for this beta")
+        Mock.eq(env.WalkMapSettings.betaSeen, "1.14.20", "seen for this version")
         Mock.eq(env.WalkMapSettings.newsSeen, "1.14.11", "What's new not marked: it shows after the full release")
         local bugs
         for _, row in ipairs(panel.options) do
@@ -386,6 +386,18 @@ return {
         env.tick(1, 5)
         env.WalkMap_Toggle()
         env.tick(1, 5)
-        Mock.ok(panel:IsShown(), "again for the next beta")
+        Mock.ok(not panel:IsShown(), "not again for the next beta of the same version")
+        env.WalkMapSettings.betaSeen = "1.14.20-beta5"
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        Mock.ok(not panel:IsShown(), "seen under the old per-beta value counts too")
+        build = "1.14.21-beta1"
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        Mock.ok(panel:IsShown(), "again for the next version")
     end},
 }

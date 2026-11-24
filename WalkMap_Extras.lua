@@ -2712,6 +2712,10 @@ end
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE, BETA_PAGE
+-- "1.14.20-beta6" -> "1.14.20": the testing page is seen per version.
+local function betaVersion(build)
+    return type(build) == "string" and build:match("^[^%-]+") or nil
+end
 local NEWS_VERSION = "1.14.19"
 -- Earlier What's new pages that already showed what this one shows: players
 -- who saw one of them do not get this one. (None for 1.14.19.)
@@ -2736,7 +2740,7 @@ local function showHiddenPage(which)
         -- get the welcome page and skip this release's news.
         if type(WalkMapSettings) == "table" then
             if which == "beta" then
-                WalkMapSettings.betaSeen = extras.Build()
+                WalkMapSettings.betaSeen = betaVersion(extras.Build())
             else
                 if which ~= "news" then WalkMapSettings.welcomeSeen = true end
                 WalkMapSettings.newsSeen = NEWS_VERSION
@@ -2772,14 +2776,18 @@ function extras.ShowTesting() if BETA_PAGE then showHiddenPage("beta") end end
 
 -- After an update: show What's new the first time the player opens the map
 -- (never by itself, never in combat, once per NEWS_VERSION). In a beta,
--- "What are we testing" instead, once per beta build.
+-- "What are we testing" instead, once per version.
 function extras.MapOpened()
     local saved = WalkMapSettings
     if type(saved) ~= "table" or not saved.welcomeSeen then return end
     if WalkMapCombat and WalkMapCombat.Locked() then return end
     if settingsPanel and settingsPanel:IsShown() then return end
     if extras.IsBeta() then
-        if BETA_PAGE and saved.betaSeen ~= extras.Build() then extras.ShowTesting() end
+        -- Once per version: a tester who saw 1.14.20-beta5 is not shown
+        -- it again for beta6, only for the first beta of 1.14.21.
+        if BETA_PAGE and betaVersion(saved.betaSeen) ~= betaVersion(extras.Build()) then
+            extras.ShowTesting()
+        end
         return
     end
     if saved.newsSeen == NEWS_VERSION or NEWS_ALREADY_SEEN[saved.newsSeen] then return end
