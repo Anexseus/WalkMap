@@ -11,6 +11,8 @@
 WalkMapBetaNotes = {
     version = "1.14.20",
     items = {
+        {"This page",
+         "New in betas: this page shows once per beta, the first time you open the map, instead of What's new. Check that it came up by itself and that /walkmap testing opens it again."},
         {"German and French",
          "Settings > Look > Language: try Deutsch and Français. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
         {"Changing the language",
