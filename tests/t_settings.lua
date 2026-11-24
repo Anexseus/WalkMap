@@ -93,6 +93,7 @@ return {
         Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors, Community", "category list")
         local community = page(env, "Community")
         Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
+        Mock.eq(#community, 5, "all five rows fit with the link box under the first")
         local giver = page(env, "Giver level")
         Mock.eq(giver[1], "Automatic", "giver level rows still built")
         Mock.eq(#giver, 7, "Automatic plus six ranges")

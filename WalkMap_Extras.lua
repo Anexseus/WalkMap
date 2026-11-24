@@ -3095,7 +3095,7 @@ local settingsPages = {
         {"__bagStatus", nil, "Bag tools status", "WalkMap auto-sell is off."},
     }},
     {"Community", "Join WalkMap's Discord: report bugs, suggest features and hear about new versions and betas first.", {
-        {"__discord", nil, "Join our Discord", "Click the link, press Ctrl+C and paste it in your browser or Discord: discord.gg/cndVAA3GST"},
+        {"__discord", nil, "Join our Discord", "Click the link below, press Ctrl+C and paste it in your browser or Discord."},
         {"__info", nil, "Bug reports", "One thread per bug in the bug-reports channel, with your WalkMap version, mouse or controller, and your other addons. The Debug report (Settings > Controller & help) helps a lot."},
         {"__info", nil, "Suggestions", "Ideas for WalkMap go in the suggestions channel. We read them all."},
         {"__info", nil, "Beta testing", "Want to try new things first? Ask for the Beta Tester role on the Discord."},
@@ -3125,7 +3125,7 @@ local settingsPages = {
         {"__news", nil, "Deutsch and Français", "WalkMap now speaks German and French. Auto follows the game's language; choose under Settings > Look > Language."},
         {"__lowQuests", nil, "Low-level quests", "Quest chains often start low and end at your level. Choose Quest chains to show gray quests at quest givers when their chain goes on to your level (the tooltip says how far), or All for every gray quest. Also under Settings > Quests on the map."},
         {"__news", nil, "Button hints stay off", "Turning off the button hints at the top of the map now lasts after a restart."},
-        {"__discord", nil, "Join our Discord", "Bug reports, suggestions and news about new versions and betas. Click the link, press Ctrl+C and paste it in your browser or Discord. Also under Settings > Community."},
+        {"__discord", nil, "Join our Discord", "Bug reports, suggestions and news about new versions and betas. Click the link below, press Ctrl+C and paste it in your browser or Discord. Also under Settings > Community."},
     }, hidden = true},
 }
 NEWS_PAGE = #settingsPages
@@ -3359,19 +3359,21 @@ refreshSettingsRows = function()
         local isLink = field == "__discord"
         if isLink and not row.walkmapLinkBox then
             local box = CreateFrame("EditBox", nil, row)
-            box:SetSize(200, 22)
-            box:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+            -- Under the description, in the settings' own font: a dark field
+            -- with a thin gold edge (the edge sits behind the field).
+            box:SetSize(250, 22)
             box:SetAutoFocus(false)
-            box:SetFontObject("ChatFontNormal")
-            box:SetTextInsets(6, 6, 0, 0)
+            box:SetFontObject("GameFontHighlight")
+            box:SetTextInsets(7, 7, 0, 0)
             box:EnableMouse(true)
-            local background = box:CreateTexture(nil, "BACKGROUND")
-            background:SetAllPoints(box)
-            background:SetColorTexture(0, 0, 0, 0.6)
-            local border = box:CreateTexture(nil, "BORDER")
+            local border = box:CreateTexture(nil, "BACKGROUND", nil, -1)
             border:SetPoint("TOPLEFT", box, "TOPLEFT", -1, 1)
             border:SetPoint("BOTTOMRIGHT", box, "BOTTOMRIGHT", 1, -1)
-            border:SetColorTexture(0.55, 0.47, 0.25, 0.9)
+            border:SetColorTexture(0.62, 0.52, 0.28, 0.9)
+            local background = box:CreateTexture(nil, "BACKGROUND", nil, 1)
+            background:SetAllPoints(box)
+            background:SetColorTexture(0.05, 0.04, 0.03, 0.85)
+            if box.SetHighlightColor then box:SetHighlightColor(0.35, 0.5, 0.85, 0.55) end
             box:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
             box:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
             box:SetScript("OnMouseUp", function(self) self:SetFocus(); self:HighlightText() end)
@@ -3390,7 +3392,6 @@ refreshSettingsRows = function()
             if isLink then
                 row.walkmapLinkBox:SetText(DISCORD_LINK)
                 row.walkmapLinkBox:SetCursorPosition(0)
-                row.description:SetPoint("RIGHT", row, "RIGHT", -216, 0)
             elseif row.walkmapLinkBox:HasFocus() then
                 row.walkmapLinkBox:ClearFocus()
             end
@@ -3673,6 +3674,12 @@ refreshSettingsRows = function()
         local textHeight = (tonumber(row.label:GetStringHeight()) or 12)
         if description and description ~= "" then
             textHeight = textHeight + 2 + (tonumber(row.description:GetStringHeight()) or 0)
+        end
+        if field == "__discord" and row.walkmapLinkBox then
+            -- The link box sits under the description.
+            row.walkmapLinkBox:ClearAllPoints()
+            row.walkmapLinkBox:SetPoint("TOPLEFT", row.description, "BOTTOMLEFT", 1, -6)
+            textHeight = textHeight + 30
         end
         local height = math.max(43, math.ceil(textHeight + 8))
         if i > 1 and y - height < bottom then
