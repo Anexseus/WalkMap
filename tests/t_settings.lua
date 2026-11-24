@@ -49,6 +49,7 @@ return {
         for _, seen in ipairs({"1.14", "1.14.8", "1.14.11"}) do
             local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
             env.loadAddon({welcomeSeen = true, newsSeen = seen}, {})
+            env.WalkMapExtras.Build = function() return "1.14.19" end -- a full release
             env.fire("PLAYER_LOGIN")
             env.fire("PLAYER_ENTERING_WORLD")
             env.tick(1, 5)
@@ -352,5 +353,39 @@ return {
         x.FollowInterfaceStyle(true)
         Mock.eq(s.playStyle, "both", "How you play followed the interface")
         Mock.eq(s.controllerHints, false, "hints still off after the switch")
+    end},
+    {"A beta shows What are we testing once per beta, not What's new", function(Mock)
+        local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {})
+        local build = "1.14.20-beta5"
+        env.WalkMapExtras.Build = function() return build end
+        env.fire("PLAYER_LOGIN")
+        env.fire("PLAYER_ENTERING_WORLD")
+        env.tick(1, 5)
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        local panel = env.WalkMapExtras.SettingsPanel()
+        Mock.ok(panel:IsShown(), "a page opened")
+        Mock.eq(panel.pageTitle:GetText(), "What are we testing in WalkMap 1.14.20-beta5", "the testing page")
+        Mock.eq(env.WalkMapSettings.betaSeen, build, "seen for this beta")
+        Mock.eq(env.WalkMapSettings.newsSeen, "1.14.11", "What's new not marked: it shows after the full release")
+        local bugs
+        for _, row in ipairs(panel.options) do
+            if row:IsShown() and tostring(row.label:GetText()):find("Found a bug", 1, true) then bugs = row end
+        end
+        Mock.ok(bugs, "asks for bug reports")
+        env.WalkMapExtras.CloseMenus()
+        panel:Hide()
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        Mock.ok(not panel:IsShown(), "not again for the same beta")
+        build = "1.14.20-beta6"
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        Mock.ok(panel:IsShown(), "again for the next beta")
     end},
 }

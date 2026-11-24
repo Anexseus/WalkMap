@@ -473,6 +473,8 @@ SlashCmdList.WALKMAP =
                 WalkMapExtras.ShowWelcome()
             end
 
+        elseif command == "testing" or command == "beta" then
+            if WalkMapExtras.ShowTesting then WalkMapExtras.ShowTesting() end
         elseif command == "news" or command == "new" then
 
             if WalkMapCombat.Locked() then

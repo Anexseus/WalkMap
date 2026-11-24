@@ -40,6 +40,19 @@ jobs:
           echo "VERSION=$version" >> "$GITHUB_ENV"
           echo "RELEASE=$release" >> "$GITHUB_ENV"
 
+      - name: Mark a beta build (What are we testing)
+        if: ${{ env.RELEASE != env.VERSION }}
+        run: |
+          notes=$(sed -n 's/^ *version = "\(.*\)",/\1/p' WalkMap_BetaNotes.lua | head -1)
+          case "$RELEASE" in
+            *-beta*)
+              if [ "$notes" != "$VERSION" ]; then
+                echo "WalkMap_BetaNotes.lua is for $notes, not $VERSION: write what to test in this beta"; exit 1
+              fi ;;
+          esac
+          sed -i "s/^## Version: .*/&\n## X-Build: $RELEASE/" WalkMap.toc
+          grep -n "X-Build" WalkMap.toc
+
       - name: Check, test and build the zip
         run: python3 tools/Release/check.py --zip dist
 

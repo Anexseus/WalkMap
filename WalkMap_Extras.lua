@@ -2711,7 +2711,7 @@ end
 
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
-local WELCOME_PAGE, NEWS_PAGE
+local WELCOME_PAGE, NEWS_PAGE, BETA_PAGE
 local NEWS_VERSION = "1.14.19"
 -- Earlier What's new pages that already showed what this one shows: players
 -- who saw one of them do not get this one. (None for 1.14.19.)
@@ -2728,15 +2728,19 @@ local function showHiddenPage(which)
         if settingsPanel:IsShown() then setControllerPanelVisible(settingsPanel, false) end
         local click = viewButton:GetScript("OnClick")
         if click then click(viewButton) end
-        local index = which == "news" and NEWS_PAGE or WELCOME_PAGE
+        local index = which == "news" and NEWS_PAGE or which == "beta" and BETA_PAGE or WELCOME_PAGE
         if not index then return end
         settingsPanel.categoryIndex = index
         refreshSettingsRows()
         -- Only counts as seen once it is actually on screen. New players
         -- get the welcome page and skip this release's news.
         if type(WalkMapSettings) == "table" then
-            if which ~= "news" then WalkMapSettings.welcomeSeen = true end
-            WalkMapSettings.newsSeen = NEWS_VERSION
+            if which == "beta" then
+                WalkMapSettings.betaSeen = extras.Build()
+            else
+                if which ~= "news" then WalkMapSettings.welcomeSeen = true end
+                WalkMapSettings.newsSeen = NEWS_VERSION
+            end
         end
         -- Controller: start on the first choice, not the category list.
         if WalkMapNativeController and WalkMapNativeController.FocusButton and settingsPanel.options[1] then
@@ -2748,17 +2752,37 @@ local function showHiddenPage(which)
     if C_Timer and C_Timer.After then C_Timer.After(0.3, open) else open() end
 end
 
+-- The build: "1.14.20-beta4" in a beta zip (## X-Build in WalkMap.toc,
+-- written by the release workflow), else the version.
+function extras.Build()
+    local metadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+    if metadata then
+        local ok, build = pcall(metadata, "WalkMap", "X-Build")
+        if ok and type(build) == "string" and build ~= "" then return build end
+        local okVersion, version = pcall(metadata, "WalkMap", "Version")
+        if okVersion and type(version) == "string" and version ~= "" then return version end
+    end
+    return WalkMapBetaNotes and WalkMapBetaNotes.version or "?"
+end
+function extras.IsBeta() return extras.Build():find("%-beta") ~= nil end
+
 function extras.ShowWelcome() showHiddenPage("welcome") end
-function extras.ShowNews() showHiddenPage("news") end
+function extras.ShowNews() showHiddenPage(extras.IsBeta() and BETA_PAGE and "beta" or "news") end
+function extras.ShowTesting() if BETA_PAGE then showHiddenPage("beta") end end
 
 -- After an update: show What's new the first time the player opens the map
--- (never by itself, never in combat, once per NEWS_VERSION).
+-- (never by itself, never in combat, once per NEWS_VERSION). In a beta,
+-- "What are we testing" instead, once per beta build.
 function extras.MapOpened()
     local saved = WalkMapSettings
-    if type(saved) ~= "table" or not saved.welcomeSeen or saved.newsSeen == NEWS_VERSION
-        or NEWS_ALREADY_SEEN[saved.newsSeen] then return end
+    if type(saved) ~= "table" or not saved.welcomeSeen then return end
     if WalkMapCombat and WalkMapCombat.Locked() then return end
     if settingsPanel and settingsPanel:IsShown() then return end
+    if extras.IsBeta() then
+        if BETA_PAGE and saved.betaSeen ~= extras.Build() then extras.ShowTesting() end
+        return
+    end
+    if saved.newsSeen == NEWS_VERSION or NEWS_ALREADY_SEEN[saved.newsSeen] then return end
     extras.ShowNews()
 end
 
@@ -3015,6 +3039,19 @@ local settingsPages = {
 }
 NEWS_PAGE = #settingsPages
 WELCOME_PAGE = NEWS_PAGE - 1
+-- Betas: "What are we testing" (WalkMap_BetaNotes.lua), with a call for bug
+-- reports. Built from the notes; the title carries the build at runtime.
+do
+    local notes = WalkMapBetaNotes
+    local rows = {}
+    for _, item in ipairs(notes and notes.items or {}) do
+        rows[#rows + 1] = {"__news", nil, item[1], item[2]}
+    end
+    rows[#rows + 1] = {"__reportBugs", nil, "Found a bug? Please tell us",
+        "This is a beta: write in the comments on WalkMap's CurseForge page what you tried and what went wrong, also when everything worked. A screenshot, a short video or the Debug report (Settings > Controller & help) helps a lot. Thank you for testing!"}
+    settingsPages[#settingsPages + 1] = {"What are we testing", "This beta is for testing. Please try the things below and tell us what you find. Done closes this page; /walkmap testing shows it again.", rows, hidden = true}
+    BETA_PAGE = #settingsPages
+end
 -- Settings rows that wait until after combat (see the row click handler).
 local COMBAT_WAIT = {
     __miniType = true, miniMap = true, nativeIcons = true, __playStyle = true,
@@ -3042,7 +3079,8 @@ refreshSettingsRows = function()
         settingsPanel.categoryIndex = 1
         page = settingsPages[1]
     end
-    settingsPanel.pageTitle:SetText(WalkMapL(page[1]))
+    settingsPanel.pageTitle:SetText(WalkMapL(settingsPanel.categoryIndex == BETA_PAGE
+        and ("What are we testing in WalkMap " .. extras.Build()) or page[1]))
     settingsPanel.summary:SetText(WalkMapL(page[2]))
     settingsPanel.rows = {}
     -- Rows listed right now ("when"), and the part of them that fits.

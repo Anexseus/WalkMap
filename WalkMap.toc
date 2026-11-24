@@ -13,6 +13,7 @@
 WalkMap_Locale.lua
 WalkMap_Locale_deDE.lua
 WalkMap_Locale_frFR.lua
+WalkMap_BetaNotes.lua
 WalkMap_Data.lua
 WalkMap_Objectives.lua
 WalkMap_LiveDB.lua

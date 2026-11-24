@@ -8,6 +8,9 @@ New
   another one (Auto, English, Deutsch, Français). The translations are new:
   corrections are welcome in the comments on CurseForge. Changing it
   redraws the open map and its buttons at once.
+- Betas show "What are we testing" (once per beta, instead of What's new):
+  what to try in that beta and a call for bug reports. /walkmap testing
+  shows it again. Full releases never show it.
 
 Fixed
 - Button hints (and Pad focus) turned off by hand came back on after a
