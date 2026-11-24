@@ -1,5 +1,18 @@
 # WalkMap changelog
 
+## 1.14.22
+
+Changed
+- Settings are tidier: Quest giver level is one row on Quests on the map
+  (Automatic, 1-10 ... 51-60) instead of a page of its own. Look is now
+  called Appearance, Profiles comes after Controller & help, and
+  Controllers is now Tested controllers, last after Community.
+- The settings window can be moved by dragging its top; it opens there
+  again (for the account). Right-click the top to put it back in the middle.
+- Debug report button at the bottom left of the settings window.
+  /walkmap debug opens the report window, also in combat and above the
+  settings window (/walkmap debug chat still writes it in chat).
+
 ## 1.14.21
 
 Fixed

@@ -11,16 +11,15 @@
 -- round: raise it (2, 3, ...) when a beta adds something new to test, so
 -- the page shows again to testers who already saw it for this version.
 WalkMapBetaNotes = {
-    version = "1.14.21",
-    round = 2,
+    version = "1.14.22",
     items = {
-        {"Low-level quests (new)",
-         "Settings > Quests on the map > Low-level quests: Off, Quest chains or All. With Quest chains, gray quests show at quest givers only when their chain goes on to your level, and the tooltip says how far. Check that chains you know show up, and that single gray quests stay hidden."},
-        {"German and French",
-         "Settings > Appearance > Language: try Deutsch and Français. The German texts were revised in this beta. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
-        {"Changing the language",
-         "Change it with the map open: the map, its buttons, the quest log, the tracker and the settings categories should change at once."},
-        {"Button hints stay as you set them",
-         "Turn Button hints off under Settings > Controller & help, restart the game and switch between mouse and controller: they should stay off."},
+        {"Quest giver level moved",
+         "Settings > Quests on the map > Quest giver level: one row now, click it to go through Automatic, 1-10, 11-20 ... 51-60. The Giver level page is gone. Check that quest givers follow your choice."},
+        {"New names and order",
+         "Look is now Appearance, Profiles sits under Controller & help, and Controllers is now Tested controllers, at the bottom after Community. Is everything easy to find?"},
+        {"Move the settings window",
+         "Drag the top of the settings window to move it. It opens there again next time, on all your characters. Right-click the top to put it back in the middle."},
+        {"Debug report button",
+         "A Debug report button now sits at the bottom left of the settings window. /walkmap debug opens the report window too, also in combat and above the settings window."},
     },
 }
