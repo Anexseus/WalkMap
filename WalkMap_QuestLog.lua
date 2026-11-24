@@ -299,7 +299,7 @@ local function makeButton(parent, width, height, text)
     local function fit() WalkMapUI.FitText(button.label, width - 6, height) end
     if hooksecurefunc then pcall(hooksecurefunc, button.label, "SetText", fit) end
     button.walkmapFit = fit
-    button.label:SetText(WalkMapL(text))
+    WalkMapLocale.Static(button.label, text)
     fit()
     return button
 end

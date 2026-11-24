@@ -3606,7 +3606,7 @@ local function createSettingsPanel()
         row.label:SetPoint("LEFT", row, "LEFT", 7, 0)
         row.label:SetPoint("RIGHT", row, "RIGHT", -4, 0)
         row.label:SetJustifyH("LEFT")
-        row.label:SetText(WalkMapL(page[1]))
+        WalkMapLocale.Static(row.label, page[1])
         row:SetScript("OnClick", function()
             settingsPanel.categoryIndex = i
             refreshSettingsRows()

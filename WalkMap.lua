@@ -2891,7 +2891,7 @@ local function makeZoomButton(label, right, tooltip, detail, tint)
     WalkMapExtras.StyleButton(button)
     local textLabel = button:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     textLabel:SetPoint("CENTER")
-    textLabel:SetText(WalkMapL(label))
+    WalkMapLocale.Static(textLabel, label)
     if tint then textLabel:SetTextColor(tint[1], tint[2], tint[3]) end
     button.walkmapLabel = textLabel
     -- Hover and native controller focus both show what the button zooms.

@@ -673,7 +673,7 @@ local function createControls()
         WalkMapExtras.StyleButton(b)
         local label = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         label:SetPoint("CENTER")
-        label:SetText(WalkMapL(text))
+        WalkMapLocale.Static(label, text)
         b:SetScript("OnClick", action)
         return b
     end
