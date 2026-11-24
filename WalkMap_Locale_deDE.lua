@@ -639,7 +639,7 @@ WalkMapLocale.Add("deDE", {
     ["What are we testing in WalkMap %s"] = "Was testen wir in WalkMap %s",
     ["What's new in WalkMap %s"] = "Neu in WalkMap %s",
     ["Zone update error: %s"] = "Fehler bei Gebietsaktualisierung: %s",
-    ["chain to level %d"] = "Reihe bis Stufe %d",
+    ["chain to level %d"] = "Reihe bis Stufe %s",
     ["open the chat line within %s seconds to put in %s."] = "öffne die Chatzeile innerhalb von %s Sekunden, um %s einzufügen.",
     ["|cff80f080ready|r"] = "|cff80f080fertig|r",
     ["|cff80ff80Current zone: %s"] = "|cff80ff80Aktuelles Gebiet: %s",

@@ -639,7 +639,7 @@ WalkMapLocale.Add("frFR", {
     ["What are we testing in WalkMap %s"] = "Que testons-nous dans WalkMap %s",
     ["What's new in WalkMap %s"] = "Nouveautés de WalkMap %s",
     ["Zone update error: %s"] = "Erreur de mise à jour de zone : %s",
-    ["chain to level %d"] = "chaîne jusqu'au niveau %d",
+    ["chain to level %d"] = "chaîne jusqu'au niveau %s",
     ["open the chat line within %s seconds to put in %s."] = "ouvrez la ligne de discussion dans les %s secondes pour insérer %s.",
     ["|cff80f080ready|r"] = "|cff80f080prête|r",
     ["|cff80ff80Current zone: %s"] = "|cff80ff80Zone actuelle : %s",
