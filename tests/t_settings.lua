@@ -30,6 +30,27 @@ end
 local function click(row) row:GetScript("OnClick")(row) end
 
 return {
+    {"Debug report: a button at the bottom left, and /walkmap debug opens the window (in combat too)", function(Mock)
+        local env, panel = start(Mock)
+        local button = panel.debugButton
+        Mock.ok(button and button:IsShown(), "debug button on the settings window")
+        local function debugWindow()
+            for _, frame in ipairs(env.__frames) do
+                if frame.box and frame.scroll and frame:IsShown() then return frame end
+            end
+        end
+        button:GetScript("OnClick")(button)
+        local window = debugWindow()
+        Mock.ok(window, "the button opens the debug window")
+        Mock.ok(tostring(window.box:GetText()):find("WalkMap", 1, true), "with the report")
+        window:Hide()
+        env.__combat = true
+        local printed = #env.__printed
+        env.SlashCmdList.WALKMAP("debug")
+        Mock.ok(debugWindow(), "/walkmap debug opens the window, in combat too")
+        Mock.eq(#env.__printed, printed, "nothing written in chat")
+        env.__combat = false
+    end},
     {"What's new 1.14.20: languages, low-level quests set right there, and the Discord link", function(Mock)
         local env, panel = start(Mock)
         local s = env.WalkMapCharacterSettings

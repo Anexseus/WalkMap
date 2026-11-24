@@ -1124,11 +1124,12 @@ local function createDebugPanel()
         panel:Hide()
         panel:SetSize(570, 440)
         panel:SetPoint("CENTER")
-        panel:SetFrameStrata("DIALOG")
+        -- Above everything WalkMap shows, the settings window included.
+        panel:SetFrameStrata("TOOLTIP")
     -- Keep this layer when the map itself changes layer (NPC and game
     -- windows): a parent's SetFrameStrata otherwise drags children along.
     if panel.SetFixedFrameStrata then panel:SetFixedFrameStrata(true) end
-        panel:SetFrameLevel(100)
+        panel:SetFrameLevel(400)
         panel:SetClampedToScreen(true)
         panel:EnableMouse(true)
         WalkMapUI.Window(panel)
@@ -1182,15 +1183,13 @@ function extras.PrintDebug()
 end
 
 function extras.ShowDebug()
-    if InCombatLockdown and InCombatLockdown() then
-        extras.PrintDebug()
-        return
-    end
+    -- The window is WalkMap's own (nothing protected), so it opens in
+    -- combat too; only the menus are left alone then.
     local report = extras.DebugReport()
     settings.lastDebugReport = report
     local ok, message = pcall(function()
         createDebugPanel()
-        extras.CloseMenus()
+        if not (InCombatLockdown and InCombatLockdown()) then extras.CloseMenus() end
         debugAction = "fill copy window"
         debugPanel.box:SetText(report)
         debugPanel.scroll:SetVerticalScroll(0)
@@ -3793,6 +3792,28 @@ local function createSettingsPanel()
     authors:SetPoint("BOTTOM", settingsPanel, "BOTTOM", 0, 37)
     WalkMapLocale.Static(authors, "Created by Anexseus and Underbuks")
     authors:SetTextColor(0.75, 0.75, 0.75)
+    -- Debug report, always in reach: bottom left, above the controller help
+    -- line (also under Controller & help, where controller focus reaches it).
+    local debugButton = CreateFrame("Button", nil, settingsPanel)
+    debugButton:SetSize(112, 20)
+    debugButton:SetPoint("BOTTOMLEFT", settingsPanel, "BOTTOMLEFT", 14, 32)
+    debugButton:EnableMouse(true)
+    extras.StyleButton(debugButton)
+    debugButton.label = debugButton:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    debugButton.label:SetPoint("CENTER")
+    debugButton.label:SetWidth(104)
+    debugButton.label:SetWordWrap(false)
+    WalkMapLocale.Static(debugButton.label, "Debug report")
+    debugButton:SetScript("OnClick", function() extras.ShowDebug() end)
+    debugButton:SetScript("OnEnter", function(self)
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetText(WalkMapL("Debug report"))
+        GameTooltip:AddLine(WalkMapL("Copy current settings and map state to report a bug."), 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    debugButton:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    settingsPanel.debugButton = debugButton
     for i, page in ipairs(settingsPages) do
         if page.hidden then break end
         local row = CreateFrame("Button", nil, settingsPanel)
