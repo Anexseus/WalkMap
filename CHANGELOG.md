@@ -6,7 +6,8 @@ New
 - German and French: WalkMap's windows, settings, menus, tooltips and chat
   messages follow the game's language. Settings > Look > Language picks
   another one (Auto, English, Deutsch, Français). The translations are new:
-  corrections are welcome in the comments on CurseForge.
+  corrections are welcome in the comments on CurseForge. Changing it
+  redraws the open map and its buttons at once.
 
 Fixed
 - Button hints (and Pad focus) turned off by hand came back on after a

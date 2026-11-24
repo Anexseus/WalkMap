@@ -1131,10 +1131,10 @@ local function createDebugPanel()
         WalkMapUI.Window(panel)
         local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
         title:SetPoint("TOP", panel, "TOP", 0, -8)
-        title:SetText(WalkMapL("WalkMap debug report"))
+        WalkMapLocale.Static(title, "WalkMap debug report")
         local hint = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         hint:SetPoint("TOPLEFT", panel, "TOPLEFT", 15, -43)
-        hint:SetText(WalkMapL("Click the report, then press Ctrl+C. Alternative: /walkmap debug chat"))
+        WalkMapLocale.Static(hint, "Click the report, then press Ctrl+C. Alternative: /walkmap debug chat")
         local scroll = CreateFrame("ScrollFrame", nil, panel)
         scroll:SetPoint("TOPLEFT", panel, "TOPLEFT", 15, -69)
         scroll:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -15, 43)
@@ -1163,7 +1163,7 @@ local function createDebugPanel()
         extras.StyleButton(close)
         local label = close:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         label:SetPoint("CENTER")
-        label:SetText(WalkMapL("Done"))
+        WalkMapLocale.Static(label, "Done")
         close:SetScript("OnClick", function() panel:Hide() end)
         debugPanel = panel
         debugAction = nil
@@ -1631,7 +1631,7 @@ local function refreshLabels()
         buttons[index].label:SetTextColor(active and 0.4 or 1,
             active and 1 or 1, active and 0.8 or 1)
     end
-    if viewButton then viewButton.label:SetText(WalkMapL("Settings")) end
+    if viewButton then WalkMapLocale.Static(viewButton.label, "Settings") end
     if questButton then
         local focus = extras.QuestFocus()
         local title = focus and C_QuestLog and C_QuestLog.GetTitleForQuestID
@@ -1687,6 +1687,18 @@ local function setOption(field, value)
     if changed then changed() end
 end
 
+-- The language changed (Settings > Look > Language): redraw what shows text.
+WalkMapLocale.OnChange(function()
+    refreshLabels()
+    if refreshSettingsRows and settingsPanel and settingsPanel:IsShown() then refreshSettingsRows() end
+    if WalkMapTracker and WalkMapTracker.Refresh then WalkMapTracker.Refresh() end
+    if WalkMapQuestLog and WalkMapQuestLog.Refresh then WalkMapQuestLog.Refresh() end
+    if WalkMapLevels and WalkMapLevels.Refresh then pcall(WalkMapLevels.Refresh) end
+    extras.Invalidate()
+    if WalkMapCore and WalkMapCore.Redraw then WalkMapCore.Redraw() end
+    if WalkMapNativeController then WalkMapNativeController.RequestRefresh() end
+end)
+
 -- =========================================================
 -- Dropdown row decoration: icon, submenu arrow, right-hand detail text,
 -- separators and a hover/focus bar. The bar follows OnEnter/OnLeave, which
@@ -1728,7 +1740,7 @@ local function rowDecor(row)
         decor.arrow = nil
         decor.arrowText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         decor.arrowText:SetPoint("RIGHT", row, "RIGHT", -5, 0)
-        decor.arrowText:SetText(WalkMapL(">"))
+        WalkMapLocale.Static(decor.arrowText, ">")
         decor.arrowText:Hide()
     else
         decor.arrow:Hide()
@@ -3548,10 +3560,10 @@ local function createSettingsPanel()
     WalkMapUI.Inset(settingsPanel, 175, 39, 10, 58)
     local title = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOP", settingsPanel, "TOP", 0, -8)
-    title:SetText(WalkMapL("WalkMap settings"))
+    WalkMapLocale.Static(title, "WalkMap settings")
     local categoriesTitle = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     categoriesTitle:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 22, -51)
-    categoriesTitle:SetText(WalkMapL("Categories"))
+    WalkMapLocale.Static(categoriesTitle, "Categories")
     settingsPanel.pageTitle = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     settingsPanel.pageTitle:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 188, -50)
     settingsPanel.summary = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -3564,7 +3576,7 @@ local function createSettingsPanel()
     extras.StyleButton(close)
     local closeText = close:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     closeText:SetPoint("CENTER")
-    closeText:SetText(WalkMapL("Done"))
+    WalkMapLocale.Static(closeText, "Done")
     close:SetScript("OnClick", function() setControllerPanelVisible(settingsPanel, false) end)
     settingsPanel.doneButton = close
     local cornerClose = CreateFrame("Button", nil, settingsPanel)
@@ -3576,11 +3588,11 @@ local function createSettingsPanel()
     settingsPanel.closeButton = cornerClose
     local footer = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     footer:SetPoint("BOTTOMLEFT", settingsPanel, "BOTTOMLEFT", 16, 15)
-    footer:SetText(WalkMapL("D-pad: navigate    Left/Right: categories/options    B: close"))
+    WalkMapLocale.Static(footer, "D-pad: navigate    Left/Right: categories/options    B: close")
     footer:SetTextColor(0.7, 0.7, 0.7)
     local authors = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     authors:SetPoint("BOTTOM", settingsPanel, "BOTTOM", 0, 37)
-    authors:SetText(WalkMapL("Created by Anexseus and Underbuks"))
+    WalkMapLocale.Static(authors, "Created by Anexseus and Underbuks")
     authors:SetTextColor(0.75, 0.75, 0.75)
     for i, page in ipairs(settingsPages) do
         if page.hidden then break end

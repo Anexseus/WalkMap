@@ -113,7 +113,7 @@ mapArrow:SetPoint("RIGHT", -1, 0)
 mapArrow:SetTexture("Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up")
 local mapPickerHint = mapPickerButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 mapPickerHint:SetPoint("RIGHT", mapArrow, "LEFT", -1, 0)
-mapPickerHint:SetText(WalkMapL("Zones"))
+WalkMapLocale.Static(mapPickerHint, "Zones")
 mapPickerHint:SetTextColor(1, 0.82, 0.3)
 mapPickerButton:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
 mapPickerButton:GetHighlightTexture():SetAlpha(0.3)
@@ -2757,7 +2757,7 @@ dbBadge:EnableMouse(true)
 WalkMapExtras.StyleButton(dbBadge)
 local dbLabel = dbBadge:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 dbLabel:SetPoint("CENTER")
-dbLabel:SetText(WalkMapL("DB: ..."))
+WalkMapLocale.Static(dbLabel, "DB: ...")
 -- The title's zone chooser ends where the badge begins, so it gains the room
 -- the compact Ready badge frees up.
 mapPickerButton:ClearAllPoints()
@@ -2783,7 +2783,7 @@ local function updateDBBadge()
     lastDBPhase, lastDBProgress = phase, progress
     if phase == "ready" then
         -- Compact when all is well; hover still shows full QuestieDB status.
-        dbLabel:SetText(WalkMapL("DB"))
+        WalkMapLocale.Static(dbLabel, "DB")
         dbLabel:SetTextColor(0.4, 1, 0.5)
         setDBBadgeWidth(36)
     elseif phase == "loading" then
@@ -2791,11 +2791,11 @@ local function updateDBBadge()
         dbLabel:SetTextColor(1, 0.82, 0.35)
         setDBBadgeWidth(79)
     elseif phase == "waiting" then
-        dbLabel:SetText(WalkMapL("DB: Wait"))
+        WalkMapLocale.Static(dbLabel, "DB: Wait")
         dbLabel:SetTextColor(1, 0.82, 0.35)
         setDBBadgeWidth(79)
     else
-        dbLabel:SetText(WalkMapL("DB: Error"))
+        WalkMapLocale.Static(dbLabel, "DB: Error")
         dbLabel:SetTextColor(1, 0.45, 0.45)
         setDBBadgeWidth(79)
     end
@@ -2978,7 +2978,7 @@ centerButton:EnableMouse(true)
 WalkMapExtras.StyleButton(centerButton)
 local centerLabel = centerButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 centerLabel:SetPoint("CENTER")
-centerLabel:SetText(WalkMapL("Player"))
+WalkMapLocale.Static(centerLabel, "Player")
 -- The footer no longer shows Player: Follow brings the map back to you, and
 -- the zone title's menu has Current zone. The button stays as a hidden
 -- action for the controller's map control (Center) and keeps the footer's
@@ -4003,7 +4003,7 @@ local function updateNearestObjective(mapID, x, y)
         end
     end
     if not nearest then
-        nearestText:SetText(WalkMapL("Focused quest: no known location in this zone"))
+        WalkMapLocale.Static(nearestText, "Focused quest: no known location in this zone")
     else
         local dx, dy = nearest[1] - x, nearest[2] - y
         local northSouth = dy < -0.025 and "N" or dy > 0.025 and "S" or ""
@@ -4426,7 +4426,7 @@ end)
 -- alter the beta's protected frame focus or global gamepad bindings.
 local padHint = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 padHint:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
-padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
+WalkMapLocale.Static(padHint, "D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
 padHint:SetTextColor(1, 0.82, 0.35)
 padHint:Hide()
 
@@ -4437,7 +4437,7 @@ resumeButton:EnableMouse(true)
 WalkMapExtras.StyleButton(resumeButton)
 local resumeLabel = resumeButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 resumeLabel:SetPoint("CENTER")
-resumeLabel:SetText(WalkMapL("Resume controller navigation"))
+WalkMapLocale.Static(resumeLabel, "Resume controller navigation")
 resumeButton:Hide()
 
 local focusTarget, focusIndex, lastPadButton
@@ -4547,7 +4547,7 @@ local function exitPinMode()
     closePinDetails()
     selectedPin, padPinIndex, padPinMode = nil, 0, false
     pinOutline:Hide()
-    padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
+    WalkMapLocale.Static(padHint, "D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
     if not padSuspended and not (WalkMapNativeController
         and WalkMapNativeController.OwnsInput()) then
         markFocus(padTargets()[focusIndex or 1])
@@ -4830,7 +4830,7 @@ updatePadMode = function()
     resumeButton:ClearAllPoints()
     resumeButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, UI_LAYOUT.footerButtonBottom)
     resumeButton:SetSize(175, 19)
-    resumeLabel:SetText(WalkMapL("Resume controller navigation"))
+    WalkMapLocale.Static(resumeLabel, "Resume controller navigation")
     if enabled then
         status:Hide()
         if padSuspended and WalkMapExtras.MapReleased() then
@@ -4848,7 +4848,7 @@ updatePadMode = function()
             resumeButton:Hide()
             padHint:Show()
             if not padPanning and not padPinMode then
-                padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
+                WalkMapLocale.Static(padHint, "D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
             end
             if not padPinMode and (not focusTarget or not focusTarget:IsShown()) then
                 focusIndex = focusIndex or 1
@@ -4888,7 +4888,7 @@ padCheck:SetAllPoints(padBox)
 padCheck:SetTexture("Interface\\Buttons\\UI-CheckBox-Check")
 local padLabel = padToggle:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 padLabel:SetPoint("LEFT", padBox, "RIGHT", 2, 0)
-padLabel:SetText(WalkMapL("Pad focus"))
+WalkMapLocale.Static(padLabel, "Pad focus")
 padToggle:SetScript("OnClick", function()
     if GameTooltip and GameTooltip.GetOwner
         and GameTooltip:GetOwner() == padToggle then GameTooltip:Hide() end
@@ -4990,10 +4990,10 @@ frame:SetScript("OnGamePadButtonDown", function(_, button)
     if button == "PAD3" and not menu then
         padPanning = not padPanning
         if padPanning then
-            padHint:SetText(WalkMapL("D-pad: pan    A: open/waypoint    B: back    Select: skills"))
+            WalkMapLocale.Static(padHint, "D-pad: pan    A: open/waypoint    B: back    Select: skills")
             markFocus(viewport)
         else
-            padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
+            WalkMapLocale.Static(padHint, "D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
             markFocus(padTargets()[focusIndex or 1])
         end
         return
@@ -5008,7 +5008,7 @@ frame:SetScript("OnGamePadButtonDown", function(_, button)
         elseif padPanning then
             padPanning = false
             WalkMapExtras.ResumeFollow()
-            padHint:SetText(WalkMapL("D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills"))
+            WalkMapLocale.Static(padHint, "D-pad: navigate   A: choose   X: pan   Y: pins   Select: skills")
             markFocus(padTargets()[focusIndex or 1])
         else
             frame:Hide()
@@ -5388,6 +5388,12 @@ WalkMapCore = {
     ZoomIndex = function() return zoomIndex end,
     UpdateZoomLabels = function() updateZoomLabels() end,
     UpdatePadMode = function() if updatePadMode then updatePadMode() end end,
+    -- Everything again, title included (the language changed).
+    Redraw = function()
+        currentMap = nil
+        if frame:IsShown() then safeUpdate() end
+        updateZoomLabels()
+    end,
     -- Quest data changed: redraw now when the map is open.
     RefreshQuests = function()
         questRefreshAt = 0

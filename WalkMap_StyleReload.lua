@@ -64,7 +64,7 @@ local function build()
     if WalkMapUI and WalkMapUI.Menu then pcall(WalkMapUI.Menu, popup) end
     popup.title = popup:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     popup.title:SetPoint("TOP", popup, "TOP", 0, -14)
-    popup.title:SetText(WalkMapL("WalkMap: reload needed"))
+    WalkMapLocale.Static(popup.title, "WalkMap: reload needed")
     popup.text = popup:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     popup.text:SetPoint("TOPLEFT", popup, "TOPLEFT", 18, -36)
     popup.text:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -18, -36)

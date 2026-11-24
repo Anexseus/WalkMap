@@ -229,7 +229,7 @@ do
     edge("TOPRIGHT", "BOTTOMRIGHT", false)
     local tag = editBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     tag:SetPoint("BOTTOMLEFT", editBox, "TOPLEFT", 2, 2)
-    tag:SetText(WalkMapL("WalkMap quest tracker"))
+    WalkMapLocale.Static(tag, "WalkMap quest tracker")
 end
 local corner = CreateFrame("Button", nil, editBox)
 corner:SetSize(18, 18)
@@ -578,7 +578,7 @@ local function render()
         elseif quest.complete then
             used = 1
             local line = lineFor(block, 1)
-            line:SetText(WalkMapL("Ready to turn in"))
+            WalkMapLocale.Static(line, "Ready to turn in")
             line:SetTextColor(0.5, 0.95, 0.5)
         else
             local ok, objectives = call(C_QuestLog.GetQuestObjectives, quest.id)

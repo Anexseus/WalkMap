@@ -26,7 +26,7 @@ do
     WalkMapExtras.StyleButton(layoutButton)
     local label = layoutButton:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     label:SetPoint("CENTER")
-    label:SetText(WalkMapL("Buttons"))
+    WalkMapLocale.Static(label, "Buttons")
     -- Quests moves one place right to make room.
     -- Quests takes the old Player slot on the right (Player is gone; its
     -- hidden button still follows the footer layout, M+/M- included).

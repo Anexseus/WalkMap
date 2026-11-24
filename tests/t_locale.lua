@@ -57,4 +57,40 @@ return {
         env.WalkMapLocale.Apply()
         Mock.eq(env.WalkMapL("Settings"), "Settings", "English chosen")
     end},
+    {"Changing the language redraws the open map at once", function(Mock)
+        local env = boot(Mock)
+        env.WalkMap_Toggle()
+        env.tick(0.5, 5)
+        local x = env.WalkMapExtras
+        x.ShowSettingsPage("Look")
+        local panel = x.SettingsPanel()
+        local row
+        for _, r in ipairs(panel.options) do
+            if r:IsShown() and tostring(r.label:GetText()):find("^Language") then row = r end
+        end
+        while not row and panel.walkmapScroll(panel.walkmapScrollEdges.last, "down") do
+            for _, r in ipairs(panel.options) do
+                if r:IsShown() and tostring(r.label:GetText()):find("^Language") then row = r end
+            end
+        end
+        Mock.ok(row, "Language row")
+        row:GetScript("OnClick")(row) -- Auto -> English
+        row:GetScript("OnClick")(row) -- English -> Deutsch
+        Mock.eq(env.WalkMapLocale.Code(), "deDE", "German chosen")
+        local titleFound, followFound = false, false
+        local function scan(frame, depth)
+            if depth > 8 then return end
+            for _, child in ipairs(frame.__children or {}) do
+                local text = child.GetText and child:GetText()
+                if type(text) == "string" then
+                    if text == "WalkMap-Einstellungen" then titleFound = true end
+                    if text:find("Folgen", 1, true) then followFound = true end
+                end
+                scan(child, depth + 1)
+            end
+        end
+        scan(env.UIParent, 0)
+        Mock.ok(followFound, "the map's Follow button is German right away")
+        Mock.ok(titleFound == true, "the settings window's title is German right away")
+    end},
 }

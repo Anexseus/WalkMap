@@ -52,7 +52,7 @@ if WalkMapUI then WalkMapUI.ApplyMaterial(coordinatesBG, 1, 0.55) end
 local coordinatesText = coordinates:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 coordinatesText:SetPoint("CENTER", coordinates, "CENTER", 0, 0)
 coordinatesText:SetTextColor(1, 0.87, 0.58)
-coordinatesText:SetText(WalkMapL("--.-, --.-"))
+WalkMapLocale.Static(coordinatesText, "--.-, --.-")
 local canvas = CreateFrame("Frame", nil, clip)
 canvas:EnableMouse(false)
 local markerLayer = CreateFrame("Frame", nil, canvas)
@@ -109,7 +109,7 @@ local function moveMiniPlayer(x, y, visible)
         player:SetRotation(GetPlayerFacing and GetPlayerFacing() or 0)
         player:Show()
     else
-        coordinatesText:SetText(WalkMapL("--.-, --.-"))
+        WalkMapLocale.Static(coordinatesText, "--.-, --.-")
         player:Hide()
     end
     return offsetX, offsetY

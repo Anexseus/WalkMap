@@ -349,7 +349,7 @@ end
 local function updateFullButton()
     local button = actions.full
     if not button then return end
-    if not fullText then button.label:SetText(WalkMapL("Full text")) return end
+    if not fullText then WalkMapLocale.Static(button.label, "Full text") return end
     local offset, maxScroll = detail.scroll:GetVerticalScroll() or 0, math.max(0,
         (detail.contentHeight or 0) - detail.scroll:GetHeight())
     button.label:SetText(WalkMapL(offset < maxScroll - 1 and "More text" or "Back"))
@@ -366,7 +366,7 @@ local function buildPanel()
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOPLEFT", panel, "TOPLEFT", 14, -9)
-    title:SetText(WalkMapL("Quest log"))
+    WalkMapLocale.Static(title, "Quest log")
     panel.count = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     panel.count:SetPoint("LEFT", title, "RIGHT", 8, 0)
     panel.count:SetTextColor(0.85, 0.78, 0.6)
@@ -489,7 +489,7 @@ local function buildPanel()
         detail.lines[i] = line
     end
     detail.rewardTitle = content:CreateFontString(nil, "OVERLAY", TITLE_FONT)
-    detail.rewardTitle:SetText(WalkMapL("Rewards"))
+    WalkMapLocale.Static(detail.rewardTitle, "Rewards")
     ink(detail.rewardTitle, INK)
     detail.rewardLine = content:CreateFontString(nil, "OVERLAY", BODY_FONT)
     detail.rewardLine:SetWidth(width)
@@ -599,13 +599,13 @@ local function buildPanel()
         local now = GetTime and GetTime() or 0
         if button.armedID ~= entry.id or now > (button.armedUntil or 0) then
             button.armedID, button.armedUntil = entry.id, now + ABANDON_WINDOW
-            button.label:SetText(WalkMapL("Confirm?"))
+            WalkMapLocale.Static(button.label, "Confirm?")
             button.label:SetTextColor(1, 0.45, 0.35)
             if C_Timer and C_Timer.After then
                 C_Timer.After(ABANDON_WINDOW, function()
                     if button.armedID == entry.id and (GetTime and GetTime() or 0) >= (button.armedUntil or 0) then
                         button.armedID = nil
-                        button.label:SetText(WalkMapL("Abandon"))
+                        WalkMapLocale.Static(button.label, "Abandon")
                         button.label:SetTextColor(1, 1, 1)
                     end
                 end)
@@ -613,7 +613,7 @@ local function buildPanel()
             return
         end
         button.armedID = nil
-        button.label:SetText(WalkMapL("Abandon"))
+        WalkMapLocale.Static(button.label, "Abandon")
         button.label:SetTextColor(1, 1, 1)
         selectQuest(entry)
         if C_QuestLog.SetAbandonQuest then call(C_QuestLog.SetAbandonQuest)
@@ -975,7 +975,7 @@ showDetail = function(questID)
     if entry.id ~= selectedID then return end
     if actions.abandon.armedID and actions.abandon.armedID ~= entry.id then
         actions.abandon.armedID = nil
-        actions.abandon.label:SetText(WalkMapL("Abandon"))
+        WalkMapLocale.Static(actions.abandon.label, "Abandon")
         actions.abandon.label:SetTextColor(1, 1, 1)
     end
     actions.track.label:SetText(WalkMapL(isTracked(entry) and "Untrack" or "Track"))

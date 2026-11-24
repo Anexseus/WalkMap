@@ -135,10 +135,25 @@ local function wanted()
     return ok and game or "enUS"
 end
 
+-- Fixed texts (labels, titles) remember their English text, so a language
+-- change shows at once; locale.OnChange functions redraw everything else.
+local statics = setmetatable({}, {__mode = "k"})
+local listeners = {}
+function locale.Static(fontString, text)
+    if not fontString or not fontString.SetText then return end
+    statics[fontString] = text
+    fontString:SetText(WalkMapL(text))
+end
+function locale.OnChange(fn) listeners[#listeners + 1] = fn end
+
 function locale.Apply(code)
+    local before = active
     activeCode = code or wanted()
     active = languages[activeCode]
     cache, cacheSize = {}, 0
+    if before == active then return end
+    for fontString, text in pairs(statics) do pcall(fontString.SetText, fontString, WalkMapL(text)) end
+    for _, fn in ipairs(listeners) do pcall(fn) end
 end
 
 function locale.Force(code) forced = code locale.Apply() end
