@@ -3094,7 +3094,7 @@ local settingsPages = {
         {"__info", nil, "Beta testing", "Want to try new things first? Ask for the Beta Tester role on the Discord."},
         {"__info", nil, "Also on CurseForge", "You can still write in the comments on WalkMap's CurseForge page."},
     }},
-    {"Recommended controllers", "Controllers we have tested and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
+    {"Tested controllers", "Controllers we have tested and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
         {"__info", nil, "Any controller: keys for the map", "Bind M (the map key) or your WalkMap key to a button. Those also open and close WalkMap during combat, which the gamepad wheel cannot."},
         {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
         {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},
@@ -3743,7 +3743,14 @@ local function createSettingsPanel()
     settingsPanel = CreateFrame("Frame", nil, owner)
     -- Tall enough for eight option rows (44 px each from y -110).
     settingsPanel:SetSize(660, 530)
-    settingsPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    -- Where the player last dragged it (account-wide), else the middle.
+    local savedPos = type(WalkMapSettings) == "table" and WalkMapSettings.settingsWindowPos
+    if type(savedPos) == "table" and tonumber(savedPos.x) and tonumber(savedPos.y) then
+        settingsPanel:SetPoint("CENTER", UIParent, "CENTER", savedPos.x, savedPos.y)
+    else
+        settingsPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    end
+    settingsPanel:SetMovable(true)
     settingsPanel:SetFrameStrata("TOOLTIP")
     -- Keep this layer when the map itself changes layer (NPC and game
     -- windows): a parent's SetFrameStrata otherwise drags children along.
@@ -3759,6 +3766,46 @@ local function createSettingsPanel()
     local title = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOP", settingsPanel, "TOP", 0, -8)
     WalkMapLocale.Static(title, "WalkMap settings")
+    -- Drag the top of the window to move it; right-click there puts it back
+    -- in the middle. The close X keeps its own clicks.
+    local dragBar = CreateFrame("Frame", nil, settingsPanel)
+    dragBar:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 4, -2)
+    dragBar:SetPoint("TOPRIGHT", settingsPanel, "TOPRIGHT", -40, -2)
+    dragBar:SetHeight(32)
+    dragBar:EnableMouse(true)
+    local function saveSettingsPos()
+        if type(WalkMapSettings) ~= "table" then return end
+        local x, y = settingsPanel:GetCenter()
+        local cx, cy = UIParent:GetCenter()
+        if not (x and y and cx and cy) then return end
+        WalkMapSettings.settingsWindowPos = {x = math.floor(x - cx + 0.5), y = math.floor(y - cy + 0.5)}
+        settingsPanel:ClearAllPoints()
+        settingsPanel:SetPoint("CENTER", UIParent, "CENTER", WalkMapSettings.settingsWindowPos.x, WalkMapSettings.settingsWindowPos.y)
+    end
+    dragBar:SetScript("OnMouseDown", function(_, button)
+        if button == "LeftButton" then
+            settingsPanel.walkmapMoving = true
+            settingsPanel:StartMoving()
+        elseif button == "RightButton" then
+            if type(WalkMapSettings) == "table" then WalkMapSettings.settingsWindowPos = nil end
+            settingsPanel:ClearAllPoints()
+            settingsPanel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        end
+    end)
+    dragBar:SetScript("OnMouseUp", function()
+        if not settingsPanel.walkmapMoving then return end
+        settingsPanel.walkmapMoving = nil
+        settingsPanel:StopMovingOrSizing()
+        saveSettingsPos()
+    end)
+    settingsPanel:HookScript("OnHide", function()
+        if settingsPanel.walkmapMoving then
+            settingsPanel.walkmapMoving = nil
+            settingsPanel:StopMovingOrSizing()
+            saveSettingsPos()
+        end
+    end)
+    settingsPanel.walkmapDragBar = dragBar
     local categoriesTitle = settingsPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     categoriesTitle:SetPoint("TOPLEFT", settingsPanel, "TOPLEFT", 22, -51)
     WalkMapLocale.Static(categoriesTitle, "Categories")

@@ -30,6 +30,24 @@ end
 local function click(row) row:GetScript("OnClick")(row) end
 
 return {
+    {"The settings window moves by its top, remembers where, and right-click puts it back", function(Mock)
+        local env, panel = start(Mock)
+        local bar = panel.walkmapDragBar
+        Mock.ok(bar, "a drag bar at the top")
+        local moved
+        panel.StartMoving = function() moved = true end
+        bar:GetScript("OnMouseDown")(bar, "LeftButton")
+        Mock.ok(moved, "left button starts moving")
+        panel:ClearAllPoints()
+        panel:SetPoint("CENTER", env.UIParent, "CENTER", 120, -40)
+        panel.GetCenter = function() return 960 + 120, 540 - 40 end
+        env.UIParent.GetCenter = function() return 960, 540 end
+        bar:GetScript("OnMouseUp")(bar, "LeftButton")
+        local pos = env.WalkMapSettings.settingsWindowPos
+        Mock.ok(pos and pos.x == 120 and pos.y == -40, "position saved for the account")
+        bar:GetScript("OnMouseDown")(bar, "RightButton")
+        Mock.eq(env.WalkMapSettings.settingsWindowPos, nil, "right-click resets it")
+    end},
     {"Debug report: a button at the bottom left, and /walkmap debug opens the window (in combat too)", function(Mock)
         local env, panel = start(Mock)
         local button = panel.debugButton
@@ -111,7 +129,7 @@ return {
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Appearance, Quest tracker, Controller & help, Profiles, Bags & vendors, Community, Recommended controllers", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Appearance, Quest tracker, Controller & help, Profiles, Bags & vendors, Community, Tested controllers", "category list")
         local community = page(env, "Community")
         Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
         Mock.eq(#community, 5, "all five rows fit with the link box under the first")
