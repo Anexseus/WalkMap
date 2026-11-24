@@ -3057,15 +3057,6 @@ local settingsPages = {
         {"__trackerWidth", nil, "Width", "Cycle narrow, normal and wide, or drag its corner in the game's Edit Mode."},
         {"__announce", nil, "Tell group about quest progress", "Party/raid chat: off, finished objectives, or every step. Also says when a quest is ready."},
     }},
-    {"Profiles", "Quest display setups for this character, and settings shared by all your characters.", {
-        {"profile", "questing", "Questing", "All quest areas, givers and objective icons."},
-        {"profile", "exploration", "Exploration", "Focused area and a clearer map."},
-        {"profile", "custom", "My settings", "Restore your saved personal quest settings."},
-        {"profile", "save", "Save current as My settings", "Keep your current quest display choices."},
-        {"__accountSave", nil, "Save as account settings", "Store all of this character's WalkMap settings for your account, so your other characters can load them."},
-        {"__accountLoad", nil, "Load account settings", "Use the saved account settings on this character, then reload the interface."},
-        {"__accountNew", nil, "New characters use account settings", "A character's first login with WalkMap starts from the saved account settings."},
-    }},
     {"Controller & help", "How you play, navigation, the map keys and help.", {
         {"__playStyle", nil, "How you play", "Mouse and keyboard, controller, or both. Sets Pad focus, button hints and the map's close X; you can still change those one by one."},
         {"controllerMode", nil, "Pad focus", "Take controller focus on open. The keybind toggles this choice."},
@@ -3080,6 +3071,15 @@ local settingsPages = {
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},
     }},
     -- Information only: controllers that work well, set up in Steam Input.
+    {"Profiles", "Quest display setups for this character, and settings shared by all your characters.", {
+        {"profile", "questing", "Questing", "All quest areas, givers and objective icons."},
+        {"profile", "exploration", "Exploration", "Focused area and a clearer map."},
+        {"profile", "custom", "My settings", "Restore your saved personal quest settings."},
+        {"profile", "save", "Save current as My settings", "Keep your current quest display choices."},
+        {"__accountSave", nil, "Save as account settings", "Store all of this character's WalkMap settings for your account, so your other characters can load them."},
+        {"__accountLoad", nil, "Load account settings", "Use the saved account settings on this character, then reload the interface."},
+        {"__accountNew", nil, "New characters use account settings", "A character's first login with WalkMap starts from the saved account settings."},
+    }},
     {"Bags & vendors", "Bag tools by Underbuks, integrated from SortPants.", {
         {"bagSortEnabled", nil, "Bag sorting", "Allow manual sorting through the button, command or shortcut."},
         {"__autoSell", nil, "Auto-sell junk", "Sell gray-quality items when a vendor opens: off, on with a chat message, or on quietly."},
@@ -3094,7 +3094,7 @@ local settingsPages = {
         {"__info", nil, "Beta testing", "Want to try new things first? Ask for the Beta Tester role on the Discord."},
         {"__info", nil, "Also on CurseForge", "You can still write in the comments on WalkMap's CurseForge page."},
     }},
-    {"Controllers", "Recommended controllers and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
+    {"Recommended controllers", "Controllers we have tested and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
         {"__info", nil, "Any controller: keys for the map", "Bind M (the map key) or your WalkMap key to a button. Those also open and close WalkMap during combat, which the gamepad wheel cannot."},
         {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
         {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},

@@ -111,7 +111,7 @@ return {
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Appearance, Quest tracker, Profiles, Controller & help, Bags & vendors, Community, Controllers", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Appearance, Quest tracker, Controller & help, Profiles, Bags & vendors, Community, Recommended controllers", "category list")
         local community = page(env, "Community")
         Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
         Mock.eq(#community, 5, "all five rows fit with the link box under the first")
