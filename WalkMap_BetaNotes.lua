@@ -8,15 +8,16 @@
 -- Update for every beta: version = the version in WalkMap.toc, items = what
 -- to try ({title, what to do and look for}). The release workflow refuses a
 -- beta whose notes are for another version.
+-- round: raise it (2, 3, ...) when a beta adds something new to test, so
+-- the page shows again to testers who already saw it for this version.
 WalkMapBetaNotes = {
     version = "1.14.20",
+    round = 2,
     items = {
-        {"This page",
-         "This page shows once per version: the first time you open the map in a beta of 1.14.20, instead of What's new. If you already saw it in an earlier 1.14.20 beta, it stays away. /walkmap testing opens it again."},
+        {"Low-level quests (new)",
+         "Settings > Quests on the map > Low-level quests: Off, Quest chains or All. With Quest chains, gray quests show at quest givers only when their chain goes on to your level, and the tooltip says how far. Check that chains you know show up, and that single gray quests stay hidden."},
         {"German and French",
-         "Settings > Look > Language: try Deutsch and Français. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
-        {"German wording",
-         "German texts revised: Radialmenü, Controller-Fokus, Schaltflächen, Standort teilen and clearer names for the two marker settings. Tell us if anything still reads wrong."},
+         "Settings > Look > Language: try Deutsch and Français. The German texts were revised in this beta. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
         {"Changing the language",
          "Change it with the map open: the map, its buttons, the quest log, the tracker and the settings categories should change at once."},
         {"Button hints stay as you set them",

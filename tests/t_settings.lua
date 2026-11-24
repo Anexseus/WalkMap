@@ -359,6 +359,7 @@ return {
         env.loadAddon({welcomeSeen = true, newsSeen = "1.14.11"}, {})
         local build = "1.14.20-beta5"
         env.WalkMapExtras.Build = function() return build end
+        env.WalkMapBetaNotes.round = nil
         env.fire("PLAYER_LOGIN")
         env.fire("PLAYER_ENTERING_WORLD")
         env.tick(1, 5)
@@ -399,5 +400,14 @@ return {
         env.WalkMap_Toggle()
         env.tick(1, 5)
         Mock.ok(panel:IsShown(), "again for the next version")
+        env.WalkMapExtras.CloseMenus()
+        panel:Hide()
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        env.WalkMapBetaNotes.round = 2
+        env.WalkMap_Toggle()
+        env.tick(1, 5)
+        Mock.ok(panel:IsShown(), "again when a beta brings something new (round 2)")
+        Mock.eq(env.WalkMapSettings.betaSeen, "1.14.21#2", "seen for round 2")
     end},
 }

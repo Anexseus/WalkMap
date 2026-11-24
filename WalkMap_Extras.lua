@@ -2774,8 +2774,18 @@ end
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE, BETA_PAGE
 -- "1.14.20-beta6" -> "1.14.20": the testing page is seen per version.
+-- WalkMapBetaNotes.round (2, 3, ...) shows it to everyone again within the
+-- same version, for a beta that brings something new to test: "1.14.20#2".
 local function betaVersion(build)
     return type(build) == "string" and build:match("^[^%-]+") or nil
+end
+local function betaSeenKey(build)
+    local version = betaVersion(build)
+    local round = type(WalkMapBetaNotes) == "table" and tonumber(WalkMapBetaNotes.round)
+    if version and round and round > 1 and not version:find("#", 1, true) then
+        version = version .. "#" .. math.floor(round)
+    end
+    return version
 end
 local NEWS_VERSION = "1.14.19"
 -- Earlier What's new pages that already showed what this one shows: players
@@ -2801,7 +2811,7 @@ local function showHiddenPage(which)
         -- get the welcome page and skip this release's news.
         if type(WalkMapSettings) == "table" then
             if which == "beta" then
-                WalkMapSettings.betaSeen = betaVersion(extras.Build())
+                WalkMapSettings.betaSeen = betaSeenKey(extras.Build())
             else
                 if which ~= "news" then WalkMapSettings.welcomeSeen = true end
                 WalkMapSettings.newsSeen = NEWS_VERSION
@@ -2846,7 +2856,7 @@ function extras.MapOpened()
     if extras.IsBeta() then
         -- Once per version: a tester who saw 1.14.20-beta5 is not shown
         -- it again for beta6, only for the first beta of 1.14.21.
-        if BETA_PAGE and betaVersion(saved.betaSeen) ~= betaVersion(extras.Build()) then
+        if BETA_PAGE and betaVersion(saved.betaSeen) ~= betaSeenKey(extras.Build()) then
             extras.ShowTesting()
         end
         return
