@@ -607,6 +607,28 @@ function live.NextQuest(questID)
     if entry then return entry[1], entry[2] end
 end
 
+-- Highest quest level further along this quest's chain, or nil: lets a
+-- gray quest that starts a chain reaching your level still be shown.
+local chainTopCache = {}
+function live.ChainTop(questID)
+    if not db or type(questID) ~= "number" then return nil end
+    if chainTopCache[questID] == nil then
+        local top, id, seen = nil, questID, {[questID] = true}
+        for _ = 1, 25 do
+            local nextID = live.NextQuest(id)
+            if not nextID or seen[nextID] then break end
+            seen[nextID] = true
+            local ok, level = pcall(db.Quest.GetByIndex, nextID, 5)
+            if ok and type(level) == "number" and level > 0 and (not top or level > top) then
+                top = level
+            end
+            id = nextID
+        end
+        chainTopCache[questID] = top or false
+    end
+    return chainTopCache[questID] or nil
+end
+
 function live.Status()
     return status
 end

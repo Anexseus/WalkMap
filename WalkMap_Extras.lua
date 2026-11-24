@@ -129,6 +129,9 @@ settings.rightClickUp = settings.rightClickUp == true
 -- Controller button hints at the top of the map; on unless turned off.
 if settings.controllerHints == nil then settings.controllerHints = true end
 if settings.announce ~= "done" and settings.announce ~= "progress" then settings.announce = "off" end
+-- Gray (low-level) quests at quest givers: "off", "chains" (only those whose
+-- chain goes on to quests at your level) or "all".
+if settings.lowQuests ~= "chains" and settings.lowQuests ~= "all" then settings.lowQuests = "off" end
 -- Tracker scope: "zone", "nearby" (this zone plus quests from neighbouring
 -- zones that reach into this map; the default since 1.11) or "all". Saves
 -- from before 1.11 only knew "zone" and move to "nearby" once.
@@ -1464,12 +1467,61 @@ local function prerequisitesMet(id)
     return true
 end
 
+-- Quests that need this one first (from the prerequisites), built once per
+-- data load; with chainTop below, a fallback when QuestieDB has no chain.
+local followUps, followUpsFor = {}, nil
+local function laterQuests(id)
+    local prereqs = WalkMapData.prereqs
+    if followUpsFor ~= prereqs then
+        followUps, followUpsFor = {}, prereqs
+        for questID, lists in pairs(type(prereqs) == "table" and prereqs or {}) do
+            for _, list in ipairs(lists) do
+                for _, prior in ipairs(list) do
+                    local key = math.abs(prior)
+                    followUps[key] = followUps[key] or {}
+                    table.insert(followUps[key], questID)
+                end
+            end
+        end
+    end
+    return followUps[id]
+end
+
+-- Highest quest level later in the chain that starts with this quest.
+local function chainTop(id)
+    local top = WalkMapLiveDB and WalkMapLiveDB.ChainTop and WalkMapLiveDB.ChainTop(id) or nil
+    local queue, seen = {id}, {[id] = true}
+    local index = 1
+    while queue[index] and index <= 60 do
+        for _, nextID in ipairs(laterQuests(queue[index]) or {}) do
+            if not seen[nextID] then
+                seen[nextID] = true
+                queue[#queue + 1] = nextID
+                local q = WalkMapData.quests[nextID]
+                local level = q and q[2]
+                if type(level) == "number" and level > 0 and (not top or level > top) then top = level end
+            end
+        end
+        index = index + 1
+    end
+    return top
+end
+extras.ChainTop = chainTop
+
+local function lowQuestAllowed(id, minQuestLevel)
+    if settings.lowQuests == "all" then return true end
+    if settings.lowQuests ~= "chains" then return false end
+    local top = chainTop(id)
+    return top ~= nil and top >= minQuestLevel
+end
+
 local function questIsNearLevel(id, level, classBit, raceBit, minQuestLevel)
     local q = WalkMapData.quests[id]
     if not q then return false end
     local required, questLevel, raceMask, classMask, maximum = q[1], q[2], q[3], q[4], q[5]
     if required > level or (maximum > 0 and maximum < level) then return false end
-    if questLevel > 0 and (questLevel < minQuestLevel or questLevel > level + 5) then
+    if questLevel > level + 5 then return false end
+    if questLevel > 0 and questLevel < minQuestLevel and not lowQuestAllowed(id, minQuestLevel) then
         return false
     end
     if classBit and classMask > 0 and math.floor(classMask / classBit) % 2 == 0 then
@@ -1510,11 +1562,20 @@ local function showGivers(mapID, level)
                         local instance = WalkMapQuestInfo and WalkMapQuestInfo.InstanceTag(id)
                         local pvp = not instance and WalkMapQuestInfo and WalkMapQuestInfo.PvPTag
                             and WalkMapQuestInfo.PvPTag(id)
+                        -- A gray quest shown for its chain: say where the chain goes.
+                        local chainNote = ""
+                        if questLevel and questLevel < minQuestLevel then
+                            local top = chainTop(id)
+                            if top and top > questLevel then
+                                chainNote = " |cff9d9d9d(" .. WalkMapL(("chain to level %d"):format(top)) .. ")|r"
+                            end
+                        end
                         if instance then instanceCount = instanceCount + 1 end
                         if pvp then pvpCount = pvpCount + 1 end
                         offered[#offered + 1] = levelText .. (quest.name or "Quest")
                             .. (instance and (" |cffff5050(" .. instance .. ")|r") or "")
                             .. (pvp and " |cffff9933(PvP)|r" or "")
+                            .. chainNote
                             .. (WalkMapQuestInfo and WalkMapQuestInfo.XPText(id) ~= ""
                                 and (" " .. WalkMapQuestInfo.XPText(id)) or "")
                             .. " |cff808080[" .. tostring(id) .. "]|r"
@@ -2613,7 +2674,7 @@ end
 local RECOMMENDED = {
     -- Quests on the map
     {"objectiveIcons", true}, {"focusObjectiveIcons", false}, {"givers", true},
-    {"questLabels", false}, {"nearestObjective", false}, {"level", 0},
+    {"questLabels", false}, {"nearestObjective", false}, {"level", 0}, {"lowQuests", "off"},
     -- Map
     {"clearView", false}, {"follow", true}, {"fadeWhileMoving", true}, {"fadeAlpha", 0.35},
     {"fadeKeepArrow", true}, {"turnInWaypoint", false}, {"rightClickUp", true}, {"focusWaypoint", true},
@@ -2926,6 +2987,8 @@ local settingsPages = {
         {"__welcomeAreas", nil, "Quest areas", "The game's blue quest areas and markers: all quests, only WalkMap's focused quest, or off."},
         {"__welcomeIcons", nil, "Quest icons", "QuestieDB objective and drop locations: all quests, only the focused quest, or off."},
         {"givers", nil, "Quest givers", "Show suitable quests for your class and level."},
+        {"__lowQuests", nil, "Low-level quests", "Also show gray quests at quest givers: off, only quest chains that go on to your level, or all of them.",
+            when = function() return settings.givers ~= false end},
         {"questLabels", nil, "Quest names on map", "Write quest titles beside the game markers."},
         {"nearestObjective", nil, "Nearest focused location", "Show the direction to the nearest known objective location."},
         {"__resetHidden", nil, "Restore hidden markers", "Show quest givers, quest locations and places you hid manually again."},
@@ -3197,6 +3260,9 @@ refreshSettingsRows = function()
         elseif field == "__welcomeAreas" then
             display = display .. ": " .. (settings.areas == "off" and "Off"
                 or settings.areas == "focus" and "Focused quest" or "All quests")
+        elseif field == "__lowQuests" then
+            display = display .. ": " .. (settings.lowQuests == "chains" and "Quest chains"
+                or settings.lowQuests == "all" and "All" or "Off")
         elseif field == "__announce" then
             display = display .. ": " .. (settings.announce == "done" and "Finished objectives"
                 or settings.announce == "progress" and "Every step" or "Off")
@@ -3479,6 +3545,11 @@ refreshSettingsRows = function()
             elseif field == "__welcomeAreas" then
                 setOption("areas", settings.areas == "all" and "focus"
                     or settings.areas == "focus" and "off" or "all")
+                refreshSettingsRows()
+            elseif field == "__lowQuests" then
+                setOption("lowQuests", settings.lowQuests == "off" and "chains"
+                    or settings.lowQuests == "chains" and "all" or "off")
+                extras.Invalidate()
                 refreshSettingsRows()
             elseif field == "__announce" then
                 settings.announce = settings.announce == "off" and "done"

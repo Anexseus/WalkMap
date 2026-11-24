@@ -30,6 +30,7 @@ return {
         Mock.eq(L("Marker distance: All"), "Reichweite der Markierungen: Gesamte Minimap", "whole minimap")
         Mock.eq(L("Marker distance: 75%"), "Reichweite der Markierungen: 75%", "a share")
         Mock.eq(L("Width: Custom (246)"), "Breite: Benutzerdefiniert (246)", "custom width")
+        Mock.eq(L("Low-level quests: Quest chains"), "Niedrigstufige Quests: Questreihen", "low-level quests")
         Mock.eq(L("Fade while moving: 35% visible"), "Sichtbarkeit beim Bewegen: 35%", "fade")
     end},
     {"French: its own colon", function(Mock)
@@ -42,6 +43,8 @@ return {
         Mock.eq(env.WalkMapL("Marker distance: All"), "Portée des marqueurs : Toute la minicarte", "whole minimap")
         Mock.eq(env.WalkMapL("Quest tracker: Off"), "Suivi des quêtes : Désactivé", "masculine stays")
         Mock.eq(env.WalkMapL("Width: Normal"), "Largeur : Normale", "feminine width")
+        Mock.eq(env.WalkMapL("Low-level quests: Off"), "Quêtes de bas niveau : Désactivées", "feminine plural")
+        Mock.eq(env.WalkMapL("chain to level 32"), "chaîne jusqu'au niveau 32", "chain note")
         Mock.eq(env.WalkMapL("Width: Custom (246)"), "Largeur : Personnalisée (246)", "custom width")
     end},
     {"German in use: map, every settings page and the zone menu, without errors", function(Mock)
