@@ -1,5 +1,12 @@
 # WalkMap changelog
 
+## 1.14.21
+
+Fixed
+- Settings > Community (and What's new): the Discord link box covered the
+  text next to it and was filled gold. It now sits under the description,
+  in the settings' own font, and a click still selects the link for Ctrl+C.
+
 ## 1.14.20
 
 New

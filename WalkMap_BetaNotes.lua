@@ -11,7 +11,7 @@
 -- round: raise it (2, 3, ...) when a beta adds something new to test, so
 -- the page shows again to testers who already saw it for this version.
 WalkMapBetaNotes = {
-    version = "1.14.20",
+    version = "1.14.21",
     round = 2,
     items = {
         {"Low-level quests (new)",
