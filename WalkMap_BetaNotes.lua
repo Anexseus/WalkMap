@@ -17,7 +17,7 @@ WalkMapBetaNotes = {
         {"Low-level quests (new)",
          "Settings > Quests on the map > Low-level quests: Off, Quest chains or All. With Quest chains, gray quests show at quest givers only when their chain goes on to your level, and the tooltip says how far. Check that chains you know show up, and that single gray quests stay hidden."},
         {"German and French",
-         "Settings > Look > Language: try Deutsch and Français. The German texts were revised in this beta. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
+         "Settings > Appearance > Language: try Deutsch and Français. The German texts were revised in this beta. Look for English text left over, text that runs outside its button or window, and translations that read wrong."},
         {"Changing the language",
          "Change it with the map open: the map, its buttons, the quest log, the tracker and the settings categories should change at once."},
         {"Button hints stay as you set them",

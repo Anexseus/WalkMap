@@ -11,7 +11,7 @@ Fixed
 
 New
 - German and French: WalkMap's windows, settings, menus, tooltips and chat
-  messages follow the game's language. Settings > Look > Language picks
+  messages follow the game's language. Settings > Appearance > Language picks
   another one (Auto, English, Deutsch, Français). Changing it redraws the
   open map and its buttons at once. German texts revised after a review.
 - Low-level quests (Settings > Quests on the map, and on What's new): Off,
@@ -574,7 +574,7 @@ Fixed
 
 ## 1.09
 
-- New: window looks. Settings > Look offers Classic (the game's window art
+- New: window looks. Settings > Appearance offers Classic (the game's window art
   and red buttons, as before), Stone and gold, Wood and parchment, and
   Leather and bronze. "Apply now" reloads the interface to use the choice.
   The looks cover the map window, its buttons, menus and close buttons, the

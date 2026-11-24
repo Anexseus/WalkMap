@@ -1747,7 +1747,7 @@ local function setOption(field, value)
     if changed then changed() end
 end
 
--- The language changed (Settings > Look > Language): redraw what shows text.
+-- The language changed (Settings > Appearance > Language): redraw what shows text.
 WalkMapLocale.OnChange(function()
     refreshLabels()
     if refreshSettingsRows and settingsPanel and settingsPanel:IsShown() then refreshSettingsRows() end
@@ -3039,7 +3039,7 @@ local settingsPages = {
         {"__nativeIconGap", nil, "Marker spacing", "Hide icons that overlap on the game's minimap: off, medium or wide.", when = miniMarkersFor("native")},
         {"__nativeIconRange", nil, "Marker distance", "Show markers within all, 75% or 50% of the game's minimap.", when = miniMarkersFor("native")},
     }},
-    {"Look", "How WalkMap's windows and buttons look. The quest icons and the map itself stay the same.", {
+    {"Appearance", "How WalkMap's windows and buttons look. The quest icons and the map itself stay the same.", {
         {"__welcomeLook", nil, "Window look", "Classic (the game's own art), Stone and gold, Wood and parchment, or Leather and bronze. Apply now uses it."},
         {"trackerFrame", nil, "Frame around the quest tracker", "With Stone, Wood or Leather: a metal frame and a title band around the quest tracker. Off: only its background."},
         {"__applyLook", nil, "Use the chosen look", "Reload the interface to use the chosen look."},
@@ -3080,13 +3080,6 @@ local settingsPages = {
         {"__debug", nil, "Debug report", "Copy current settings and map state to report a bug."},
     }},
     -- Information only: controllers that work well, set up in Steam Input.
-    {"Controllers", "Recommended controllers and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
-        {"__info", nil, "Any controller: keys for the map", "Bind M (the map key) or your WalkMap key to a button. Those also open and close WalkMap during combat, which the gamepad wheel cannot."},
-        {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
-        {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},
-        {"__info", nil, "Xbox Series controller", "On Windows: in Steam's controller settings, install Xbox Extended Feature Support and restart the PC. Then the Share button can be mapped in Steam Input, for example to M. If it still does not show, update the controller in Microsoft's Xbox Accessories app."},
-        {"__info", nil, "Other controllers", "Other controllers are most likely fine too; we have only tested with the ones above."},
-    }},
     {"Bags & vendors", "Bag tools by Underbuks, integrated from SortPants.", {
         {"bagSortEnabled", nil, "Bag sorting", "Allow manual sorting through the button, command or shortcut."},
         {"__autoSell", nil, "Auto-sell junk", "Sell gray-quality items when a vendor opens: off, on with a chat message, or on quietly."},
@@ -3101,13 +3094,20 @@ local settingsPages = {
         {"__info", nil, "Beta testing", "Want to try new things first? Ask for the Beta Tester role on the Discord."},
         {"__info", nil, "Also on CurseForge", "You can still write in the comments on WalkMap's CurseForge page."},
     }},
+    {"Controllers", "Recommended controllers and how to set them up. WoW Forever must run through Steam (add it as a non-Steam game) to use Steam Input.", {
+        {"__info", nil, "Any controller: keys for the map", "Bind M (the map key) or your WalkMap key to a button. Those also open and close WalkMap during combat, which the gamepad wheel cannot."},
+        {"__info", nil, "Steam Controller", "Map its back buttons to keys in Steam Input, for example M for the map and B for bags. Set the left touchpad to a radial menu with the keys you use most."},
+        {"__info", nil, "8BitDo Pro 3", "Switch it to D-input mode and use it through Steam: Steam then sees its extra buttons (the back buttons too), so you can map them to keys in Steam Input."},
+        {"__info", nil, "Xbox Series controller", "On Windows: in Steam's controller settings, install Xbox Extended Feature Support and restart the PC. Then the Share button can be mapped in Steam Input, for example to M. If it still does not show, update the controller in Microsoft's Xbox Accessories app."},
+        {"__info", nil, "Other controllers", "Other controllers are most likely fine too; we have only tested with the ones above."},
+    }},
     -- First-time page; not listed under Categories (see WELCOME_PAGE).
     {"Welcome to WalkMap", "Pick the basics now; everything can be changed later under Settings. Done closes this page. Tips: /walkmap guide", {
         {"__recommended", nil, "Use recommended settings", "The authors' setup for the map, quest log, tracker, controller, minimap and map buttons. The choices below are up to you."},
         {"__welcomeAreas", nil, "Game quest areas", "The game's own blue quest areas and markers: all quests, only the focused quest, or off."},
         {"playerHalo", nil, "Player marker halo", "A pulsing gold ring around your arrow on the large map."},
         {"autoSellJunk", nil, "Auto-sell grey items", "Sell grey-quality items when a vendor opens. Recover them from the vendor's Buyback tab."},
-        {"__welcomeLook", nil, "Window look", "Classic, Stone and gold, Wood and parchment or Leather and bronze. Settings > Look > Apply now uses it."},
+        {"__welcomeLook", nil, "Window look", "Classic, Stone and gold, Wood and parchment or Leather and bronze. Settings > Appearance > Apply now uses it."},
         {"__welcomeIcons", nil, "QuestieDB quest icons", "Where to kill, loot and use things: all quests, only the focused quest, or off."},
         {"__playStyle", nil, "How you play", "Mouse and keyboard, controller, or both. Sets Pad focus, button hints and the map's close X; recommended settings follow it."},
         {"selectKeepsReleased", nil, "Select keeps the map released", "Off: the map takes the controller every time it opens. On: press Select to leave the map and it stays out of your way - when you open it again you keep control of your character. Press Select to take the map back.",
@@ -3122,7 +3122,7 @@ local settingsPages = {
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
     {"What's new in WalkMap 1.14.20", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
-        {"__news", nil, "Deutsch and Français", "WalkMap now speaks German and French. Auto follows the game's language; choose under Settings > Look > Language."},
+        {"__news", nil, "Deutsch and Français", "WalkMap now speaks German and French. Auto follows the game's language; choose under Settings > Appearance > Language."},
         {"__lowQuests", nil, "Low-level quests", "Quest chains often start low and end at your level. Choose Quest chains to show gray quests at quest givers when their chain goes on to your level (the tooltip says how far), or All for every gray quest. Also under Settings > Quests on the map."},
         {"__news", nil, "Button hints stay off", "Turning off the button hints at the top of the map now lasts after a restart."},
         {"__discord", nil, "Join our Discord", "Bug reports, suggestions and news about new versions and betas. Click the link below, press Ctrl+C and paste it in your browser or Discord. Also under Settings > Community."},

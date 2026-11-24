@@ -265,7 +265,7 @@ COMMANDS
 
 LOOK
 ----
-Settings > Look: Classic (the game's own window art), Stone and gold, Wood and
+Settings > Appearance: Classic (the game's own window art), Stone and gold, Wood and
 parchment, or Leather and bronze. "Apply now" reloads the interface to use the
 choice. WalkMap's windows, buttons, menus, tracker and minimap frames change;
 the map and its icons stay the same.
@@ -312,7 +312,7 @@ Chat and data:
 
 Languages:
 - WalkMap's own text is in English, German and French and follows the
-  game's language; Settings > Look > Language picks another one.
+  game's language; Settings > Appearance > Language picks another one.
 - The translations are in WalkMap_Locale_deDE.lua and WalkMap_Locale_frFR.lua:
   the English text on the left, the translation on the right. Corrections
   are welcome. The debug report stays in English.

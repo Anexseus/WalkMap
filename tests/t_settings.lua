@@ -111,7 +111,7 @@ return {
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors, Community", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Appearance, Quest tracker, Profiles, Controller & help, Bags & vendors, Community, Controllers", "category list")
         local community = page(env, "Community")
         Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
         Mock.eq(#community, 5, "all five rows fit with the link box under the first")
@@ -238,18 +238,18 @@ return {
         local before = panel.scroll
         panel:GetScript("OnMouseWheel")(panel, 1)
         Mock.eq(panel.scroll, before - 1, "mouse wheel scrolls back up")
-        page(env, "Look")
+        page(env, "Appearance")
         Mock.ok(not panel.scrollBar:IsShown(), "short page: no scroll bar")
         Mock.eq(panel.walkmapScroll(panel.walkmapScrollEdges.last, "down"), false, "short page does not scroll")
     end},
     {"Apply rows have a real button that does the same as the row", function(Mock)
         local env, panel = start(Mock)
-        page(env, "Look")
+        page(env, "Appearance")
         local row = rowStarting(panel, "Use the chosen look")
         Mock.ok(row and row.walkmapActionButton and row.walkmapActionButton:IsShown(), "Look: button shown")
         Mock.eq(row.walkmapActionButton.text:GetText(), "In use", "nothing to apply yet")
         env.WalkMapCharacterSettings.look = env.WalkMapUI.Look() == "wood" and "stone" or "wood"
-        env.WalkMapExtras.ShowSettingsPage("Look")
+        env.WalkMapExtras.ShowSettingsPage("Appearance")
         Mock.eq(row.walkmapActionButton.text:GetText(), "Apply now", "another look chosen")
         local reloads = 0
         env.C_UI = {Reload = function() reloads = reloads + 1 end}
@@ -366,7 +366,7 @@ return {
         local after = select(5, bar.thumb:GetPoint(1))
         Mock.ok(after < before, "thumb moved down")
         bar.down:GetScript("OnClick")(bar.down)
-        page(env, "Look")
+        page(env, "Appearance")
         Mock.eq(bar:IsShown(), false, "a short page: no scroll bar")
     end},
     {"Close map when combat starts: on for new players, unchanged for existing ones", function(Mock)

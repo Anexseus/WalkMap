@@ -76,7 +76,7 @@ return {
         env.WalkMap_Toggle()
         env.tick(0.5, 5)
         local x = env.WalkMapExtras
-        x.ShowSettingsPage("Look")
+        x.ShowSettingsPage("Appearance")
         local panel = x.SettingsPanel()
         local row
         for _, r in ipairs(panel.options) do
