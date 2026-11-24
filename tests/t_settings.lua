@@ -334,4 +334,23 @@ return {
         env.loadAddon({welcomeSeen = true}, {closeInCombat = true})
         Mock.eq(env.WalkMapCharacterSettings.closeInCombat, true, "a saved choice stays")
     end},
+    {"Button hints turned off by hand stay off when the game switches interface", function(Mock)
+        local env, panel = start(Mock)
+        local s = env.WalkMapCharacterSettings
+        local x = env.WalkMapExtras
+        s.playStyle = "both"
+        s.controllerHints = true
+        page(env, "Controller & help")
+        local row = rowStarting(panel, "Button hints")
+        while not row and panel.walkmapScroll(panel.walkmapScrollEdges.last, "down") do
+            row = rowStarting(panel, "Button hints")
+        end
+        Mock.ok(row, "Button hints row")
+        click(row)
+        Mock.eq(s.controllerHints, false, "turned off")
+        x.FollowInterfaceStyle(false)
+        x.FollowInterfaceStyle(true)
+        Mock.eq(s.playStyle, "both", "How you play followed the interface")
+        Mock.eq(s.controllerHints, false, "hints still off after the switch")
+    end},
 }

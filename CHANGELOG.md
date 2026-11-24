@@ -1,5 +1,13 @@
 # WalkMap changelog
 
+## 1.14.20
+
+Fixed
+- Button hints (and Pad focus) turned off by hand came back on after a
+  restart: when the game switched its interface at login, "How you play"
+  followed it and set them again. Now your own choice stays; choosing
+  "How you play" yourself still sets them.
+
 ## 1.14.19
 
 New

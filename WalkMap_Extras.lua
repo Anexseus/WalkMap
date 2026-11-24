@@ -2643,9 +2643,16 @@ end
 
 -- Pad focus, button hints and the close X for this play style. The close
 -- button only changes out of combat.
-local function applyPlayStyle(style)
+-- automatic: the game switched interface (not the player choosing "How you
+-- play"): then Pad focus and Button hints the player set by hand are kept.
+-- Choosing "How you play" yourself sets them all again.
+local function applyPlayStyle(style, automatic)
     local values, hideClose = styleValues(style)
-    for _, entry in ipairs(values) do settings[entry[1]] = entry[2] end
+    local own = type(settings.ownChoice) == "table" and settings.ownChoice or {}
+    for _, entry in ipairs(values) do
+        if not (automatic and own[entry[1]]) then settings[entry[1]] = entry[2] end
+    end
+    if not automatic then settings.ownChoice = nil end
     if buttonsMenu and buttonsMenu.IsHidden("close") ~= hideClose then buttonsMenu.Toggle("close") end
 end
 
@@ -2661,7 +2668,7 @@ function extras.FollowInterfaceStyle(gamepad)
     else wanted = "mouse" end
     if wanted == settings.playStyle then return nil end
     settings.playStyle = wanted
-    applyPlayStyle(wanted)
+    applyPlayStyle(wanted, true)
     setOption("controllerMode", settings.controllerMode)
     if refreshSettingsRows and settingsPanel and settingsPanel:IsShown() then refreshSettingsRows() end
     return wanted
@@ -3424,6 +3431,13 @@ refreshSettingsRows = function()
                 settings.miniTerrain = value
                 setOption("miniMap", not alreadyShown)
             elseif value == nil then
+                -- Pad focus and Button hints switched by hand stay as chosen
+                -- when "How you play" follows the game's interface later
+                -- (it did turn hints back on after each restart).
+                if field == "controllerHints" or field == "controllerMode" then
+                    settings.ownChoice = type(settings.ownChoice) == "table" and settings.ownChoice or {}
+                    settings.ownChoice[field] = true
+                end
                 setOption(field, not settings[field])
             else
                 setOption(field, value)
