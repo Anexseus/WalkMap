@@ -3002,13 +3002,14 @@ local settingsPages = {
         {"__welcomeAreas", nil, "Quest areas", "The game's blue quest areas and markers: all quests, only WalkMap's focused quest, or off."},
         {"__welcomeIcons", nil, "Quest icons", "QuestieDB objective and drop locations: all quests, only the focused quest, or off."},
         {"givers", nil, "Quest givers", "Show suitable quests for your class and level."},
+        {"__giverLevel", nil, "Quest giver level", "Automatic uses your level. Or pick a range - 1-10, 11-20 and so on - to see the quest givers for it.",
+            when = function() return settings.givers ~= false end},
         {"__lowQuests", nil, "Low-level quests", "Also show gray quests at quest givers: off, only quest chains that go on to your level, or all of them.",
             when = function() return settings.givers ~= false end},
         {"questLabels", nil, "Quest names on map", "Write quest titles beside the game markers."},
         {"nearestObjective", nil, "Nearest focused location", "Show the direction to the nearest known objective location."},
         {"__resetHidden", nil, "Restore hidden markers", "Show quest givers, quest locations and places you hid manually again."},
     }},
-    {"Giver level", "Use your level automatically or choose a level range.", {}, giverLevel = true},
     {"Map", "The large map: what it shows and how it behaves.", {
         {"clearView", nil, "Clear view", "Make explored terrain and the map frame transparent."},
         {"follow", nil, "Follow player", "Keep the zoomed map centered on your character."},
@@ -3151,16 +3152,19 @@ local COMBAT_WAIT = {
     __applyLook = true, __accountLoad = true, __sortBags = true, __bagBinding = true,
     __recommended = true, __intro = true,
 }
-local giverRows
-for _, page in ipairs(settingsPages) do
-    if page.giverLevel then giverRows = page[3] end
+-- Quest giver level (Quests on the map): Automatic, then the ranges 1-10 to
+-- 51-60. A range is saved as its middle level (5, 15 ... 55), as before.
+local function giverLevelName(level)
+    if not level or level <= 0 then return "Automatic" end
+    local start = math.floor((level - 1) / 10) * 10 + 1
+    return start .. "-" .. (start + 9)
 end
-giverRows[1] = {"level", 0, "Automatic", "Use your character's current level."}
-for start = 1, 60, 10 do
-    giverRows[#giverRows + 1] =
-        {"level", start + 4, start .. "-" .. (start + 9),
-            "Show quest givers near this level range."}
+local function nextGiverLevel(level)
+    if not level or level <= 0 then return 5 end
+    local nextLevel = math.floor((level - 1) / 10) * 10 + 15
+    return nextLevel > 60 and 0 or nextLevel
 end
+extras.GiverLevelName = giverLevelName
 
 refreshSettingsRows = function()
     if not settingsPanel then return end
@@ -3280,6 +3284,8 @@ refreshSettingsRows = function()
         elseif field == "__welcomeAreas" then
             display = display .. ": " .. (settings.areas == "off" and "Off"
                 or settings.areas == "focus" and "Focused quest" or "All quests")
+        elseif field == "__giverLevel" then
+            display = display .. ": " .. giverLevelName(settings.level)
         elseif field == "__lowQuests" then
             display = display .. ": " .. (settings.lowQuests == "chains" and "Quest chains"
                 or settings.lowQuests == "all" and "All" or "Off")
@@ -3611,6 +3617,10 @@ refreshSettingsRows = function()
             elseif field == "__welcomeAreas" then
                 setOption("areas", settings.areas == "all" and "focus"
                     or settings.areas == "focus" and "off" or "all")
+                refreshSettingsRows()
+            elseif field == "__giverLevel" then
+                setOption("level", nextGiverLevel(settings.level))
+                extras.Invalidate()
                 refreshSettingsRows()
             elseif field == "__lowQuests" then
                 setOption("lowQuests", settings.lowQuests == "off" and "chains"

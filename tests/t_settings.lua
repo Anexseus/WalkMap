@@ -86,17 +86,27 @@ return {
         env.InputUtil = nil
         Mock.eq(x.TrackerSettings().h, 180, "mouse layout unchanged")
     end},
-    {"Categories: eleven pages, merged ones gone", function(Mock)
+    {"Categories: ten pages, merged ones gone", function(Mock)
         local env, panel = start(Mock)
         local names = {}
         for _, row in ipairs(panel.categories) do names[#names + 1] = row.label:GetText() end
-        Mock.eq(table.concat(names, ", "), "Quests on the map, Giver level, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors, Community", "category list")
+        Mock.eq(table.concat(names, ", "), "Quests on the map, Map, Minimap, Look, Quest tracker, Profiles, Controller & help, Controllers, Bags & vendors, Community", "category list")
         local community = page(env, "Community")
         Mock.ok(community[1]:find("Join our Discord", 1, true), "Discord first on Community")
         Mock.eq(#community, 5, "all five rows fit with the link box under the first")
-        local giver = page(env, "Giver level")
-        Mock.eq(giver[1], "Automatic", "giver level rows still built")
-        Mock.eq(#giver, 7, "Automatic plus six ranges")
+        page(env, "Quests on the map")
+        local row = rowStarting(panel, "Quest giver level")
+        Mock.ok(row, "quest giver level is on Quests on the map")
+        Mock.ok(tostring(row.label:GetText()):find("Automatic", 1, true), "Automatic first")
+        local seen = {}
+        for _ = 1, 7 do
+            click(row)
+            seen[#seen + 1] = tostring(row.label:GetText()):match(": (.+)$")
+        end
+        Mock.eq(table.concat(seen, ", "), "1-10, 11-20, 21-30, 31-40, 41-50, 51-60, Automatic", "cycles the ranges")
+        Mock.eq(env.WalkMapCharacterSettings.level, 0, "back to automatic")
+        click(row)
+        Mock.eq(env.WalkMapCharacterSettings.level, 5, "a range is saved as its middle level")
     end},
     {"Quests on the map: cycles and one restore button", function(Mock)
         local env, panel = start(Mock)
@@ -112,6 +122,7 @@ return {
         Mock.eq(s.objectiveIcons, false, "then off")
         local commands = {}
         env.WalkMapExtras.Command = function(what, action) commands[#commands + 1] = what .. " " .. action end
+        while panel.walkmapScroll(panel.walkmapScrollEdges.last, "down") do end
         click(rowStarting(panel, "Restore hidden markers"))
         Mock.eq(table.concat(commands, ", "), "givers reset, markers reset", "one button restores both")
     end},

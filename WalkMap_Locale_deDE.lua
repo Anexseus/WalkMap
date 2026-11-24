@@ -39,6 +39,7 @@ WalkMapLocale.Add("deDE", {
     ["Auto-sell stopped because the game rejected an item action."] = "Automatischer Verkauf gestoppt, weil das Spiel eine Gegenstandsaktion abgelehnt hat.",
     ["Auto-selling gray-quality items."] = "Graue Gegenstände werden automatisch verkauft.",
     ["Automatic"] = "Automatisch",
+    ["Automatic uses your level. Or pick a range - 1-10, 11-20 and so on - to see the quest givers for it."] = "Automatisch nutzt deine Stufe. Oder wähle einen Bereich - 1-10, 11-20 und so weiter -, um die Questgeber dafür zu sehen.",
     ["Back"] = "Zurück",
     ["Background"] = "Hintergrund",
     ["Bag sorting"] = "Taschen sortieren",
