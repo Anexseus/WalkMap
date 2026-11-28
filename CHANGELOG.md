@@ -2,7 +2,18 @@
 
 ## 1.14.22
 
+New
+- Setup guide for new players instead of the long welcome page: how you
+  play, how quests show (with pictures of QuestieDB icons, the game's quest
+  areas, or both), a few more choices, and the look last (it reloads).
+  Recommended settings are applied first, so they never override a choice
+  made in the guide. /walkmap setup and Settings > Profiles > Setup guide
+  open it again.
+
 Changed
+- In combat with the gamepad interface, a dark bar covers the map's footer
+  with the combat hint, instead of the hint running over the buttons.
+- The footer's Buttons button grows to fit longer translations.
 - Settings are tidier: Quest giver level is one row on Quests on the map
   (Automatic, 1-10 ... 51-60) instead of a page of its own. Look is now
   called Appearance, Profiles comes after Controller & help, and

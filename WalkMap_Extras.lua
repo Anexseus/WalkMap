@@ -2769,6 +2769,60 @@ local function applyRecommended()
     print(WalkMapL("|cff80ff80WalkMap:|r recommended settings applied. Change anything later under Settings."))
 end
 
+-- Setup guide (WalkMap_Setup.lua): the choices it starts from, and the one
+-- place that applies them. Recommended settings go first, so they never
+-- override what the player picked in the guide.
+local function questMode()
+    local areas = settings.areas ~= "off"
+    local icons = settings.objectiveIcons and true or false
+    if areas and icons then return "both" end
+    if icons then return "icons" end
+    if areas then return "areas" end
+    return "both"
+end
+local function trackerChoice()
+    if settings.zoneTracker == false then return "off" end
+    return settings.trackerScope == "all" and "all" or settings.trackerScope == "nearby" and "nearby" or "zone"
+end
+function extras.SetupState()
+    return {
+        style = extras.PlayStyle(), quests = questMode(), tracker = trackerChoice(),
+        friends = settings.friendsOnMap and true or false, guild = settings.guildOnMap and true or false,
+        share = settings.shareLocation and true or false, autoSell = settings.autoSellJunk and true or false,
+        look = settings.look or WalkMapUI.Look(),
+    }
+end
+function extras.SetupApply(choice)
+    if type(choice) ~= "table" then return end
+    if PLAY_STYLES[choice.style] then settings.playStyle = choice.style end
+    if choice.recommended then applyRecommended() end
+    if PLAY_STYLES[choice.style] then
+        applyPlayStyle(choice.style)
+        setOption("controllerMode", settings.controllerMode)
+    end
+    if choice.quests == "icons" or choice.quests == "areas" or choice.quests == "both" then
+        local icons = choice.quests ~= "areas"
+        setOption("focusObjectiveIcons", false)
+        setOption("objectiveIcons", icons)
+        setOption("areas", choice.quests == "icons" and "off" or "all")
+    end
+    if choice.tracker == "off" then
+        settings.zoneTracker = false
+    elseif choice.tracker == "zone" or choice.tracker == "nearby" or choice.tracker == "all" then
+        settings.zoneTracker, settings.trackerScope = true, choice.tracker
+    end
+    if choice.friends ~= nil then setOption("friendsOnMap", choice.friends and true or false) end
+    if choice.guild ~= nil then setOption("guildOnMap", choice.guild and true or false) end
+    if choice.share ~= nil then setOption("shareLocation", choice.share and true or false) end
+    if choice.autoSell ~= nil then setOption("autoSellJunk", choice.autoSell and true or false) end
+    for _, look in ipairs(WalkMapUI.LookOrder) do
+        if choice.look == look then setOption("look", look) end
+    end
+    if WalkMapTracker and WalkMapTracker.Refresh then pcall(WalkMapTracker.Refresh) end
+    if WalkMapCombat and WalkMapCombat.SettingChanged then WalkMapCombat.SettingChanged() end
+    extras.Invalidate()
+end
+
 -- Index of the hidden welcome page; set where settingsPages is defined
 -- (declared here because ShowWelcome below uses it).
 local WELCOME_PAGE, NEWS_PAGE, BETA_PAGE
@@ -2795,6 +2849,12 @@ local NEWS_VERSION = "1.14.20"
 -- Earlier What's new pages that already showed what this one shows: players
 -- who saw one of them do not get this one. (None for 1.14.20.)
 local NEWS_ALREADY_SEEN = {}
+-- The guide counts as the welcome: no welcome page, no What's new after it.
+function extras.SetupSeen()
+    if type(WalkMapSettings) ~= "table" then WalkMapSettings = {} end
+    WalkMapSettings.welcomeSeen = true
+    WalkMapSettings.newsSeen = NEWS_VERSION
+end
 
 -- Welcome page: opens the map (if needed) with settings on that page.
 -- Out of combat only.
@@ -2845,7 +2905,11 @@ function extras.Build()
 end
 function extras.IsBeta() return extras.Build():find("%-beta") ~= nil end
 
-function extras.ShowWelcome() showHiddenPage("welcome") end
+-- The setup guide when it is there (WalkMap_Setup.lua), else the page.
+function extras.ShowWelcome()
+    if WalkMapSetup and WalkMapSetup.Show and WalkMapSetup.Show() then return end
+    showHiddenPage("welcome")
+end
 function extras.ShowNews() showHiddenPage(extras.IsBeta() and BETA_PAGE and "beta" or "news") end
 function extras.ShowTesting() if BETA_PAGE then showHiddenPage("beta") end end
 
@@ -3072,6 +3136,7 @@ local settingsPages = {
     }},
     -- Information only: controllers that work well, set up in Steam Input.
     {"Profiles", "Quest display setups for this character, and settings shared by all your characters.", {
+        {"__setupGuide", nil, "Setup guide", "A few questions again: how you play, how quests show, and the look. Also /walkmap setup."},
         {"profile", "questing", "Questing", "All quest areas, givers and objective icons."},
         {"profile", "exploration", "Exploration", "Focused area and a clearer map."},
         {"profile", "custom", "My settings", "Restore your saved personal quest settings."},
@@ -3319,6 +3384,7 @@ refreshSettingsRows = function()
         -- buttons, so it is clear they can be pressed. The button and the
         -- row do the same thing; controller focus stays on the row.
         local isButton = field == "__recommended" or field == "__applyLook" or field == "__trySelect"
+            or field == "__setupGuide"
         if isButton and not row.walkmapActionButton then
             local button = CreateFrame("Button", nil, row)
             button:SetSize(92, 24)
@@ -3347,16 +3413,18 @@ refreshSettingsRows = function()
             local done
             if field == "__recommended" then done = recommendedActive()
             elseif field == "__trySelect" then done = settings.selectKeepsReleased == true
+            elseif field == "__setupGuide" then done = false
             else done = (settings.look or "classic") == WalkMapUI.Look() end
             local text = field == "__recommended" and (done and "Applied" or "Apply")
                 or field == "__trySelect" and (done and "Turn off" or "Try it")
+                or field == "__setupGuide" and "Open"
                 or (done and "In use" or "Apply now")
             actionButton.text:SetText(WalkMapL(text))
             -- Gold when there is something to apply, grey when it is done.
             if done then actionButton.text:SetTextColor(0.62, 0.62, 0.62)
             else actionButton.text:SetTextColor(1, 0.82, 0) end
             actionButton:SetAlpha(done and 0.7 or 1)
-            if field == "__recommended" or field == "__trySelect" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
+            if field == "__recommended" or field == "__trySelect" or field == "__setupGuide" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
             row.description:SetPoint("RIGHT", row, "RIGHT", -108, 0)
         end
         -- Discord: the invite in a box on the right. A click on the row or
@@ -3527,6 +3595,8 @@ refreshSettingsRows = function()
             elseif field == "__news" or field == "__newsStar" or field == "__reportBugs" or field == "__info" then
                 -- Information only.
                 return
+            elseif field == "__setupGuide" then
+                if WalkMapSetup and WalkMapSetup.Show then WalkMapSetup.Show() end
             elseif field == "__trySelect" then
                 setOption("selectKeepsReleased", settings.selectKeepsReleased ~= true)
                 if settings.selectKeepsReleased then

@@ -465,6 +465,12 @@ SlashCmdList.WALKMAP =
 
             WalkMapExtras.Guide()
 
+        elseif command == "setup" then
+
+            if WalkMapCombat.Locked() or not (WalkMapSetup and WalkMapSetup.Show and WalkMapSetup.Show()) then
+                say("The setup guide opens after combat.")
+            end
+
         elseif command == "welcome" or command == "intro" then
 
             if WalkMapCombat.Locked() then
