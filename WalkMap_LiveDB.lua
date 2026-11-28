@@ -607,6 +607,73 @@ function live.NextQuest(questID)
     if entry then return entry[1], entry[2] end
 end
 
+-- Pet food (Places > Pet food, hunters): QuestieDB's pet food data
+-- (contract 5: support "PetFood", food type -> item IDs) and each item's
+-- vendors. Returns [mapID] = {{x, y, vendor name, faction, {food names}}}
+-- for the food types given, with food the pet still eats (item level more
+-- than 30 below the pet's level is refused, as Questie counts it) and the
+-- player may buy (required level). nil while QuestieDB has no pet food data.
+local REFUSED_LEVELS_BELOW_PET = 30
+local petFoodCache = {}
+function live.PetFoodData()
+    if not (db and db.Support and db.Support.Get) then return nil end
+    local ok, data = pcall(db.Support.Get, "PetFood")
+    if ok and type(data) == "table" and type(data.itemIdsByFoodType) == "table" then return data end
+end
+function live.PetFoodVendors(foodTypes, petLevel, playerLevel)
+    local data = live.PetFoodData()
+    if not data or not (db.Item and db.Npc) then return nil end
+    petLevel, playerLevel = tonumber(petLevel) or 0, tonumber(playerLevel) or 60
+    local key = table.concat(foodTypes, ",") .. ":" .. petLevel .. ":" .. playerLevel
+    if petFoodCache[key] then return petFoodCache[key] end
+    local item, npc = db.Item, db.Npc
+    local function field(entity, id, name, index)
+        local ok, value = pcall(entity.Get or entity.GetByIndex, id, entity.Get and name or index)
+        if ok then return value end
+    end
+    local foodsByVendor = {}
+    for _, foodType in ipairs(foodTypes) do
+        for _, itemID in ipairs(data.itemIdsByFoodType[foodType] or {}) do
+            local itemLevel = field(item, itemID, "itemLevel")
+            local required = field(item, itemID, "requiredLevel") or 0
+            if type(itemLevel) == "number" and itemLevel + REFUSED_LEVELS_BELOW_PET > petLevel
+                and required <= playerLevel then
+                local vendors = field(item, itemID, "vendors")
+                local name = field(item, itemID, "name", 1)
+                if type(vendors) == "table" and type(name) == "string" then
+                    for _, vendorID in ipairs(vendors) do
+                        foodsByVendor[vendorID] = foodsByVendor[vendorID] or {}
+                        table.insert(foodsByVendor[vendorID], name)
+                    end
+                end
+            end
+        end
+    end
+    local result = {}
+    for vendorID, foods in pairs(foodsByVendor) do
+        local name = npc.GetByIndex(vendorID, 1)
+        local faction = npc.GetByIndex(vendorID, 13)
+        local spawns = npc.GetByIndex(vendorID, 7)
+        if type(name) == "string" and type(spawns) == "table" then
+            table.sort(foods)
+            for areaID, coords in pairs(spawns) do
+                local mapID = areaToMap and areaToMap[areaID]
+                if mapID and type(coords) == "table" then
+                    for index = 1, math.min(#coords, 4) do
+                        local point = coords[index]
+                        if validPoint(point) then
+                            addZonePoint(result, mapID, {round(point[1]), round(point[2]), name,
+                                faction == "A" and "A" or faction == "H" and "H" or "AH", foods})
+                        end
+                    end
+                end
+            end
+        end
+    end
+    petFoodCache[key] = result
+    return result
+end
+
 -- Highest quest level further along this quest's chain, or nil: lets a
 -- gray quest that starts a chain reaching your level still be shown.
 local chainTopCache = {}

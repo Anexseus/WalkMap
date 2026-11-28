@@ -20,7 +20,7 @@ local CHARACTER_ONLY = {
     hiddenMarkers = true, lastBlockedAction = true, lastDebugReport = true,
     lastNativeCombatAction = true, questFocusID = true, questSolo = true,
     questLogCollapsed = true, trackerHidden = true, trackerNearbySeen = true, mapReleased = true,
-    lastInterface = true,
+    lastInterface = true, petFoodTypes = true, petLevel = true,
     waypoint = true, walkmapNativeFirstButton = true,
 }
 local function deepCopy(value)
@@ -294,6 +294,9 @@ local otherOptions = {
     {"herb", "Herbs"}, {"ore", "Mining"},
     {"rare", "Rare mobs"},
 }
+-- Pet food vendors: hunters only (QuestieDB's pet food data).
+local isHunter = UnitClass and select(2, UnitClass("player")) == "HUNTER"
+if isHunter then table.insert(otherOptions, 9, {"petfood", "Pet food"}) end
 local placeGroups = {
     {"profession", "Profession Trainers", professionOptions},
     {"class", "Class Trainers", classOptions},
@@ -337,6 +340,7 @@ local icons = {
     herb = "Interface\\Icons\\Trade_Herbalism",
     ore = "Interface\\Icons\\Trade_Mining",
     rare = "Interface\\Icons\\Ability_Hunter_SniperShot",
+    petfood = "Interface\\Icons\\INV_Misc_Food_14",
 }
 local professionIcons = {
     alchemy = "Interface\\Icons\\Trade_Alchemy",
@@ -1355,6 +1359,56 @@ local function undiscoveredFlight(nodes, x, y)
     return best and bestDistance < 0.0009 and best.isUndiscovered == true or false
 end
 
+-- Pet food: what the hunter's pet eats, from the game (its food names, or
+-- its family through QuestieDB's table), saved per character so the
+-- vendors stay on the map while the pet is dismissed. Unknown: all food.
+local ALL_FOOD = {1, 2, 3, 4, 5, 6}
+local function readPet()
+    if not isHunter or not (WalkMapLiveDB and WalkMapLiveDB.PetFoodData) then return end
+    local data = WalkMapLiveDB.PetFoodData()
+    if not data or not (HasPetUI and select(2, HasPetUI())) then return end
+    local types, seen = {}, {}
+    local names = GetPetFoodTypes and {GetPetFoodTypes()} or {}
+    for _, name in ipairs(names) do
+        local foodType = data.foodTypesByName and data.foodTypesByName[name]
+        if foodType and not seen[foodType] then seen[foodType] = true types[#types + 1] = foodType end
+    end
+    if #types == 0 and UnitCreatureFamily then
+        local _, family = UnitCreatureFamily("pet")
+        for _, foodType in ipairs(type(family) == "number" and data.foodTypesByFamily
+            and data.foodTypesByFamily[family] or {}) do types[#types + 1] = foodType end
+    end
+    if #types == 0 then return end
+    table.sort(types)
+    settings.petFoodTypes = types
+    settings.petLevel = UnitLevel and tonumber(UnitLevel("pet")) or 0
+end
+function extras.PetFood()
+    return settings.petFoodTypes or ALL_FOOD, settings.petLevel or 0
+end
+if isHunter then
+    local petWatch = CreateFrame("Frame")
+    for _, event in ipairs({"PLAYER_ENTERING_WORLD", "UNIT_PET", "PET_UI_UPDATE", "UNIT_LEVEL"}) do
+        petWatch:RegisterEvent(event)
+    end
+    petWatch:SetScript("OnEvent", function(_, event, unit)
+        if event == "UNIT_PET" and unit ~= "player" then return end
+        if event == "UNIT_LEVEL" and unit ~= "pet" then return end
+        local before = table.concat(settings.petFoodTypes or {}, ",") .. ":" .. tostring(settings.petLevel)
+        pcall(readPet)
+        local after = table.concat(settings.petFoodTypes or {}, ",") .. ":" .. tostring(settings.petLevel)
+        if before ~= after and settings.placeFilters.petfood and extras.Invalidate then extras.Invalidate() end
+    end)
+end
+
+local function petFoodDetail(foods)
+    local shown = {}
+    for i = 1, math.min(#foods, 4) do shown[i] = foods[i] end
+    local text = WalkMapL("Pet food") .. ": " .. table.concat(shown, ", ")
+    if #foods > 4 then text = text .. " " .. WalkMapL(("+%d more"):format(#foods - 4)) end
+    return "|cff80ff80" .. text .. "|r"
+end
+
 local function showServices(mapID)
     local count = 0
     local shown = {}
@@ -1391,6 +1445,27 @@ local function showServices(mapID)
                 pin.texture:SetDesaturated(undiscovered)
                 if undiscovered then pin.texture:SetVertexColor(1, 0.55, 0.55)
                 else pin.texture:SetVertexColor(1, 1, 1) end
+                if count >= 120 then break end
+            end
+        end
+    end
+    -- Vendors with food the hunter's pet eats (Places > Pet food).
+    if isHunter and settings.placeFilters.petfood and count < 120
+        and WalkMapLiveDB and WalkMapLiveDB.PetFoodVendors then
+        local types, petLevel = extras.PetFood()
+        local vendors = WalkMapLiveDB.PetFoodVendors(types, petLevel, playerLevel())
+        local shown = {}
+        for _, entry in ipairs(vendors and vendors[mapID] or {}) do
+            local identity = entry[1] .. ":" .. entry[2] .. ":" .. entry[3]
+            local key = extras.MarkerKey("service", mapID, entry[3], entry[1], entry[2])
+            if factionOK(entry[4]) and not shown[identity] and not extras.MarkerHidden(key) then
+                shown[identity] = true
+                count = count + 1
+                makePin(servicePins, count, icons.petfood, entry[1], entry[2], entry[3],
+                    petFoodDetail(entry[5]), 17, key)
+                local pin = servicePins[count]
+                pin.texture:SetDesaturated(false)
+                pin.texture:SetVertexColor(1, 1, 1)
                 if count >= 120 then break end
             end
         end
