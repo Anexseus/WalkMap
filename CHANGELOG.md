@@ -14,6 +14,8 @@ Changed
 - In combat with the gamepad interface, a dark bar covers the map's footer
   with the combat hint, instead of the hint running over the buttons.
 - The footer's Buttons button grows to fit longer translations.
+- Reload now (reload window) runs the game's /reload, so a reload is
+  never blocked as an addon action.
 - Settings are tidier: Quest giver level is one row on Quests on the map
   (Automatic, 1-10 ... 51-60) instead of a page of its own. Look is now
   called Appearance, Profiles comes after Controller & help, and

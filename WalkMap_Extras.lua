@@ -2845,9 +2845,9 @@ end
 local DISCORD_LINK = "https://discord.gg/cndVAA3GST"
 extras.DISCORD_LINK = DISCORD_LINK
 
-local NEWS_VERSION = "1.14.20"
+local NEWS_VERSION = "1.14.22"
 -- Earlier What's new pages that already showed what this one shows: players
--- who saw one of them do not get this one. (None for 1.14.20.)
+-- who saw one of them do not get this one. (None for 1.14.22.)
 local NEWS_ALREADY_SEEN = {}
 -- The guide counts as the welcome: no welcome page, no What's new after it.
 function extras.SetupSeen()
@@ -3186,11 +3186,11 @@ local settingsPages = {
     -- NEWS_VERSION). Only for releases with significant changes: then
     -- replace the rows, the version in the title and NEWS_VERSION. Hotfixes
     -- and small additions leave all three alone, so nothing pops up.
-    {"What's new in WalkMap 1.14.20", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
-        {"__news", nil, "Deutsch and Français", "WalkMap now speaks German and French. Auto follows the game's language; choose under Settings > Appearance > Language."},
-        {"__lowQuests", nil, "Low-level quests", "Quest chains often start low and end at your level. Choose Quest chains to show gray quests at quest givers when their chain goes on to your level (the tooltip says how far), or All for every gray quest. Also under Settings > Quests on the map."},
-        {"__news", nil, "Button hints stay off", "Turning off the button hints at the top of the map now lasts after a restart."},
-        {"__discord", nil, "Join our Discord", "Bug reports, suggestions and news about new versions and betas. Click the link below, press Ctrl+C and paste it in your browser or Discord. Also under Settings > Community."},
+    {"What's new in WalkMap 1.14.22", "Changes since the last big update. Done closes this page; /walkmap news shows it again.", {
+        {"__setupGuide", nil, "Setup guide", "A few questions with pictures: how you play, how quests show, and the look. New players get it first; open it any time here or with /walkmap setup."},
+        {"__news", nil, "Tidier settings", "Quest giver level is now one line under Quests on the map. Look is called Appearance, Profiles follows Controller & help, and Tested controllers is last, after Community."},
+        {"__news", nil, "Move the settings window", "Drag its top to move it; it opens there again. Right-click the top to put it back in the middle."},
+        {"__news", nil, "Debug report button", "Bottom left in the settings window. /walkmap debug opens the report window, also in combat."},
     }, hidden = true},
 }
 NEWS_PAGE = #settingsPages
