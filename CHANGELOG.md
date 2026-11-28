@@ -1,5 +1,16 @@
 # WalkMap changelog
 
+## 1.14.23
+
+Changed
+- "Use recommended settings" is gone. A character new to WalkMap starts
+  with the authors' setup instead (game-terrain minimap, tracker for all
+  zones with the game's tracker hidden, right-click goes a map level up,
+  focus waypoint, bag sorting and more). Existing characters keep their
+  settings.
+- The setup guide asks about fading the map while moving and telling the
+  group about finished objectives (both on by default).
+
 ## 1.14.22
 
 New

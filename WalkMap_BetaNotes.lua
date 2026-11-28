@@ -11,7 +11,7 @@
 -- round: raise it (2, 3, ...) when a beta adds something new to test, so
 -- the page shows again to testers who already saw it for this version.
 WalkMapBetaNotes = {
-    version = "1.14.22",
+    version = "1.14.23",
     items = {
         {"Quest giver level moved",
          "Settings > Quests on the map > Quest giver level: one row now, click it to go through Automatic, 1-10, 11-20 ... 51-60. The Giver level page is gone. Check that quest givers follow your choice."},
