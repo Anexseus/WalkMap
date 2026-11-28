@@ -5,10 +5,8 @@
 -- cards (pictures for the quest display and the looks). Shown once for a
 -- new player instead of the welcome page; /walkmap setup opens it again.
 --
--- Nothing changes until Finish. Then WalkMapExtras.SetupApply applies
--- recommended settings first (if chosen) and the player's picks on top,
--- so recommended settings never override a choice made here. The look is
--- the last step, because using a new look reloads the interface.
+-- Nothing changes until Finish (WalkMapExtras.SetupApply). The look is the
+-- last step, because using a new look reloads the interface.
 -- =========================================================
 
 WalkMapSetup = {}
@@ -54,13 +52,13 @@ local STEPS = {
 local TRACKER = {"off", "zone", "nearby", "all"}
 local TRACKER_NAMES = {off = "Off", zone = "This zone", nearby = "This zone + nearby", all = "All zones"}
 local MORE = {
-    {"recommended", "Use recommended settings for the rest",
-        "The authors' setup for everything this guide does not ask. Your choices here always win."},
     {"tracker", "Quest tracker", "WalkMap's own tracker: off, this zone, this zone plus nearby quests, or all zones."},
     {"friends", "See friends on the map", "Online friends by zone, with one click to invite them."},
     {"guild", "See guild on the map", "Online guild members by zone, the same way."},
     {"share", "Share where you are",
         "Your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."},
+    {"fade", "Fade the map while moving", "The map turns see-through while you walk, run or ride, so you see the world behind it."},
+    {"announce", "Tell your group about finished objectives", "A short party or raid message when you finish a quest objective."},
     {"autoSell", "Auto-sell grey items", "Sell grey items when a vendor opens. Buy them back from the vendor's Buyback tab."},
 }
 
@@ -183,7 +181,7 @@ local function create()
     if panel then return panel end
     local owner = WalkMapCore and WalkMapCore.frame or UIParent
     panel = CreateFrame("Frame", "WalkMapSetupFrame", owner)
-    panel:SetSize(700, 470)
+    panel:SetSize(700, 500)
     panel:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     panel:SetFrameStrata("TOOLTIP")
     if panel.SetFixedFrameStrata then panel:SetFixedFrameStrata(true) end
@@ -308,7 +306,7 @@ function setup.Refresh()
             l.key = data[1]
             l:SetWidth(652)
             l:ClearAllPoints()
-            l:SetPoint("TOPLEFT", panel, "TOPLEFT", 24, -104 - (i - 1) * 46)
+            l:SetPoint("TOPLEFT", panel, "TOPLEFT", 24, -104 - (i - 1) * 45)
             local value
             if data[1] == "tracker" then value = L(TRACKER_NAMES[choice.tracker] or "This zone")
             else value = onOff(choice[data[1]]) end
@@ -345,8 +343,6 @@ function setup.Show()
         if locked() then return end
         create()
         choice = extras.SetupState()
-        -- Recommended settings: on for a new player, off when opened again.
-        choice.recommended = not (type(WalkMapSettings) == "table" and WalkMapSettings.welcomeSeen)
         step = 1
         if extras.CloseMenus then pcall(extras.CloseMenus) end
         local settingsPanel = extras.SettingsPanel and extras.SettingsPanel()

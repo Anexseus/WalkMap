@@ -42,8 +42,12 @@ if type(WalkMapCharacterSettings) ~= "table"
     WalkMapCharacterSettings = accountCopy(WalkMapSettings.accountSettings)
     WalkMapCharacterSettings.fromAccountSettings = true
 end
+-- A character new to WalkMap (no saved settings, none copied from the
+-- account) starts with the authors' setup; see NEW_CHARACTER below.
+local newCharacter = false
 if type(WalkMapCharacterSettings) ~= "table" then
     local old = type(WalkMapSettings) == "table" and WalkMapSettings or {}
+    newCharacter = true
     WalkMapCharacterSettings = {}
     for _, field in ipairs({"givers", "areas", "level", "clearView",
         "controllerMode", "miniMap", "miniZoom", "miniTerrain", "nativeIcons",
@@ -60,6 +64,32 @@ if type(WalkMapCharacterSettings) ~= "table" then
     end
 end
 local settings = WalkMapCharacterSettings
+-- Defaults for a new character: what used to be "Use recommended settings"
+-- (the authors' own setup). Only where nothing is saved, so the old 0.x
+-- values copied above stay. Existing characters keep their settings.
+-- Fading while moving and the group messages are also asked in the setup
+-- guide. Pad focus and button hints follow How you play.
+local NEW_CHARACTER = {
+    -- Quests on the map
+    {"objectiveIcons", true}, {"givers", true},
+    -- Map
+    {"follow", true}, {"fadeWhileMoving", true}, {"fadeAlpha", 0.35},
+    {"fadeKeepArrow", true}, {"rightClickUp", true}, {"focusWaypoint", true},
+    -- Minimap
+    {"miniMap", true}, {"miniTerrain", "game"}, {"nativeIcons", true},
+    -- Quest tracker
+    {"zoneTracker", true}, {"trackerScope", "all"}, {"hideGameTracker", true},
+    {"announce", "done"},
+    -- Controller & help
+    {"nativeController", true}, {"useGameMapKeys", true}, {"wheelOpensQuestLog", false},
+    -- Bags & vendors
+    {"bagSortEnabled", true}, {"vendorMessages", true},
+}
+if newCharacter then
+    for _, entry in ipairs(NEW_CHARACTER) do
+        if settings[entry[1]] == nil then settings[entry[1]] = entry[2] end
+    end
+end
 -- Migrate saved single-choice place filters from WalkMap 0.8.
 if type(settings.placeFilters) ~= "table" then
     settings.placeFilters = {}
@@ -2665,31 +2695,6 @@ function extras.OpenMapMenu(button)
     openMenu(button, options, "maps")
 end
 
--- "Use recommended settings" on the welcome page: the authors' own setup
--- (Anexseus' settings, debug report of 2026-11-16). Only settings you can
--- choose: quests, givers and markers you hid yourself, places, positions,
--- zoom levels and the window look are left alone. Quest areas, the halo and
--- auto-sell are also asked separately on the welcome page and not set here.
-local RECOMMENDED = {
-    -- Quests on the map
-    {"objectiveIcons", true}, {"focusObjectiveIcons", false}, {"givers", true},
-    {"questLabels", false}, {"nearestObjective", false}, {"level", 0}, {"lowQuests", "off"},
-    -- Map
-    {"clearView", false}, {"follow", true}, {"fadeWhileMoving", true}, {"fadeAlpha", 0.35},
-    {"fadeKeepArrow", true}, {"turnInWaypoint", false}, {"rightClickUp", true}, {"focusWaypoint", true},
-    -- Minimap
-    {"miniMap", true}, {"miniTerrain", "game"}, {"nativeIcons", true},
-    {"miniIconScale", 1}, {"miniIconGap", 0}, {"miniIconRange", 1},
-    {"nativeIconScale", 1}, {"nativeIconGap", 0}, {"nativeIconRange", 1},
-    -- Quest tracker
-    {"zoneTracker", true}, {"trackerScope", "all"}, {"hideGameTracker", true},
-    {"announce", "done"},
-    -- Controller & help (Pad focus and Button hints follow "How you play")
-    {"nativeController", true}, {"useGameMapKeys", true}, {"wheelOpensQuestLog", false},
-    -- Bags & vendors
-    {"bagSortEnabled", true}, {"vendorMessages", true},
-}
-
 -- "How you play" (welcome page): "mouse", "controller" or "both". Until it
 -- is chosen, a guess from the game's own gamepad setting.
 local PLAY_STYLES = {mouse = "Mouse and keyboard", controller = "Controller", both = "Both"}
@@ -2710,18 +2715,6 @@ end
 local function styleValues(style)
     local pad = style ~= "mouse"
     return {{"controllerMode", pad}, {"controllerHints", pad}}, style == "controller"
-end
-
-local function recommendedActive()
-    for _, entry in ipairs(RECOMMENDED) do
-        if settings[entry[1]] ~= entry[2] then return false end
-    end
-    local values, hideClose = styleValues(extras.PlayStyle())
-    for _, entry in ipairs(values) do
-        if settings[entry[1]] ~= entry[2] then return false end
-    end
-    if buttonsMenu and buttonsMenu.IsHidden("close") ~= hideClose then return false end
-    return true
 end
 
 -- Pad focus, button hints and the close X for this play style. The close
@@ -2757,21 +2750,8 @@ function extras.FollowInterfaceStyle(gamepad)
     return wanted
 end
 
-local function applyRecommended()
-    for _, entry in ipairs(RECOMMENDED) do settings[entry[1]] = entry[2] end
-    applyPlayStyle(extras.PlayStyle())
-    -- Quest icons and labels belong to the display profile: save as My settings.
-    markProfileEdited("objectiveIcons")
-    -- One setOption call runs the usual refresh (profile, minimap, menus,
-    -- map redraw); every other value above is read live.
-    setOption("miniMap", true)
-    if WalkMapCombat and WalkMapCombat.SettingChanged then WalkMapCombat.SettingChanged() end
-    print(WalkMapL("|cff80ff80WalkMap:|r recommended settings applied. Change anything later under Settings."))
-end
-
 -- Setup guide (WalkMap_Setup.lua): the choices it starts from, and the one
--- place that applies them. Recommended settings go first, so they never
--- override what the player picked in the guide.
+-- place that applies them.
 local function questMode()
     local areas = settings.areas ~= "off"
     local icons = settings.objectiveIcons and true or false
@@ -2789,13 +2769,13 @@ function extras.SetupState()
         style = extras.PlayStyle(), quests = questMode(), tracker = trackerChoice(),
         friends = settings.friendsOnMap and true or false, guild = settings.guildOnMap and true or false,
         share = settings.shareLocation and true or false, autoSell = settings.autoSellJunk and true or false,
+        fade = settings.fadeWhileMoving and true or false, announce = settings.announce ~= "off",
         look = settings.look or WalkMapUI.Look(),
     }
 end
 function extras.SetupApply(choice)
     if type(choice) ~= "table" then return end
     if PLAY_STYLES[choice.style] then settings.playStyle = choice.style end
-    if choice.recommended then applyRecommended() end
     if PLAY_STYLES[choice.style] then
         applyPlayStyle(choice.style)
         setOption("controllerMode", settings.controllerMode)
@@ -2815,6 +2795,12 @@ function extras.SetupApply(choice)
     if choice.guild ~= nil then setOption("guildOnMap", choice.guild and true or false) end
     if choice.share ~= nil then setOption("shareLocation", choice.share and true or false) end
     if choice.autoSell ~= nil then setOption("autoSellJunk", choice.autoSell and true or false) end
+    if choice.fade ~= nil then setOption("fadeWhileMoving", choice.fade and true or false) end
+    if choice.announce ~= nil then
+        -- On keeps "Every step" if that was chosen; else finished objectives.
+        if not choice.announce then settings.announce = "off"
+        elseif settings.announce == "off" then settings.announce = "done" end
+    end
     for _, look in ipairs(WalkMapUI.LookOrder) do
         if choice.look == look then setOption("look", look) end
     end
@@ -3168,13 +3154,12 @@ local settingsPages = {
     }},
     -- First-time page; not listed under Categories (see WELCOME_PAGE).
     {"Welcome to WalkMap", "Pick the basics now; everything can be changed later under Settings. Done closes this page. Tips: /walkmap guide", {
-        {"__recommended", nil, "Use recommended settings", "The authors' setup for the map, quest log, tracker, controller, minimap and map buttons. The choices below are up to you."},
         {"__welcomeAreas", nil, "Game quest areas", "The game's own blue quest areas and markers: all quests, only the focused quest, or off."},
         {"playerHalo", nil, "Player marker halo", "A pulsing gold ring around your arrow on the large map."},
         {"autoSellJunk", nil, "Auto-sell grey items", "Sell grey-quality items when a vendor opens. Recover them from the vendor's Buyback tab."},
         {"__welcomeLook", nil, "Window look", "Classic, Stone and gold, Wood and parchment or Leather and bronze. Settings > Appearance > Apply now uses it."},
         {"__welcomeIcons", nil, "QuestieDB quest icons", "Where to kill, loot and use things: all quests, only the focused quest, or off."},
-        {"__playStyle", nil, "How you play", "Mouse and keyboard, controller, or both. Sets Pad focus, button hints and the map's close X; recommended settings follow it."},
+        {"__playStyle", nil, "How you play", "Mouse and keyboard, controller, or both. Sets Pad focus, button hints and the map's close X."},
         {"selectKeepsReleased", nil, "Select keeps the map released", "Off: the map takes the controller every time it opens. On: press Select to leave the map and it stays out of your way - when you open it again you keep control of your character. Press Select to take the map back.",
             when = function() return extras.PlayStyle() ~= "mouse" end},
         {"__trackerScope", nil, "Quest tracker", "WalkMap's own tracker: off, this zone only, this zone plus nearby quests, or all zones."},
@@ -3214,7 +3199,7 @@ local COMBAT_WAIT = {
     controllerMode = true, nativeController = true, selectKeepsReleased = true, __trySelect = true,
     __mapKeys = true, useGameMapKeys = true, combatWheel = true, __dungeonMap = true, hideGameTracker = true, __trackerScope = true,
     __applyLook = true, __accountLoad = true, __sortBags = true, __bagBinding = true,
-    __recommended = true, __intro = true,
+    __intro = true,
 }
 -- Quest giver level (Quests on the map): Automatic, then the ranges 1-10 to
 -- 51-60. A range is saved as its middle level (5, 15 ... 55), as before.
@@ -3379,11 +3364,11 @@ refreshSettingsRows = function()
         row.description:ClearAllPoints()
         row.description:SetPoint("TOPLEFT", row.label, "BOTTOMLEFT", 0, -2)
         row.description:SetPoint("RIGHT", row, "RIGHT", -4, 0)
-        -- Rows that do something once (Use recommended settings, Apply now)
+        -- Rows that do something once (Apply now, Try it, Open)
         -- get a real button on the right, styled like the game's other
         -- buttons, so it is clear they can be pressed. The button and the
         -- row do the same thing; controller focus stays on the row.
-        local isButton = field == "__recommended" or field == "__applyLook" or field == "__trySelect"
+        local isButton = field == "__applyLook" or field == "__trySelect"
             or field == "__setupGuide"
         if isButton and not row.walkmapActionButton then
             local button = CreateFrame("Button", nil, row)
@@ -3411,12 +3396,10 @@ refreshSettingsRows = function()
         if actionButton then actionButton:SetShown(isButton) end
         if isButton then
             local done
-            if field == "__recommended" then done = recommendedActive()
-            elseif field == "__trySelect" then done = settings.selectKeepsReleased == true
+            if field == "__trySelect" then done = settings.selectKeepsReleased == true
             elseif field == "__setupGuide" then done = false
             else done = (settings.look or "classic") == WalkMapUI.Look() end
-            local text = field == "__recommended" and (done and "Applied" or "Apply")
-                or field == "__trySelect" and (done and "Turn off" or "Try it")
+            local text = field == "__trySelect" and (done and "Turn off" or "Try it")
                 or field == "__setupGuide" and "Open"
                 or (done and "In use" or "Apply now")
             actionButton.text:SetText(WalkMapL(text))
@@ -3424,7 +3407,7 @@ refreshSettingsRows = function()
             if done then actionButton.text:SetTextColor(0.62, 0.62, 0.62)
             else actionButton.text:SetTextColor(1, 0.82, 0) end
             actionButton:SetAlpha(done and 0.7 or 1)
-            if field == "__recommended" or field == "__trySelect" or field == "__setupGuide" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
+            if field == "__trySelect" or field == "__setupGuide" then row.label:SetText(WalkMapL("|cffffd24a" .. display .. "|r")) end
             row.description:SetPoint("RIGHT", row, "RIGHT", -108, 0)
         end
         -- Discord: the invite in a box on the right. A click on the row or
@@ -3624,9 +3607,6 @@ refreshSettingsRows = function()
                     end
                 end
                 settings[setting] = choices[nextChoice]
-                refreshSettingsRows()
-            elseif field == "__recommended" then
-                applyRecommended()
                 refreshSettingsRows()
             elseif field == "__welcomeIcons" then
                 -- All quests -> Focused quest -> Off -> All quests

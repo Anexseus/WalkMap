@@ -2,7 +2,7 @@
 -- the welcome page; picks apply at Finish, on top of recommended settings.
 local function newPlayer(Mock, account)
     local env = Mock.new({playerMap = 1436})
-    env.loadAddon(account or {}, {})
+    env.loadAddon(account or {}, false)
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     env.tick(5, 20) -- the 4 s wait, then the map opens
@@ -48,7 +48,7 @@ return {
         Mock.ok(not (settingsPanel and settingsPanel:IsShown()), "no welcome page under it")
         Mock.ok(cardNamed(env, "Mouse and keyboard") and cardNamed(env, "Controller") and cardNamed(env, "Both"), "three choices")
     end},
-    {"Picks win over recommended settings; the look is last and reloads", function(Mock)
+    {"Picks apply at Finish; the look is last and asks to reload", function(Mock)
         local env = newPlayer(Mock)
         local reloaded = false
         env.C_UI = {Reload = function() reloaded = true end}
@@ -59,7 +59,10 @@ return {
         Mock.ok(areas.image:IsShown(), "with a picture")
         click(areas)
         click(nextButton(env))
-        Mock.ok(env.WalkMapSetup.Choice().recommended, "recommended on for a new player")
+        Mock.eq(env.WalkMapSetup.Choice().fade, true, "fading on by default")
+        Mock.eq(env.WalkMapSetup.Choice().announce, true, "group messages on by default")
+        click(lineNamed(env, "Fade the map while moving"))
+        click(lineNamed(env, "Tell your group"))
         local tracker = lineNamed(env, "Quest tracker")
         while env.WalkMapSetup.Choice().tracker ~= "off" do click(tracker) end
         click(lineNamed(env, "Share where you are"))
@@ -71,12 +74,14 @@ return {
         click(finish)
         local s = env.WalkMapCharacterSettings
         Mock.eq(s.playStyle, "controller", "how you play")
-        Mock.eq(s.objectiveIcons, false, "areas only: recommended did not turn icons back on")
+        Mock.eq(s.objectiveIcons, false, "areas only")
         Mock.eq(s.areas, "all", "game quest areas")
-        Mock.eq(s.zoneTracker, false, "tracker off: recommended did not turn it on")
+        Mock.eq(s.zoneTracker, false, "tracker off")
         Mock.eq(s.shareLocation, true, "share where you are")
         Mock.eq(s.look, "stone", "look")
-        Mock.eq(s.follow, true, "recommended applied to the rest")
+        Mock.eq(s.fadeWhileMoving, false, "fading turned off in the guide")
+        Mock.eq(s.announce, "off", "group messages turned off in the guide")
+        Mock.eq(s.follow, true, "new-character defaults for the rest")
         Mock.ok(not reloaded, "no Reload() from WalkMap's own code")
         env.tick(0.5, 5)
         local popup = env.WalkMapStyleReload.Frame()
@@ -97,6 +102,5 @@ return {
         env.SlashCmdList.WALKMAP("setup")
         env.tick(0.5, 5)
         Mock.ok(panel:IsShown(), "opens again")
-        Mock.eq(env.WalkMapSetup.Choice().recommended, false, "recommended off when opened again")
     end},
 }

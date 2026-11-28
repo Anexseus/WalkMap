@@ -1,7 +1,7 @@
 -- Settings window: merged rows, fewer categories and scrolling.
-local function start(Mock)
+local function start(Mock, newCharacter)
     local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
-    env.loadAddon()
+    if newCharacter then env.loadAddon({welcomeSeen = true, newsSeen = "1.14.22"}, false) else env.loadAddon() end
     env.fire("PLAYER_LOGIN")
     env.fire("PLAYER_ENTERING_WORLD")
     env.tick(1, 5)
@@ -261,29 +261,22 @@ return {
         Mock.eq(reloads, 1, "the button applies the look")
         local window = rowStarting(panel, "Window look")
         Mock.ok(not (window.walkmapActionButton and window.walkmapActionButton:IsShown()), "other rows have no button")
-        env.WalkMapExtras.ShowSettingsPage("Welcome to WalkMap")
-        local recommended = rowStarting(panel, "|cffffd24aUse recommended settings")
-        Mock.ok(recommended and recommended.walkmapActionButton:IsShown(), "welcome page: button shown")
-        Mock.ok(({Apply = true, Applied = true})[recommended.walkmapActionButton.text:GetText()], "Apply or Applied")
     end},
-    {"Recommended settings: the authors' setup, quest choices left alone", function(Mock)
-        local env, panel = start(Mock)
+    {"A new character starts with the authors' setup; How you play sets the controller parts", function(Mock)
+        local env, panel = start(Mock, true)
         local s = env.WalkMapCharacterSettings
-        s.rightClickUp, s.controllerHints, s.miniTerrain = false, false, "zone"
-        s.trackerHidden = {[101] = true}
-        s.hiddenGivers = {["npc:1"] = true}
-        s.look = "wood"
-        env.WalkMapExtras.ShowSettingsPage("Welcome to WalkMap")
-        local row = rowStarting(panel, "|cffffd24aUse recommended settings")
-        Mock.eq(row.walkmapActionButton.text:GetText(), "Apply", "not in use yet")
-        Mock.eq(rowStarting(panel, "How you play").label:GetText(), "How you play: Mouse and keyboard",
-            "no gamepad: mouse and keyboard until chosen")
-        click(row)
         Mock.eq(s.rightClickUp, true, "right-click goes a level up")
         Mock.eq(s.miniTerrain, "game", "game terrain minimap")
-        Mock.eq(s.controllerMode, false, "mouse and keyboard: Pad focus off")
-        Mock.eq(s.controllerHints, false, "mouse and keyboard: no button hints")
-        Mock.ok(not (s.hiddenButtons and s.hiddenButtons.close), "mouse and keyboard: close X stays")
+        Mock.eq(s.fadeWhileMoving, true, "fades while moving")
+        Mock.eq(s.announce, "done", "tells the group about finished objectives")
+        Mock.eq(s.trackerScope, "all", "tracker: all zones")
+        Mock.eq(s.hideGameTracker, true, "game tracker hidden")
+        Mock.eq(s.bagSortEnabled, true, "bag sorting")
+        env.WalkMapExtras.ShowSettingsPage("Welcome to WalkMap")
+        Mock.ok(not rowStarting(panel, "|cffffd24aUse recommended settings") and not rowStarting(panel, "Use recommended settings"),
+            "no recommended settings button any more")
+        Mock.eq(rowStarting(panel, "How you play").label:GetText(), "How you play: Mouse and keyboard",
+            "no gamepad: mouse and keyboard until chosen")
         click(rowStarting(panel, "How you play"))
         Mock.eq(s.playStyle, "controller", "then controller")
         Mock.eq(s.controllerMode, true, "controller: Pad focus on")
@@ -293,11 +286,14 @@ return {
         Mock.eq(s.playStyle, "both", "then both")
         Mock.eq(s.controllerMode, true, "both: Pad focus on")
         Mock.ok(not s.hiddenButtons.close, "both: close X back for the mouse")
-        Mock.eq(s.trackerHidden[101], true, "untracked quests left alone")
-        Mock.eq(s.hiddenGivers["npc:1"], true, "hidden givers left alone")
-        Mock.eq(s.look, "wood", "the chosen look left alone")
-        env.WalkMapExtras.ShowSettingsPage("Welcome to WalkMap")
-        Mock.eq(row.walkmapActionButton.text:GetText(), "Applied", "now in use")
+    end},
+    {"An existing character keeps its own settings", function(Mock)
+        local env = Mock.new({playerMap = 1436})
+        env.loadAddon({welcomeSeen = true, newsSeen = "1.14.22"}, {follow = false, rightClickUp = false, announce = "off"})
+        local s = env.WalkMapCharacterSettings
+        Mock.eq(s.rightClickUp, false, "right-click left alone")
+        Mock.eq(s.announce, "off", "group messages left alone")
+        Mock.eq(s.fadeWhileMoving, false, "fading stays off when it was never on")
     end},
     {"Welcome page: Select keeps the map released, for controller players", function(Mock)
         local env, panel = start(Mock)
