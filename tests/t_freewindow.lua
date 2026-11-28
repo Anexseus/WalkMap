@@ -1,7 +1,12 @@
 -- With the game's gamepad UI off at load, the map is an ordinary window
 -- that works in combat; switching the game's interface asks for a reload.
-local function start(Mock, gamepad)
+local function start(Mock, gamepad, secure)
     local env = Mock.new({playerMap = 1436, quests = {{header = "Westfall"}, {id = 101, title = "Westfall Stew", level = 13}}})
+    if secure then
+        -- The secure combat parts (state driver, key bindings) for the shield.
+        env.RegisterStateDriver = function() end
+        env.GetBindingKey = function() end
+    end
     env.__gamepad = gamepad
     env.InputUtil = {IsGamepadUIEnabled = function() return env.__gamepad end}
     env.loadAddon({welcomeSeen = true}, {follow = true})
@@ -18,6 +23,27 @@ local function combat(env, on)
 end
 
 return {
+    {"Gamepad UI in combat: a dark bar over the footer says what works, inside the bar", function(Mock)
+        local env = start(Mock, true, true)
+        Mock.eq(env.WalkMapCombat.Free(), false, "protected window")
+        Mock.eq(env.WalkMapCombat.Ready(), true, env.WalkMapCombat.Diagnostics())
+        env.WalkMap_Toggle()
+        env.tick(0.3, 2)
+        combat(env, true)
+        env.WalkMapCombat.SetPassive(true)
+        local shield, label = env.WalkMapCombat.ShieldParts()
+        Mock.ok(shield and shield:IsShown(), "shield shown")
+        local footer = shield.pieces[2]
+        Mock.ok(shield.footerCover, "a dark cover over the footer")
+        Mock.ok(label.__parent == footer or label:GetParent() == footer, "the text sits in the footer bar")
+        Mock.ok(tostring(label:GetText()):find("work with the mouse", 1, true), "says what works")
+        local width = tonumber(footer:GetWidth()) or 0
+        if width > 40 then
+            Mock.ok(label:GetStringWidth() <= width - 24, "and fits the bar")
+        end
+        env.WalkMapCombat.SetPassive(false)
+        combat(env, false)
+    end},
     {"Gamepad UI off: open, close and settings in combat", function(Mock)
         local env = start(Mock, false)
         Mock.eq(env.WalkMapCombat.Free(), true, "free window")

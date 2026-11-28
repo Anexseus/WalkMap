@@ -41,6 +41,8 @@ function combat.FrameLocked() return not free and combat.Locked() end
 
 function combat.Passive() return passive == true end
 function combat.Ready() return ready == true end
+-- Tests: the combat bar over the footer and its text.
+function combat.ShieldParts() return shield, shieldLabel end
 
 -- Title-area buttons that stay usable with the mouse in combat. They only
 -- change what WalkMap shows, so they are lifted above the shield while it
@@ -244,9 +246,28 @@ function combat.Init(frame, closeButton, toggleButton, viewport)
             if piece.EnableGamePadButton then piece:EnableGamePadButton(false) end
             shield.pieces[i] = piece
         end
-        shieldLabel = shield:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-        shieldLabel:SetPoint("BOTTOM", shield, "BOTTOM", 0, 7)
-        shieldLabel:SetText(WalkMapL(SHIELD_TEXT))
+        -- The footer's buttons do not work in combat: a dark bar covers
+        -- them and says what does, instead of text over the buttons.
+        local footer = shield.pieces[2]
+        local cover = footer:CreateTexture(nil, "BACKGROUND")
+        cover:SetPoint("TOPLEFT", footer, "TOPLEFT", 6, -2)
+        cover:SetPoint("BOTTOMRIGHT", footer, "BOTTOMRIGHT", -6, 4)
+        cover:SetColorTexture(0.06, 0.03, 0.02, 0.92)
+        shield.footerCover = cover
+        shieldLabel = footer:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        shieldLabel:SetPoint("CENTER", cover, "CENTER", 0, 0)
+        shieldLabel:SetWordWrap(false)
+        local function fitShieldLabel()
+            shieldLabel:SetText(WalkMapL(SHIELD_TEXT))
+            local width = tonumber(footer:GetWidth()) or 0
+            if width > 40 and WalkMapUI and WalkMapUI.FitText then
+                WalkMapUI.FitText(shieldLabel, width - 24)
+            end
+        end
+        fitShieldLabel()
+        footer:HookScript("OnShow", fitShieldLabel)
+        footer:HookScript("OnSizeChanged", fitShieldLabel)
+        if WalkMapLocale and WalkMapLocale.OnChange then WalkMapLocale.OnChange(fitShieldLabel) end
         shield:Hide()
         closeButton:SetFrameLevel(shield:GetFrameLevel() + 2)
         -- Opened during combat: fit the shield to the map area again.
