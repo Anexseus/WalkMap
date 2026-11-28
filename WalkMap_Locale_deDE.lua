@@ -636,6 +636,7 @@ WalkMapLocale.Add("deDE", {
     ["Your arrow stays fully visible while the map fades."] = "Dein Pfeil bleibt voll sichtbar, während die Karte verblasst.",
     ["Your corpse"] = "Deine Leiche",
     ["Your guild and friends who use WalkMap or OpenMap see a dot where you are, and you see theirs. Never from dungeons, raids or battlegrounds."] = "Deine Gilde und Freunde mit WalkMap oder OpenMap sehen einen Punkt, wo du bist, und du ihren. Nie aus Dungeons, Schlachtzügen oder Schlachtfeldern.",
+    ["Your new look is ready. Reload the interface to use it."] = "Dein neues Aussehen ist bereit. Lade die Oberfläche neu, um es zu verwenden.",
     ["Your quest log is empty."] = "Dein Questlog ist leer.",
     ["Zephras Isle 1-12, Riverglades 35-45, Shen'dralas 35-45 and Mount Hyjal 55-60, in the map title and on the map."] = "Zephras Isle 1-12, Riverglades 35-45, Shen'dralas 35-45 und Mount Hyjal 55-60, im Kartentitel und auf der Karte.",
     ["Zone"] = "Gebiet",

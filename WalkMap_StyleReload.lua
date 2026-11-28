@@ -51,10 +51,6 @@ local function controllerHide(frame)
     if m and type(m.FrameHidden) == "function" then pcall(m.FrameHidden, m, frame) end
 end
 
-local function doReload()
-    if C_UI and C_UI.Reload then C_UI.Reload() elseif ReloadUI then ReloadUI() end
-end
-
 local function build()
     popup = CreateFrame("Frame", "WalkMapStyleReloadFrame", UIParent)
     popup:SetSize(380, 132)
@@ -80,13 +76,26 @@ local function build()
         b:SetScript("OnClick", onClick)
         return b
     end
-    popup.reloadButton = button("Reload now", -60, function()
+    -- Reload now runs /reload through a secure macro button: the game's own
+    -- slash command reloads, so no addon code calls the protected Reload().
+    -- (Called from WalkMap's click handler it was blocked:
+    -- ADDON_ACTION_BLOCKED Reload(), setup guide, 2026-11-28.)
+    local secure = CreateFrame("Button", "WalkMapReloadNowButton", popup, "SecureActionButtonTemplate")
+    secure:SetSize(110, 24)
+    secure:SetPoint("BOTTOM", popup, "BOTTOM", -60, 14)
+    secure:RegisterForClicks("AnyUp", "AnyDown")
+    secure:SetAttribute("type", "macro")
+    secure:SetAttribute("macrotext", "/reload")
+    if WalkMapExtras and WalkMapExtras.StyleButton then WalkMapExtras.StyleButton(secure) end
+    secure.text = secure:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    secure.text:SetPoint("CENTER")
+    secure.text:SetText(WalkMapL("Reload now"))
+    secure:SetScript("PreClick", function()
         if InCombatLockdown and InCombatLockdown() then
             print(WalkMapL("|cff80ff80WalkMap:|r Reload after combat."))
-            return
         end
-        doReload()
     end)
+    popup.reloadButton = secure
     popup.laterButton = button("Later", 60, function() reload.Hide() end)
     popup:Hide()
 end
@@ -107,6 +116,20 @@ function reload.Show()
         and "You switched the game to its controller interface. Reload so WalkMap's map works with the controller. Until then the map behaves as with mouse and keyboard."
         or "You switched the game to its mouse and keyboard interface. Reload so WalkMap's map can also be moved, resized and set up during combat.")
         .. styleNote))
+    if not popup:IsShown() then
+        shownCount = shownCount + 1
+        popup:Show()
+        controllerShow(popup, popup.reloadButton)
+    end
+end
+
+-- Any other reason to reload (the setup guide's new look): the same small
+-- window, so the reload is its own click on Reload now. Reloading straight
+-- from the guide's Finish, after it had changed settings in the same
+-- click, was blocked by the game (ADDON_ACTION_BLOCKED Reload()).
+function reload.Ask(text)
+    if not popup then build() end
+    popup.text:SetText(WalkMapL(text))
     if not popup:IsShown() then
         shownCount = shownCount + 1
         popup:Show()

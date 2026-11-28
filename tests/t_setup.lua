@@ -77,7 +77,11 @@ return {
         Mock.eq(s.shareLocation, true, "share where you are")
         Mock.eq(s.look, "stone", "look")
         Mock.eq(s.follow, true, "recommended applied to the rest")
-        Mock.ok(reloaded, "reloaded for the new look")
+        Mock.ok(not reloaded, "no Reload() from WalkMap's own code")
+        env.tick(0.5, 5)
+        local popup = env.WalkMapStyleReload.Frame()
+        Mock.ok(popup and popup:IsShown(), "the reload window asks")
+        Mock.eq(popup.reloadButton:GetAttribute("macrotext"), "/reload", "Reload now runs the game's /reload")
         Mock.ok(not env.WalkMapSetup.Panel():IsShown(), "guide closed")
     end},
     {"Skip changes nothing; /walkmap setup opens it again", function(Mock)

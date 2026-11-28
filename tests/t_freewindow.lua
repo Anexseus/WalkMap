@@ -112,8 +112,8 @@ return {
         Mock.ok(not popup:IsShown(), "not in combat")
         combat(env, false)
         Mock.ok(popup:IsShown(), "shown when combat ends")
-        popup.reloadButton:GetScript("OnClick")(popup.reloadButton)
-        Mock.eq(reloads, 1, "Reload now reloads")
+        Mock.eq(popup.reloadButton:GetAttribute("type"), "macro", "Reload now is a secure macro button")
+        Mock.eq(popup.reloadButton:GetAttribute("macrotext"), "/reload", "that runs the game's /reload")
     end},
     {"A chosen Controller style is kept when the gamepad UI comes on", function(Mock)
         local env = start(Mock, false)

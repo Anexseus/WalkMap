@@ -80,13 +80,11 @@ local function makeButton(parent, width, height)
     return button
 end
 
-local function card(index)
-    if cards[index] then return cards[index] end
-    -- A card is a dark panel with a thin edge (the button art and its glow
-    -- are made for short buttons and stretch badly on a tall card). The
-    -- edge lights up under the mouse or the controller, and stays bright
-    -- with a warm tint on the chosen card.
-    local c = CreateFrame("Button", nil, panel)
+-- Cards and lines are dark panels with a thin edge (the button art and
+-- its glow are made for short buttons and stretch badly when tall). The
+-- edge lights up under the mouse or the controller, and stays bright with a
+-- warm tint on the chosen one.
+local function framed(c)
     c:EnableMouse(true)
     local back = c:CreateTexture(nil, "BACKGROUND")
     back:SetAllPoints(c)
@@ -116,6 +114,17 @@ local function card(index)
     end
     c:SetScript("OnEnter", function(self) self.hover = true self:Paint() end)
     c:SetScript("OnLeave", function(self) self.hover = false self:Paint() end)
+    c:Paint()
+end
+
+local function card(index)
+    if cards[index] then return cards[index] end
+    -- A card is a dark panel with a thin edge (the button art and its glow
+    -- are made for short buttons and stretch badly on a tall card). The
+    -- edge lights up under the mouse or the controller, and stays bright
+    -- with a warm tint on the chosen card.
+    local c = CreateFrame("Button", nil, panel)
+    framed(c)
     c.image = c:CreateTexture(nil, "ARTWORK")
     c.image:SetPoint("TOP", c, "TOP", 0, -8)
     c.badge = c:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -136,8 +145,7 @@ local function line(index)
     if lines[index] then return lines[index] end
     local l = CreateFrame("Button", nil, panel)
     l:SetSize(600, 40)
-    l:EnableMouse(true)
-    extras.StyleButton(l)
+    framed(l)
     l.label = l:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     l.label:SetPoint("TOPLEFT", l, "TOPLEFT", 12, -6)
     l.label:SetJustifyH("LEFT")
@@ -362,8 +370,13 @@ function setup.Finish()
     extras.SetupApply(choice)
     setup.Close()
     print(L("|cff80ff80WalkMap:|r Setup done. Change anything later under Settings; /walkmap setup runs this guide again."))
-    if reload and not (InCombatLockdown and InCombatLockdown()) then
-        if C_UI and C_UI.Reload then C_UI.Reload() elseif ReloadUI then ReloadUI() end
+    -- The reload is its own click in WalkMap's small reload window: called
+    -- here, after changing settings in the same click, the game blocked it.
+    if reload and WalkMapStyleReload and WalkMapStyleReload.Ask then
+        local function ask()
+            WalkMapStyleReload.Ask("Your new look is ready. Reload the interface to use it.")
+        end
+        if C_Timer and C_Timer.After then C_Timer.After(0.1, ask) else ask() end
     end
 end
 
