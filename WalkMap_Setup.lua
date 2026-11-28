@@ -34,9 +34,9 @@ local STEPS = {
     {key = "quests", title = "How should quests show on the map?",
         text = "Change it later under Settings > Quests on the map.",
         cards = {
-            {"icons", "QuestieDB icons", "An icon where to kill, loot or use something, for each objective.", "quests_icons"},
+            {"icons", "QuestieDB icons", "An exact icon where to kill, loot or use something. Not every quest has them yet.", "quests_icons"},
             {"areas", "Game quest areas", "The game's own blue areas and markers, as on its map.", "quests_areas"},
-            {"both", "Both", "The blue areas and QuestieDB's icons together.", "quests_both"},
+            {"both", "Both", "QuestieDB's icons are the most precise, the game's areas cover the quests QuestieDB does not have yet.", "quests_both", true},
         }},
     {key = "more", title = "A few more choices",
         text = "Click a line to change it. Everything is also under Settings."},
@@ -82,16 +82,44 @@ end
 
 local function card(index)
     if cards[index] then return cards[index] end
+    -- A card is a dark panel with a thin edge (the button art and its glow
+    -- are made for short buttons and stretch badly on a tall card). The
+    -- edge lights up under the mouse or the controller, and stays bright
+    -- with a warm tint on the chosen card.
     local c = CreateFrame("Button", nil, panel)
     c:EnableMouse(true)
-    extras.StyleButton(c)
+    local back = c:CreateTexture(nil, "BACKGROUND")
+    back:SetAllPoints(c)
+    back:SetColorTexture(0.06, 0.035, 0.025, 0.85)
+    c.chosen = c:CreateTexture(nil, "BORDER")
+    c.chosen:SetPoint("TOPLEFT", c, "TOPLEFT", 1, -1)
+    c.chosen:SetPoint("BOTTOMRIGHT", c, "BOTTOMRIGHT", -1, 1)
+    c.chosen:SetColorTexture(1, 0.78, 0.3, 0.16)
+    c.edges = {}
+    local sides = {
+        {"TOPLEFT", "TOPRIGHT", nil, 2}, {"BOTTOMLEFT", "BOTTOMRIGHT", nil, 2},
+        {"TOPLEFT", "BOTTOMLEFT", 2, nil}, {"TOPRIGHT", "BOTTOMRIGHT", 2, nil},
+    }
+    for i, side in ipairs(sides) do
+        local edge = c:CreateTexture(nil, "OVERLAY")
+        edge:SetPoint(side[1], c, side[1], 0, 0)
+        edge:SetPoint(side[2], c, side[2], 0, 0)
+        if side[3] then edge:SetWidth(side[3]) else edge:SetHeight(side[4]) end
+        c.edges[i] = edge
+    end
+    function c:Paint()
+        local r, g, b, a = 0.55, 0.42, 0.25, 0.8
+        if self.hover then r, g, b, a = 1, 0.85, 0.45, 1
+        elseif self.picked then r, g, b, a = 0.95, 0.75, 0.3, 1 end
+        for _, edge in ipairs(self.edges) do edge:SetColorTexture(r, g, b, a) end
+        self.chosen:SetShown(self.picked == true)
+    end
+    c:SetScript("OnEnter", function(self) self.hover = true self:Paint() end)
+    c:SetScript("OnLeave", function(self) self.hover = false self:Paint() end)
     c.image = c:CreateTexture(nil, "ARTWORK")
     c.image:SetPoint("TOP", c, "TOP", 0, -8)
-    -- Chosen: a gold frame around the whole card.
-    c.chosen = c:CreateTexture(nil, "BORDER")
-    c.chosen:SetPoint("TOPLEFT", c, "TOPLEFT", 2, -2)
-    c.chosen:SetPoint("BOTTOMRIGHT", c, "BOTTOMRIGHT", -2, 2)
-    c.chosen:SetColorTexture(1, 0.82, 0.3, 0.22)
+    c.badge = c:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    c.badge:SetPoint("TOPRIGHT", c, "TOPRIGHT", -12, -12)
     c.title = c:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     c.text = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     c.text:SetJustifyH("CENTER")
@@ -241,7 +269,24 @@ function setup.Refresh()
             local picked = choice[s.key] == data[1]
             c.title:SetText((picked and "|cff80ff80" or "") .. L(data[2]) .. (picked and "|r" or ""))
             c.text:SetText(L(data[3]))
-            c.chosen:SetShown(picked)
+            c.picked = picked
+            c:Paint()
+            -- "Recommended" on the card the authors suggest.
+            if data[5] then
+                c.badge:SetText("|cff201008" .. L("Recommended") .. "|r")
+                if not c.badgeBack then
+                    c.badgeBack = c:CreateTexture(nil, "OVERLAY", nil, -1)
+                    c.badgeBack:SetColorTexture(1, 0.82, 0.35, 0.95)
+                end
+                c.badgeBack:ClearAllPoints()
+                c.badgeBack:SetPoint("TOPLEFT", c.badge, "TOPLEFT", -5, 3)
+                c.badgeBack:SetPoint("BOTTOMRIGHT", c.badge, "BOTTOMRIGHT", 5, -3)
+                c.badge:Show()
+                c.badgeBack:Show()
+            else
+                c.badge:Hide()
+                if c.badgeBack then c.badgeBack:Hide() end
+            end
             c:Show()
             if picked or not first then first = picked and c or first or c end
         end
