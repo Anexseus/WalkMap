@@ -18,6 +18,7 @@ local extras = WalkMapExtras
 local IMAGES = "Interface\\AddOns\\WalkMap\\Media\\Setup\\"
 -- Pictures are 256x128 textures; the used width of each (from the left).
 local IMAGE_WIDTH = {
+    style_mouse = 205, style_controller = 205, style_both = 205,
     quests_icons = 210, quests_areas = 206, quests_both = 210,
     look_classic = 155, look_stone = 159, look_wood = 162, look_leather = 161,
 }
@@ -26,9 +27,9 @@ local STEPS = {
     {key = "style", title = "How do you play?",
         text = "WalkMap sets up its controller help and buttons for it. Change it later under Settings > Controller & help.",
         cards = {
-            {"mouse", "Mouse and keyboard", "Click the map, its markers and menus. No controller hints."},
-            {"controller", "Controller", "D-pad, A and B in the map and its menus, with button hints at the top."},
-            {"both", "Both", "A controller and the mouse, side by side. Good for handhelds and the couch."},
+            {"mouse", "Mouse and keyboard", "Click the map, its markers and menus. No controller hints.", "style_mouse"},
+            {"controller", "Controller", "D-pad, A and B in the map and its menus, with button hints at the top.", "style_controller"},
+            {"both", "Both", "A controller and the mouse, side by side. Good for handhelds and the couch.", "style_both"},
         }},
     {key = "quests", title = "How should quests show on the map?",
         text = "Change it later under Settings > Quests on the map.",
